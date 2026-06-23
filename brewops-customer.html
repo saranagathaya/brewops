@@ -1,0 +1,121 @@
+-- ============================================================
+-- BREWOPS — AUTHENTICATION SETUP
+-- Run this in Supabase SQL Editor AFTER brewops-full-reset.sql
+--
+-- Adds:
+--   1. invite_codes table (for franchisee/franchisor signup)
+--   2. Auto-create profile trigger (fires on every new signup)
+--   3. RLS policies for invite code validation
+-- ============================================================
+
+-- ── 1. INVITE CODES TABLE ──
+create table if not exists invite_codes (
+  id           uuid primary key default uuid_generate_v4(),
+  code         text not null unique,
+  role         text not null check (role in ('franchisee','franchisor')),
+  outlet_id    uuid references outlets(id),  -- required for franchisee, null for franchisor
+  used_by      uuid references auth.users(id),
+  used_at      timestamptz,
+  expires_at   timestamptz,
+  created_at   timestamptz default now()
+);
+
+alter table invite_codes enable row level security;
+
+-- Anyone (even anon, pre-login) can check if a code is valid —
+-- needed during the signup flow before the user has an account yet.
+-- They can only SEE it, not edit it.
+drop policy if exists "invite_codes_public_read" on invite_codes;
+create policy "invite_codes_public_read" on invite_codes
+  for select to anon, authenticated using (true);
+
+-- Only franchisors can create/manage invite codes
+drop policy if exists "invite_codes_franchisor_all" on invite_codes;
+create policy "invite_codes_franchisor_all" on invite_codes
+  for all to authenticated using (get_my_role() = 'franchisor');
+
+-- ── 2. AUTO-CREATE PROFILE ON SIGNUP ──
+-- Whenever someone signs up via Supabase Auth, this automatically
+-- creates their matching row in `profiles`. The role and outlet_id
+-- are passed in as "user metadata" at signup time (see app code).
+create or replace function handle_new_user()
+returns trigger as $$
+declare
+  v_role text;
+  v_outlet_id uuid;
+  v_full_name text;
+begin
+  v_role      := coalesce(new.raw_user_meta_data->>'role', 'customer');
+  v_outlet_id := (new.raw_user_meta_data->>'outlet_id')::uuid;
+  v_full_name := new.raw_user_meta_data->>'full_name';
+
+  insert into public.profiles (id, role, full_name, phone, outlet_id)
+  values (new.id, v_role, v_full_name, new.phone, v_outlet_id)
+  on conflict (id) do nothing;
+
+  -- If this signup used an invite code, mark it as used
+  if new.raw_user_meta_data->>'invite_code' is not null then
+    update invite_codes
+    set used_by = new.id, used_at = now()
+    where code = new.raw_user_meta_data->>'invite_code'
+      and used_by is null;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function handle_new_user();
+
+-- ── 3. UPDATE ORDERS RLS — customers should only see their own orders ──
+-- Previously orders_anon_select allowed anon to read ALL orders (needed
+-- for guest checkout testing). Now that we have real customer accounts,
+-- tighten this: authenticated customers see only their own orders.
+drop policy if exists "orders_customer_own_authenticated" on orders;
+create policy "orders_customer_own_authenticated" on orders
+  for select to authenticated
+  using (customer_id = auth.uid() or get_my_role() in ('franchisee','franchisor'));
+
+-- Keep guest/anon checkout working (cart → order insert before login)
+-- but anon SELECT is now scoped down — guests can't browse others' orders.
+drop policy if exists "orders_anon_select" on orders;
+-- (intentionally not recreated as "using (true)" — anon should not
+--  list all orders anymore now that real accounts exist)
+
+-- ── VERIFY ──
+select tablename, policyname, roles, cmd
+from pg_policies
+where tablename in ('invite_codes','orders','profiles')
+order by tablename, cmd;
+
+-- ============================================================
+-- NEXT STEP — generate invite codes for your franchisees:
+--
+--   insert into invite_codes (code, role, outlet_id, expires_at)
+--   values ('FRANCHISEE-C03-2026', 'franchisee',
+--           'a1b2c3d4-0002-0002-0002-000000000002',  -- Colombo 03
+--           now() + interval '30 days');
+--
+--   insert into invite_codes (code, role, expires_at)
+--   values ('FRANCHISOR-DENNIS-2026', 'franchisor',
+--           now() + interval '30 days');
+-- ============================================================
+
+-- ── 4. ORDERS INSERT — allow authenticated customers to insert their own orders ──
+-- (anon insert policy from earlier setup still covers pre-auth/guest-cart edge cases,
+--  but authenticated customers should also be explicitly covered)
+drop policy if exists "orders_customer_insert_authenticated" on orders;
+create policy "orders_customer_insert_authenticated" on orders
+  for insert to authenticated
+  with check (customer_id = auth.uid() or get_my_role() in ('franchisee','franchisor'));
+
+-- ============================================================
+-- DONE — auth system fully wired:
+--   • customers sign up with email+password (phone OTP later via Twilio)
+--   • franchisees/franchisors sign up with email+password + invite code
+--   • profiles auto-created on signup via trigger
+--   • orders correctly scoped to customer_id once logged in
+-- ============================================================
