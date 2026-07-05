@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BrewOps — My Outlet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Sora:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#faf6ef;--cream2:#f3ede1;--cream3:#ebe2d0;
+  --brown-deep:#1e1408;--brown:#2d1f0e;--brown2:#4a3420;--brown3:#6b4f32;
+  --gold:#c8922a;--gold2:#e8b04a;--gold3:#fac775;--gold-dim:rgba(200,146,42,0.12);
+  --green:#2d6a4f;--green2:#40916c;--green-light:#d8f3dc;--green-dim:rgba(45,106,79,0.12);
+  --red:#9b2226;--red2:#ae2012;--red-light:#fde8e8;--red-dim:rgba(155,34,38,0.1);
+  --amber:#ca6702;--amber-light:#fef3c7;--amber-dim:rgba(202,103,2,0.1);
+  --blue:#1d4e89;--blue-light:#dbeafe;--blue-dim:rgba(29,78,137,0.1);
+  --brand:#8B1A1A;--brand-light:#fdf0f0;--brand-dim:rgba(139,26,26,0.1);
+  --text:#1e1408;--text2:#4a3420;--text3:#8b7355;--text4:#b5a48a;
+  --border:rgba(30,20,8,0.08);--border2:rgba(30,20,8,0.15);
+  --shadow:0 1px 3px rgba(30,20,8,0.08),0 4px 16px rgba(30,20,8,0.06);
+  --shadow-lg:0 4px 6px rgba(30,20,8,0.06),0 12px 32px rgba(30,20,8,0.12);
+  --shadow-xl:0 16px 48px rgba(30,20,8,0.18);
+  --r:16px;--r-sm:10px;--r-xs:6px;
+  --nav-h:64px;--topbar-h:60px;
+  --font-display:'Playfair Display',serif;--font-body:'Sora',sans-serif;--font-mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden;position:relative;}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--border);height:var(--topbar-h);display:flex;align-items:center;padding:0 20px;gap:12px;}
+.topbar-logo{font-family:var(--font-display);font-size:20px;color:var(--brown);font-weight:700;letter-spacing:-0.01em;flex:1;}
+.topbar-logo span{color:var(--gold);}
+.outlet-chip{display:flex;align-items:center;gap:6px;background:var(--brown);color:var(--cream);border-radius:20px;padding:5px 12px;font-size:11px;font-family:var(--font-mono);font-weight:500;cursor:pointer;}
+.outlet-chip .dot-live{width:6px;height:6px;border-radius:50%;background:var(--green2);animation:live-pulse 2s ease-in-out infinite;}
+@keyframes live-pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.notif-btn{width:36px;height:36px;border-radius:var(--r-sm);border:1px solid var(--border2);background:white;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;position:relative;flex-shrink:0;}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--cream);}
+.notif-count{position:absolute;top:4px;right:4px;background:var(--red);color:white;font-size:8px;font-family:var(--font-mono);font-weight:700;min-width:15px;height:15px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--cream);}
+
+/* CONTENT */
+.content{padding:0 16px calc(var(--nav-h) + 24px);}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:var(--nav-h);background:var(--brown-deep);display:flex;align-items:stretch;z-index:200;border-top:1px solid rgba(255,255,255,0.08);}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:rgba(255,255,255,0.35);transition:color 0.15s;position:relative;-webkit-tap-highlight-color:transparent;}
+.nav-tab.active{color:var(--gold2);}
+.nav-tab.active::before{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:var(--gold);border-radius:0 0 3px 3px;}
+.nav-icon{font-size:20px;line-height:1;}
+.nav-label{font-size:9px;font-family:var(--font-mono);letter-spacing:0.04em;}
+.nav-badge{position:absolute;top:8px;right:12px;background:var(--red);color:white;font-size:9px;font-family:var(--font-mono);font-weight:500;min-width:16px;height:16px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--brown-deep);}
+.nav-badge.green-badge{background:var(--green2);}
+.nav-badge.pulse{animation:badgePulse 1.2s ease-in-out infinite;}
+@keyframes badgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.3);}}
+
+/* GREETING */
+.greeting-block{padding:20px 0 4px;animation:fadeUp 0.4s ease both;}
+.greeting-time{font-size:11px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;}
+.greeting-name{font-family:var(--font-display);font-size:26px;color:var(--brown);font-weight:700;line-height:1.1;margin-bottom:2px;}
+.greeting-name em{color:var(--gold);font-style:italic;}
+.greeting-sub{font-size:12px;color:var(--text3);}
+
+/* DAILY HERO */
+.daily-hero{background:var(--brown);border-radius:var(--r);padding:20px;margin:16px 0;position:relative;overflow:hidden;box-shadow:var(--shadow-lg);animation:fadeUp 0.4s 0.05s ease both;}
+.daily-hero::before{content:'☕';position:absolute;right:-10px;top:-10px;font-size:90px;opacity:0.06;line-height:1;}
+.hero-label{font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;}
+.hero-cups{font-family:var(--font-display);font-size:52px;font-weight:700;color:white;line-height:1;margin-bottom:4px;}
+.hero-cups span{font-size:20px;color:rgba(255,255,255,0.5);font-weight:400;}
+.hero-revenue{font-size:22px;color:var(--gold3);font-weight:600;font-family:var(--font-mono);margin-bottom:16px;}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.1);border-radius:var(--r-sm);overflow:hidden;}
+.hero-stat{background:rgba(255,255,255,0.06);padding:10px 8px;text-align:center;}
+.hero-stat-val{font-size:15px;font-weight:600;color:white;font-family:var(--font-mono);}
+.hero-stat-lbl{font-size:9px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+.hero-stat.live-orders{background:rgba(45,106,79,0.3);}
+.hero-stat.live-orders .hero-stat-val{color:#5dcaa5;}
+
+/* QUICK ACTIONS */
+.section-label{font-size:10px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin:20px 0 10px;}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;animation:fadeUp 0.4s 0.1s ease both;}
+.quick-btn{background:white;border:1px solid var(--border);border-radius:var(--r);padding:16px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;box-shadow:var(--shadow);transition:all 0.15s;-webkit-tap-highlight-color:transparent;user-select:none;position:relative;}
+.quick-btn:active{transform:scale(0.96);box-shadow:none;}
+.quick-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.quick-label{font-size:11px;font-weight:500;color:var(--text2);text-align:center;line-height:1.3;}
+.qi-sale{background:#fff8e6;}
+.qi-stock{background:var(--green-light);}
+.qi-machine{background:#fff0e6;}
+.qi-waste{background:var(--red-light);}
+.qi-payment{background:var(--blue-light);}
+.qi-issue{background:#fce7f3;}
+.qi-orders{background:#e8f4fb;}
+.quick-btn-badge{position:absolute;top:10px;right:10px;background:var(--red);color:white;font-size:9px;font-family:var(--font-mono);min-width:16px;height:16px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 3px;font-weight:700;}
+.quick-btn-badge.green{background:var(--green2);}
+
+/* CARDS */
+.card{background:white;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-bottom:12px;animation:fadeUp 0.4s ease both;}
+.card-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-title{font-size:13px;font-weight:600;color:var(--brown);flex:1;}
+.card-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.card-body{padding:14px 16px;}
+
+/* STATUS STRIP */
+.status-strip{display:flex;gap:8px;margin-bottom:12px;animation:fadeUp 0.4s 0.15s ease both;overflow-x:auto;padding-bottom:2px;-ms-overflow-style:none;scrollbar-width:none;}
+.status-strip::-webkit-scrollbar{display:none;}
+.status-chip{display:flex;align-items:center;gap:6px;background:white;border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:11px;font-family:var(--font-mono);white-space:nowrap;box-shadow:var(--shadow);flex-shrink:0;}
+.status-chip .dot{width:6px;height:6px;border-radius:50%;}
+.sc-green{color:var(--green);}
+.sc-amber{color:var(--amber);}
+.sc-red{color:var(--red);}
+.sc-blue{color:var(--blue);}
+.sc-dot-green{background:var(--green2);}
+.sc-dot-amber{background:var(--amber);}
+.sc-dot-red{background:var(--red);}
+.sc-dot-blue{background:var(--blue);}
+
+/* LIVE ORDER ITEMS */
+.live-order-item{border-radius:var(--r);overflow:hidden;margin-bottom:10px;border:1px solid var(--border);background:white;box-shadow:var(--shadow);transition:all 0.2s;}
+.live-order-item.new-order{border-color:var(--green2);animation:orderSlideIn 0.4s ease;}
+.live-order-item.cash-pending{border-color:var(--amber);border-width:2px;}
+.live-order-item.ready-to-serve{border-color:var(--blue);}
+@keyframes orderSlideIn{from{opacity:0;transform:translateX(-16px);}to{opacity:1;transform:translateX(0);}}
+.loi-head{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;border-bottom:1px solid var(--border);}
+.loi-num{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--gold);}
+.loi-mode{font-size:10px;font-family:var(--font-mono);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.lm-pickup{background:var(--green-dim);color:var(--green);}
+.lm-delivery{background:var(--blue-dim);color:var(--blue);}
+.loi-time{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-left:auto;}
+.loi-status{font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:10px;flex-shrink:0;}
+.ls-new{background:var(--green-dim);color:var(--green);}
+.ls-cash{background:var(--amber-dim);color:var(--amber);}
+.ls-prep{background:var(--blue-dim);color:var(--blue);}
+.ls-ready{background:var(--green-dim);color:var(--green);}
+.ls-done{background:rgba(30,20,8,0.06);color:var(--text3);}
+.loi-body{padding:10px 14px;}
+.loi-item-row{display:flex;align-items:center;gap:10px;padding:4px 0;}
+.loi-emoji{font-size:18px;width:24px;text-align:center;flex-shrink:0;}
+.loi-item-name{font-size:13px;font-weight:500;flex:1;}
+.loi-item-detail{font-size:11px;color:var(--text3);}
+.loi-item-qty{font-size:12px;font-family:var(--font-mono);color:var(--text3);}
+.loi-item-price{font-size:13px;font-family:var(--font-mono);font-weight:600;color:var(--gold);}
+.cash-alert-bar{background:var(--amber-dim);border-top:1px solid rgba(202,103,2,0.2);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--amber);font-weight:500;}
+.loi-foot{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--border);}
+.loi-payment{font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:4px;flex-shrink:0;}
+.lp-card{background:var(--blue-dim);color:var(--blue);}
+.lp-cash{background:var(--amber-dim);color:var(--amber);}
+.lp-qr{background:rgba(127,119,221,0.12);color:#534AB7;}
+.loi-total{font-size:14px;font-weight:700;font-family:var(--font-mono);color:var(--brown);margin-left:auto;}
+.loi-action{padding:8px 16px;border-radius:30px;border:none;font-size:12px;font-weight:600;font-family:var(--font-body);cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
+.la-confirm{background:var(--green);color:white;}
+.la-prepare{background:var(--blue);color:white;}
+.la-ready{background:var(--brown);color:white;}
+.la-cash{background:var(--amber);color:var(--brown-deep);}
+.la-done{background:var(--cream3);color:var(--text3);}
+
+/* ORDER FILTERS */
+.order-filter-row{display:flex;gap:7px;overflow-x:auto;padding:2px;margin-bottom:14px;-ms-overflow-style:none;scrollbar-width:none;}
+.order-filter-row::-webkit-scrollbar{display:none;}
+.of-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:white;font-size:11px;font-family:var(--font-mono);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
+.of-chip.active{background:var(--brown);color:var(--cream);border-color:var(--brown);}
+
+/* CASH CONFIRMATION MODAL CARD */
+.cash-confirm-popup{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:300;background:var(--amber);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-xl);transition:transform 0.4s ease;transform:translateX(-50%) translateY(-100%);}
+.cash-confirm-popup.show{transform:translateX(-50%) translateY(0);}
+.ccp-icon{font-size:28px;flex-shrink:0;}
+.ccp-text{flex:1;}
+.ccp-title{font-size:14px;font-weight:700;color:var(--brown-deep);}
+.ccp-sub{font-size:11px;color:rgba(30,20,8,0.7);font-family:var(--font-mono);margin-top:1px;}
+.ccp-confirm{background:var(--brown-deep);color:white;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+.ccp-dismiss{background:rgba(30,20,8,0.15);color:var(--brown-deep);border:none;border-radius:20px;padding:8px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+
+/* NEW ORDER POPUP */
+.new-order-popup{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(20px);width:calc(100% - 32px);max-width:448px;z-index:290;background:var(--brown-deep);border:1px solid rgba(45,106,79,0.4);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-xl);opacity:0;transition:all 0.35s ease;pointer-events:none;}
+.new-order-popup.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
+.new-order-popup::before{content:'';position:absolute;top:-1px;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green2),transparent 60%);border-radius:var(--r) var(--r) 0 0;}
+.nop-pulse{width:10px;height:10px;border-radius:50%;background:var(--green2);box-shadow:0 0 10px var(--green2);animation:live-pulse 1.2s infinite;flex-shrink:0;}
+.nop-text{flex:1;}
+.nop-label{font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;}
+.nop-title{font-size:14px;font-weight:600;color:white;}
+.nop-sub{font-size:11px;color:rgba(255,255,255,0.5);font-family:var(--font-mono);}
+.nop-btn{background:var(--green);color:white;border:none;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
+
+/* STOCKS */
+.stock-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.stock-item:last-child{border-bottom:none;}
+.stock-emoji{font-size:20px;width:28px;text-align:center;flex-shrink:0;}
+.stock-name{font-size:13px;font-weight:500;flex:1;}
+.stock-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:1px;}
+.stock-pct{font-size:13px;font-family:var(--font-mono);font-weight:600;flex-shrink:0;width:36px;text-align:right;}
+.stock-bar-wrap{width:60px;flex-shrink:0;}
+.sbar{height:6px;border-radius:3px;background:var(--cream3);overflow:hidden;}
+.sbar-fill{height:100%;border-radius:3px;}
+.sb-green{background:var(--green2);}
+.sb-amber{background:var(--amber);}
+.sb-red{background:var(--red);}
+.pct-green{color:var(--green);}
+.pct-amber{color:var(--amber);}
+.pct-red{color:var(--red);}
+
+/* MACHINE CHECKLIST */
+.check-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.check-item:last-child{border-bottom:none;}
+.check-box{width:24px;height:24px;border-radius:7px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;font-size:13px;}
+.check-box.done{background:var(--green);border-color:var(--green);color:white;}
+.check-text{flex:1;}
+.check-title{font-size:13px;font-weight:500;}
+.check-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:1px;}
+.check-time{font-size:11px;color:var(--text3);font-family:var(--font-mono);flex-shrink:0;}
+
+/* BEV ITEMS */
+.bev-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.bev-item:last-child{border-bottom:none;}
+.bev-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.bev-name{font-size:13px;flex:1;}
+.bev-count{font-size:13px;font-family:var(--font-mono);font-weight:600;color:var(--brown);}
+.bev-bar-wrap{width:70px;}
+.bev-sbar{height:5px;border-radius:3px;background:var(--cream3);overflow:hidden;}
+.bev-fill{height:100%;border-radius:3px;background:var(--gold);}
+.bev-pct{font-size:11px;color:var(--text3);font-family:var(--font-mono);width:30px;text-align:right;flex-shrink:0;}
+
+/* PAY ITEMS */
+.pay-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.pay-item:last-child{border-bottom:none;}
+.pay-method{font-size:10px;font-family:var(--font-mono);font-weight:500;padding:3px 8px;border-radius:5px;flex-shrink:0;}
+.pm-card{background:var(--blue-light);color:var(--blue);}
+.pm-cash{background:var(--green-light);color:var(--green);}
+.pm-qr{background:var(--amber-light);color:var(--amber);}
+.pay-desc{font-size:12px;flex:1;color:var(--text2);}
+.pay-time{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.pay-amount{font-size:13px;font-weight:600;font-family:var(--font-mono);color:var(--brown);}
+
+/* RENT */
+.rent-card{border-radius:var(--r);padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
+.rent-card.due-soon{background:var(--amber-light);border:1px solid rgba(202,103,2,0.2);}
+.rent-card.ok{background:var(--green-light);border:1px solid rgba(45,106,79,0.2);}
+.rent-label{font-size:10px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;}
+.rent-amount{font-size:24px;font-weight:700;font-family:var(--font-mono);color:var(--brown);}
+.rent-due{font-size:13px;color:var(--text2);margin-top:4px;}
+.rent-last{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:2px;}
+.rent-countdown{position:absolute;right:16px;top:50%;transform:translateY(-50%);text-align:right;}
+.countdown-num{font-size:36px;font-weight:700;font-family:var(--font-display);color:var(--amber);line-height:1;}
+.countdown-lbl{font-size:10px;color:var(--text3);font-family:var(--font-mono);}
+
+/* COUPONS */
+.coupon-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.coupon-item:last-child{border-bottom:none;}
+.coupon-code{font-family:var(--font-mono);font-size:12px;font-weight:500;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(200,146,42,0.2);border-radius:var(--r-xs);padding:3px 9px;flex-shrink:0;min-width:80px;text-align:center;}
+.coupon-desc{font-size:12px;flex:1;color:var(--text2);}
+.coupon-count{font-size:12px;font-family:var(--font-mono);color:var(--text3);}
+.coupon-disc{font-size:12px;font-family:var(--font-mono);color:var(--red);font-weight:500;}
+
+/* WASTE */
+.waste-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.waste-item:last-child{border-bottom:none;}
+.waste-cat{font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:4px;flex-shrink:0;}
+.wc-disposed{background:var(--red-light);color:var(--red);}
+.wc-spilled{background:var(--amber-light);color:var(--amber);}
+.waste-name{font-size:12px;flex:1;color:var(--text2);}
+.waste-qty{font-size:12px;font-family:var(--font-mono);color:var(--brown);font-weight:600;}
+.waste-cost{font-size:11px;font-family:var(--font-mono);color:var(--red);}
+
+/* SUM ROWS */
+.sum-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.sum-row:last-child{border-bottom:none;}
+.sum-label{font-size:13px;color:var(--text2);}
+.sum-val{font-size:13px;font-weight:600;font-family:var(--font-mono);color:var(--brown);}
+.sum-val.green{color:var(--green);}
+.sum-val.red{color:var(--red);}
+.sum-val.amber{color:var(--amber);}
+.sum-val.blue{color:var(--blue);}
+
+/* COMPLAINTS */
+.complaint-item{padding:12px 0;border-bottom:1px solid var(--border);}
+.complaint-item:last-child{border-bottom:none;}
+.comp-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.sev-pill{font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:20px;}
+.sp-high{background:var(--red-light);color:var(--red);}
+.sp-med{background:var(--amber-light);color:var(--amber);}
+.sp-low{background:var(--green-light);color:var(--green);}
+.comp-time{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-left:auto;}
+.comp-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.comp-status{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-top:4px;}
+
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;max-width:480px;margin:0 auto;background:rgba(30,20,8,0.6);backdrop-filter:blur(4px);z-index:500;align-items:flex-end;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--cream);border-radius:var(--r) var(--r) 0 0;width:100%;max-height:88vh;overflow-y:auto;animation:sheetUp 0.3s ease;}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 0;}
+.sheet-head{padding:12px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;}
+.sheet-title{font-size:16px;font-weight:700;font-family:var(--font-display);color:var(--brown);flex:1;}
+.sheet-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);background:white;color:var(--text3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.sheet-body{padding:16px 20px 24px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-family:var(--font-mono);color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px;display:block;}
+.form-input{width:100%;padding:11px 14px;background:white;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-family:var(--font-body);color:var(--text);outline:none;transition:border-color 0.15s;appearance:none;}
+.form-input:focus{border-color:var(--gold);}
+.form-select{width:100%;padding:11px 14px;background:white;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-family:var(--font-body);color:var(--text);outline:none;appearance:none;cursor:pointer;}
+.form-textarea{width:100%;padding:11px 14px;background:white;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-family:var(--font-body);color:var(--text);outline:none;resize:none;min-height:80px;}
+.form-textarea:focus{border-color:var(--gold);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bev-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.bev-pick-btn{padding:10px 6px;background:white;border:2px solid var(--border);border-radius:var(--r-sm);text-align:center;cursor:pointer;transition:all 0.12s;-webkit-tap-highlight-color:transparent;}
+.bev-pick-btn.selected{border-color:var(--gold);background:var(--gold-dim);}
+.bev-pick-btn .bicon{font-size:20px;margin-bottom:4px;}
+.bev-pick-btn .bname{font-size:11px;font-weight:500;color:var(--text2);}
+.stepper{display:flex;align-items:center;gap:12px;background:white;border:1px solid var(--border2);border-radius:var(--r-sm);padding:4px;}
+.step-btn{width:36px;height:36px;border-radius:var(--r-xs);border:none;background:var(--cream2);font-size:20px;color:var(--brown);cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:300;transition:background 0.12s;}
+.step-val{flex:1;text-align:center;font-size:22px;font-weight:700;font-family:var(--font-mono);color:var(--brown);}
+.method-picker{display:flex;gap:8px;}
+.method-btn{flex:1;padding:10px 6px;background:white;border:2px solid var(--border);border-radius:var(--r-sm);text-align:center;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all 0.12s;}
+.method-btn.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--brown);}
+.submit-btn{width:100%;padding:14px;background:var(--brown);color:var(--cream);border:none;border-radius:var(--r-sm);font-size:15px;font-weight:600;font-family:var(--font-body);cursor:pointer;margin-top:8px;transition:background 0.15s;-webkit-tap-highlight-color:transparent;}
+.submit-btn:active{background:var(--brown2);}
+.submit-btn.gold{background:var(--gold);color:var(--brown-deep);}
+.submit-btn.green{background:var(--green);}
+.submit-btn.red{background:var(--red);}
+
+/* AI TIP */
+.ai-tip{background:linear-gradient(135deg,#e8f5ee 0%,#f0faf4 100%);border:1px solid rgba(45,106,79,0.2);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;animation:fadeUp 0.4s 0.2s ease both;}
+.ai-tip-icon{width:32px;height:32px;background:var(--green2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:white;}
+.ai-tip-label{font-size:10px;font-family:var(--font-mono);color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;}
+.ai-tip-text{font-size:12px;color:var(--green);line-height:1.55;}
+
+/* ALERT BANNER */
+.alert-banner{border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;}
+.ab-red{background:var(--red-light);color:var(--red);border:1px solid rgba(155,34,38,0.15);}
+.ab-amber{background:var(--amber-light);color:var(--amber);border:1px solid rgba(202,103,2,0.15);}
+.ab-green{background:var(--green-light);color:var(--green);border:1px solid rgba(45,106,79,0.15);}
+.ab-icon{font-size:18px;flex-shrink:0;}
+.ab-text{flex:1;line-height:1.4;}
+
+/* PILL */
+.pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-family:var(--font-mono);font-weight:500;}
+.pill-green{background:var(--green-light);color:var(--green);}
+.pill-amber{background:var(--amber-light);color:var(--amber);}
+.pill-red{background:var(--red-light);color:var(--red);}
+.pill-blue{background:var(--blue-light);color:var(--blue);}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--brown-deep);color:white;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;z-index:999;opacity:0;transition:all 0.25s ease;white-space:nowrap;box-shadow:var(--shadow-xl);pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.page.active .card:nth-child(1){animation-delay:0.02s;}
+.page.active .card:nth-child(2){animation-delay:0.06s;}
+.page.active .card:nth-child(3){animation-delay:0.10s;}
+.page.active .card:nth-child(4){animation-delay:0.14s;}
+
+@media(min-width:480px){body{border-left:1px solid var(--border);border-right:1px solid var(--border);box-shadow:0 0 60px rgba(0,0,0,0.1);}
+.modal-overlay{left:50%;transform:translateX(-50%);right:auto;width:480px;}
+.cash-confirm-popup,.new-order-popup{width:480px;}
+.new-order-popup{width:calc(480px - 32px);}
+.bottom-nav{left:50%;}}
+</style>
+</head>
+<body>
+<!-- ══ LOGIN GATE — blocks all content until authenticated ══ -->
+<div id="auth-gate" style="position:fixed;inset:0;z-index:9999;background:var(--bg,#FBF6EE);display:flex;flex-direction:column;justify-content:center;padding:32px 24px;font-family:var(--font-display,serif);">
+  <div style="max-width:380px;margin:0 auto;width:100%;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:28px;font-weight:700;color:var(--brand,#8B1A1A);font-family:var(--font-display,serif);">BrewOps</div>
+      <div style="color:var(--text3,#8b7355);font-size:13px;margin-top:4px;">Franchisee Portal</div>
+    </div>
+
+    <div id="auth-tabs" style="display:flex;gap:8px;margin-bottom:20px;background:rgba(0,0,0,0.04);border-radius:10px;padding:4px;">
+      <button id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--brand,#8B1A1A);color:white;font-weight:600;font-size:14px;cursor:pointer;">Log In</button>
+      <button id="auth-tab-signup" onclick="switchAuthTab('signup')" style="flex:1;padding:10px;border:none;border-radius:8px;background:transparent;color:var(--text2,#4a3420);font-weight:600;font-size:14px;cursor:pointer;">Sign Up</button>
+    </div>
+
+    <div id="auth-error" style="display:none;background:#fee;color:#a33;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="auth-form-login">
+      <input type="email" id="login-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+      <input type="password" id="login-password" placeholder="Password" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:16px;font-size:14px;box-sizing:border-box;">
+      <button onclick="doLogin()" id="login-btn" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--brand,#8B1A1A);color:white;font-weight:700;font-size:15px;cursor:pointer;">Log In</button>
+    </div>
+
+    <!-- SIGNUP FORM (requires invite code) -->
+    <div id="auth-form-signup" style="display:none;">
+      <input type="text" id="signup-name" placeholder="Full name" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+      <input type="email" id="signup-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+      <input type="password" id="signup-password" placeholder="Password (min 6 characters)" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+      <input type="text" id="signup-invite" placeholder="Invite code (from your franchisor)" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:16px;font-size:14px;box-sizing:border-box;text-transform:uppercase;">
+      <button onclick="doSignup()" id="signup-btn" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--brand,#8B1A1A);color:white;font-weight:700;font-size:15px;cursor:pointer;">Create Account</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CASH CONFIRM POPUP (slides from top) -->
+<div class="cash-confirm-popup" id="cash-confirm-popup">
+  <div class="ccp-icon">💵</div>
+  <div class="ccp-text">
+    <div class="ccp-title" id="ccp-title">Cash Payment — ORD-4819</div>
+    <div class="ccp-sub" id="ccp-sub">Latte × 1 · LKR 520 · Confirm cash received?</div>
+  </div>
+  <button class="ccp-confirm" onclick="confirmCash()">✓ Received</button>
+  <button class="ccp-dismiss" onclick="dismissCash()">Dismiss</button>
+</div>
+
+<!-- NEW ORDER POPUP (slides from bottom above nav) -->
+<div class="new-order-popup" id="new-order-popup">
+  <div class="nop-pulse"></div>
+  <div class="nop-text">
+    <div class="nop-label">New customer order</div>
+    <div class="nop-title" id="nop-title">Flat White × 2 + Cold Brew</div>
+    <div class="nop-sub" id="nop-sub">Card payment · LKR 1,590 · Pickup</div>
+  </div>
+  <button class="nop-btn" onclick="goToOrders()">View →</button>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">Brew<span>Ops</span></div>
+  <div class="outlet-chip"><div class="dot-live"></div><span id="topbar-outlet-name">Loading...</span></div>
+  <div class="notif-btn" id="notif-btn" onclick="navigate('alerts')">
+    🔔
+    <div class="notif-count" id="notif-count">3</div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- HOME PAGE -->
+  <div class="page active" id="page-home">
+    <div class="greeting-block" style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div class="greeting-time" id="greeting-time"></div>
+        <div class="greeting-name" id="greeting-name-text">Good morning, <em>Nimal.</em></div>
+        <div class="greeting-sub" id="greeting-sub-text">Loading outlet info...</div>
+      </div>
+      <button onclick="doFranchiseeLogout()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:7px 14px;border-radius:18px;font-size:12px;cursor:pointer;font-family:var(--font-body);flex-shrink:0;margin-top:2px;">Log Out</button>
+    </div>
+
+    <div class="daily-hero">
+      <div class="hero-label">Today's performance</div>
+      <div class="hero-cups">247 <span>cups</span></div>
+      <div class="hero-revenue">LKR 18,400</div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-val">LKR 74</div><div class="hero-stat-lbl">Avg/Cup</div></div>
+        <div class="hero-stat"><div class="hero-stat-val">3</div><div class="hero-stat-lbl">Cleans</div></div>
+        <div class="hero-stat"><div class="hero-stat-val">1</div><div class="hero-stat-lbl">Flushes</div></div>
+        <div class="hero-stat live-orders"><div class="hero-stat-val" id="live-order-hero">4</div><div class="hero-stat-lbl">Live Orders</div></div>
+      </div>
+    </div>
+
+    <div class="status-strip">
+      <div class="status-chip sc-green"><div class="dot sc-dot-green"></div>Machine OK</div>
+      <div class="status-chip sc-amber"><div class="dot sc-dot-amber"></div>Cup lids 38%</div>
+      <div class="status-chip sc-blue"><div class="dot sc-dot-blue"></div>4 live orders</div>
+      <div class="status-chip sc-green"><div class="dot sc-dot-green"></div>Rent OK — 21d</div>
+      <div class="status-chip sc-red"><div class="dot sc-dot-red"></div>1 open issue</div>
+    </div>
+
+    <div class="ai-tip">
+      <div class="ai-tip-icon">◎</div>
+      <div>
+        <div class="ai-tip-label">AI Insight for you</div>
+        <div class="ai-tip-text">You have 4 active orders from the customer app. Flat White demand is up 34% this week — ensure stock is sufficient. Iced Latte trending at network level — check your cold brew stock.</div>
+      </div>
+    </div>
+
+    <div class="section-label">Quick actions</div>
+    <div class="quick-grid">
+      <div class="quick-btn" onclick="navigate('orders')">
+        <div class="quick-icon qi-orders">⚡</div>
+        <div class="quick-label">Live Orders</div>
+        <div class="quick-btn-badge green" id="orders-quick-badge">4</div>
+      </div>
+      <div class="quick-btn" onclick="openSaleModal()">
+        <div class="quick-icon qi-sale">☕</div>
+        <div class="quick-label">Log Walk-in</div>
+      </div>
+      <div class="quick-btn" onclick="navigate('stock')">
+        <div class="quick-icon qi-stock">📦</div>
+        <div class="quick-label">Update Stock</div>
+      </div>
+      <div class="quick-btn" onclick="navigate('machine')">
+        <div class="quick-icon qi-machine">🔧</div>
+        <div class="quick-label">Machine Log</div>
+      </div>
+      <div class="quick-btn" onclick="navigate('finance')">
+        <div class="quick-icon qi-payment">💳</div>
+        <div class="quick-label">Payments</div>
+      </div>
+      <div class="quick-btn" onclick="openIssueModal()">
+        <div class="quick-icon qi-issue">⚠️</div>
+        <div class="quick-label">Report Issue</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:20px">Today's beverages</div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Sales by Beverage</div><div class="card-sub" id="bev-cups-total">0 cups total</div></div>
+      <div class="card-body" style="padding:8px 16px" id="bev-list-body">
+        <div style="padding:14px 0;color:var(--text3);font-size:12px;text-align:center">No sales recorded yet today</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:8px">Recent walk-in transactions</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="walkins-list-body">
+        <div style="padding:14px 0;color:var(--text3);font-size:12px;text-align:center">No walk-in sales logged yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE ORDERS PAGE -->
+  <div class="page" id="page-orders">
+    <div class="greeting-block">
+      <div class="greeting-name" style="font-size:22px">Live Orders</div>
+      <div class="greeting-sub" id="orders-page-sub">4 active orders from customer app · <span class="outlet-name-inline">Loading...</span></div>
+    </div>
+
+    <div class="alert-banner ab-green">
+      <div class="ab-icon">⚡</div>
+      <div class="ab-text">All customer app orders appear here instantly. Confirm, prepare, then mark ready for customer pickup or delivery.</div>
+    </div>
+
+    <div class="order-filter-row">
+      <div class="of-chip active" onclick="filterOrders('all',this)">All</div>
+      <div class="of-chip" onclick="filterOrders('cash',this)">💵 Cash Confirm</div>
+      <div class="of-chip" onclick="filterOrders('new',this)">New</div>
+      <div class="of-chip" onclick="filterOrders('preparing',this)">Preparing</div>
+      <div class="of-chip" onclick="filterOrders('ready',this)">Ready</div>
+      <div class="of-chip" onclick="filterOrders('done',this)">Done</div>
+    </div>
+
+    <div id="order-list"></div>
+  </div>
+
+  <!-- STOCK PAGE -->
+  <div class="page" id="page-stock">
+    <div class="greeting-block">
+      <div class="greeting-name" style="font-size:22px">Stock & Supply</div>
+      <div class="greeting-sub" id="stock-page-sub">Current delivery cycle · <span class="outlet-name-inline">Loading...</span></div>
+    </div>
+    <div class="alert-banner ab-amber"><div class="ab-icon">⚠️</div><div class="ab-text">Cup lids at 38% — expected to run out in 3 days at current usage. Request top-up now.</div></div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Stock Levels</div><div class="card-sub">Updated 2h ago</div></div>
+      <div class="card-body" style="padding:4px 16px">
+        <div class="stock-item"><div class="stock-emoji">🫘</div><div style="flex:1"><div class="stock-name">Coffee Beans</div><div class="stock-sub">1.2 kg remaining</div></div><div class="stock-bar-wrap"><div class="sbar"><div class="sbar-fill sb-green" style="width:72%"></div></div></div><div class="stock-pct pct-green">72%</div></div>
+        <div class="stock-item"><div class="stock-emoji">🥛</div><div style="flex:1"><div class="stock-name">Milk</div><div class="stock-sub">6.8 L remaining</div></div><div class="stock-bar-wrap"><div class="sbar"><div class="sbar-fill sb-green" style="width:68%"></div></div></div><div class="stock-pct pct-green">68%</div></div>
+        <div class="stock-item"><div class="stock-emoji">🥤</div><div style="flex:1"><div class="stock-name">10oz Cups</div><div class="stock-sub">310 units left</div></div><div class="stock-bar-wrap"><div class="sbar"><div class="sbar-fill sb-amber" style="width:62%"></div></div></div><div class="stock-pct pct-amber">62%</div></div>
+        <div class="stock-item"><div class="stock-emoji">🪄</div><div style="flex:1"><div class="stock-name">Cup Lids</div><div class="stock-sub">190 units — LOW</div></div><div class="stock-bar-wrap"><div class="sbar"><div class="sbar-fill sb-amber" style="width:38%"></div></div></div><div class="stock-pct pct-amber">38%</div></div>
+        <div class="stock-item"><div class="stock-emoji">🧢</div><div style="flex:1"><div class="stock-name">Cup Sleeves</div><div class="stock-sub">420 units left</div></div><div class="stock-bar-wrap"><div class="sbar"><div class="sbar-fill sb-green" style="width:84%"></div></div></div><div class="stock-pct pct-green">84%</div></div>
+        <div class="stock-item"><div class="stock-emoji">💧</div><div style="flex:1"><div class="stock-name">Water</div><div class="stock-sub">14.2 L remaining</div></div><div class="stock-bar-wrap"><div class="sbar"><div class="sbar-fill sb-green" style="width:71%"></div></div></div><div class="stock-pct pct-green">71%</div></div>
+        <div class="stock-item"><div class="stock-emoji">⚡</div><div style="flex:1"><div class="stock-name">Electricity</div><div class="stock-sub">8.4 kWh today</div></div><div class="stock-bar-wrap"><div class="sbar"><div class="sbar-fill sb-green" style="width:58%"></div></div></div><div class="stock-pct pct-green">58%</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Cycle Summary</div><div class="card-sub" id="cycle-summary-sub"></div></div>
+      <div class="card-body" style="padding:4px 16px" id="cycle-summary-body">
+        <div class="sum-row"><span class="sum-label">Delivery received</span><span class="sum-val">—</span></div>
+        <div class="sum-row"><span class="sum-label">Next delivery est.</span><span class="sum-val">—</span></div>
+        <div class="sum-row"><span class="sum-label">Cups used this cycle</span><span class="sum-val">—</span></div>
+        <div class="sum-row"><span class="sum-label">Stock status</span><span class="sum-val amber">1 item low</span></div>
+      </div>
+    </div>
+    <button class="submit-btn gold" onclick="openStockRequestModal()">Request Stock Top-Up</button>
+  </div>
+
+  <!-- MACHINE PAGE -->
+  <div class="page" id="page-machine">
+    <div class="greeting-block">
+      <div class="greeting-name" style="font-size:22px">Machine Care</div>
+      <div class="greeting-sub" id="machine-subtitle">Loading machine info...</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Today's Checklist</div><div class="card-sub" id="checklist-progress">0 / 5 done</div></div>
+      <div class="card-body" style="padding:4px 16px" id="machine-checklist">
+        <div style="padding:20px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Service Status</div></div>
+      <div class="card-body" style="padding:4px 16px" id="machine-service-status">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Log Machine Event</div></div>
+      <div class="card-body">
+        <div class="form-group"><label class="form-label">Event type</label><select class="form-select" id="machine-event-type">
+          <option value="clean">Manual Clean</option>
+          <option value="flush">System Flush</option>
+          <option value="routine_service">Routine Service</option>
+          <option value="emergency_service">Emergency Service</option>
+          <option value="issue_noticed">Issue Noticed</option>
+          <option value="part_replaced">Part Replaced</option>
+        </select></div>
+        <div class="form-group"><label class="form-label">Notes (optional)</label><textarea class="form-textarea" id="machine-event-notes" placeholder="Describe what was done..."></textarea></div>
+        <button class="submit-btn" id="machine-event-submit-btn" onclick="submitMachineEvent()">Log Event</button>
+      </div>
+    </div>
+    <button class="submit-btn red" style="margin-top:4px" onclick="openIssueModal()">🚨 Report Emergency Issue</button>
+  </div>
+
+  <!-- FINANCE PAGE -->
+  <div class="page" id="page-finance">
+    <div class="greeting-block">
+      <div class="greeting-name" style="font-size:22px">Finance</div>
+      <div class="greeting-sub" id="finance-subtitle">Payments, invoices & rent</div>
+    </div>
+    <div class="section-label">Rent status</div>
+    <div id="finance-rent-card">
+      <div class="rent-card" style="padding:16px;color:var(--text3);font-size:13px">Loading...</div>
+    </div>
+    <div class="section-label">Revenue this cycle</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="finance-revenue-card">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <div class="section-label">Payment methods — today</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="finance-payment-methods">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <div class="section-label">Coupons used today</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="finance-coupons">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTS PAGE -->
+  <div class="page" id="page-alerts">
+    <div class="greeting-block">
+      <div class="greeting-name" style="font-size:22px">Issues & Alerts</div>
+      <div class="greeting-sub" id="alerts-subtitle">Open items</div>
+    </div>
+    <div id="alerts-banner-wrap"></div>
+    <div class="section-label">Open issues</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="alerts-issues-list">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <div class="section-label">Waste logged today</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="alerts-waste-list">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <button class="submit-btn gold" onclick="openIssueModal()">+ Report New Issue</button>
+    <button class="submit-btn" style="margin-top:10px;background:var(--brown3)" onclick="openWasteModal()">+ Log Waste</button>
+  </div>
+
+  <!-- STATS PAGE -->
+  <div class="page" id="page-stats">
+    <div class="greeting-block">
+      <div class="greeting-name" style="font-size:22px">My Performance</div>
+      <div class="greeting-sub" id="stats-subtitle">Loading...</div>
+    </div>
+    <div class="section-label">This month</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="stats-month-summary">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+    <div class="section-label">Network ranking</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="stats-network-ranking">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-tab" onclick="navigate('home',this)" id="bnav-home">
+    <div class="nav-icon">⌂</div><div class="nav-label">Home</div>
+  </div>
+  <div class="nav-tab" onclick="navigate('orders',this)" id="bnav-orders">
+    <div class="nav-icon">⚡</div><div class="nav-label">Orders</div>
+    <div class="nav-badge green-badge pulse" id="orders-badge">4</div>
+  </div>
+  <div class="nav-tab" onclick="navigate('stock',this)" id="bnav-stock">
+    <div class="nav-icon">▦</div><div class="nav-label">Stock</div>
+    <div class="nav-badge">1</div>
+  </div>
+  <div class="nav-tab" onclick="navigate('machine',this)" id="bnav-machine">
+    <div class="nav-icon">⊞</div><div class="nav-label">Machine</div>
+  </div>
+  <div class="nav-tab" onclick="navigate('finance',this)" id="bnav-finance">
+    <div class="nav-icon">◇</div><div class="nav-label">Finance</div>
+  </div>
+  <div class="nav-tab" onclick="navigate('stats',this)" id="bnav-stats">
+    <div class="nav-icon">◉</div><div class="nav-label">Stats</div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-sale">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div class="sheet-title">Log Walk-in Sale</div><div class="sheet-close" onclick="closeModal('modal-sale')">×</div></div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Beverage</label>
+        <select class="form-select" id="sale-menu-item"><option value="">Loading menu...</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Quantity</label>
+        <div class="stepper"><button class="step-btn" onclick="stepQty(-1)">−</button><div class="step-val" id="qty-val">1</div><button class="step-btn" onclick="stepQty(1)">+</button></div>
+      </div>
+      <div class="form-group"><label class="form-label">Payment method</label>
+        <div class="method-picker" id="sale-payment-picker">
+          <div class="method-btn selected" data-method="card" onclick="pickMethod(this)">💳 Card</div>
+          <div class="method-btn" data-method="cash" onclick="pickMethod(this)">💵 Cash</div>
+          <div class="method-btn" data-method="qr" onclick="pickMethod(this)">📱 QR</div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Coupon code (optional)</label><input type="text" class="form-input" id="sale-coupon" placeholder="e.g. BREW20" style="text-transform:uppercase"></div>
+      <div class="form-group"><label class="form-label">Price (LKR)</label><input type="number" class="form-input" id="sale-price" value="0"></div>
+      <button class="submit-btn gold" id="sale-submit-btn" onclick="submitSale()">Record Sale</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-waste">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div class="sheet-title">Log Waste</div><div class="sheet-close" onclick="closeModal('modal-waste')">×</div></div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Item type</label><select class="form-select" id="waste-item-name"><option>Coffee Beans</option><option>Milk</option><option>10oz Cups</option><option>Cup Lids</option><option>Cup Sleeves</option><option>Other</option></select></div>
+      <div class="form-group"><label class="form-label">Reason</label><select class="form-select" id="waste-reason">
+        <option value="spilled">Spilled / Accident</option>
+        <option value="disposed">Disposed (damaged)</option>
+        <option value="expired">Expired / End of day</option>
+        <option value="quality_issue">Quality issue</option>
+      </select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Quantity</label><input type="text" class="form-input" id="waste-quantity" placeholder="e.g. 0.5 L"></div>
+        <div class="form-group"><label class="form-label">Est. cost (LKR)</label><input type="number" class="form-input" id="waste-cost" placeholder="0"></div>
+      </div>
+      <button class="submit-btn red" id="waste-submit-btn" onclick="submitWasteLog()">Log Waste Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-issue">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div class="sheet-title">Report Issue</div><div class="sheet-close" onclick="closeModal('modal-issue')">×</div></div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Issue category</label><select class="form-select" id="issue-category">
+        <option>Machine — Emergency</option>
+        <option>Machine — Routine concern</option>
+        <option>Stock / Supply</option>
+        <option>Packaging quality</option>
+        <option>Customer complaint</option>
+        <option>Suggestion / Improvement</option>
+        <option>Other</option>
+      </select></div>
+      <div class="form-group"><label class="form-label">Severity</label>
+        <div class="method-picker" id="issue-severity-picker">
+          <div class="method-btn selected" data-severity="high" onclick="pickMethod(this)" style="background:var(--red-light);border-color:var(--red);color:var(--red)">🔴 High</div>
+          <div class="method-btn" data-severity="medium" onclick="pickMethod(this)">🟡 Medium</div>
+          <div class="method-btn" data-severity="low" onclick="pickMethod(this)">🟢 Low</div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="issue-description" placeholder="Describe the issue in detail..."></textarea></div>
+      <button class="submit-btn red" id="issue-submit-btn" onclick="submitIssue()">Submit Issue</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-stock-req">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div class="sheet-title">Request Stock Top-Up</div><div class="sheet-close" onclick="closeModal('modal-stock-req')">×</div></div>
+    <div class="sheet-body">
+      <div class="form-group"><label class="form-label">Items needed</label>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="stock-req-items">
+          <div style="font-size:12px;color:var(--text3)">Loading stock items...</div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Urgency</label><select class="form-select" id="stock-req-urgency">
+        <option value="critical">Today — critical</option>
+        <option value="urgent">Within 2 days</option>
+        <option value="normal">Next delivery</option>
+      </select></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="stock-req-notes" placeholder="Any specific quantities..."></textarea></div>
+      <button class="submit-btn gold" id="stock-req-submit-btn" onclick="submitStockRequest()">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-icon"></span><span id="toast-msg"></span></div>
+
+<script>
+// ══ SUPABASE CONFIG ══
+// Replace with your values from supabase.com → Settings → API
+const SUPABASE_URL = 'https://fjmzsxslnzrtgcilttly.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqbXpzeHNsbnpydGdjaWx0dGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzMjU4OTksImV4cCI6MjA5NjkwMTg5OX0.F56god4wqLUCgP1lCVTLZCK9aII4Vo_4g4fJcPAFfFc';
+let OUTLET_ID = null; // set after login from the franchisee's profile
+
+let sb = null;
+
+async function initSupabase() {
+  try {
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('✓ Supabase connected');
+
+    // Check for an existing logged-in session first
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      await loadProfileAndEnterApp(session.user.id);
+    } else {
+      document.getElementById('auth-gate').style.display = 'flex';
+    }
+  } catch(e) {
+    console.error('Supabase connection failed:', e.message);
+    document.getElementById('auth-error').textContent = 'Cannot connect — check your internet connection.';
+    document.getElementById('auth-error').style.display = 'block';
+  }
+}
+
+// ── Load the logged-in franchisee's profile, then unlock the app ──
+// ── Logout ──
+async function doFranchiseeLogout() {
+  if (!confirm('Log out of BrewOps?')) return;
+  if (sb) await sb.auth.signOut();
+  location.reload();
+}
+
+async function loadProfileAndEnterApp(userId) {
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
+  if (error || !profile) {
+    showAuthError('Could not load your profile. Please contact your franchisor.');
+    await sb.auth.signOut();
+    return;
+  }
+  if (profile.role !== 'franchisee') {
+    showAuthError('This account is not registered as a franchisee.');
+    await sb.auth.signOut();
+    return;
+  }
+  if (!profile.outlet_id) {
+    showAuthError('Your account has no outlet assigned. Contact your franchisor.');
+    await sb.auth.signOut();
+    return;
+  }
+
+  OUTLET_ID = profile.outlet_id;
+  window.MY_PROFILE = profile;
+
+  // Update greeting with real name
+  const nameEl = document.querySelector('.greeting-name em');
+  if (nameEl && profile.full_name) nameEl.textContent = profile.full_name.split(' ')[0] + '.';
+
+  // Fetch and display the real outlet name/location everywhere it's shown
+  // (previously hardcoded as "Colombo 03" leftover placeholder text)
+  const { data: outlet, error: outletErr } = await sb.from('outlets')
+    .select('name, location').eq('id', OUTLET_ID).maybeSingle();
+
+  if (outlet && !outletErr) {
+    const outletLabel = outlet.location ? `${outlet.name} · ${outlet.location}` : outlet.name;
+
+    const topbarEl = document.getElementById('topbar-outlet-name');
+    if (topbarEl) topbarEl.textContent = outlet.name;
+
+    const greetingSubEl = document.getElementById('greeting-sub-text');
+    if (greetingSubEl) greetingSubEl.textContent = outletLabel;
+
+    document.querySelectorAll('.outlet-name-inline').forEach(el => {
+      el.textContent = outlet.name;
+    });
+  } else {
+    // Fallback if outlet fetch fails — don't leave "Loading..." stuck forever
+    const topbarEl = document.getElementById('topbar-outlet-name');
+    if (topbarEl) topbarEl.textContent = 'Outlet';
+    const greetingSubEl = document.getElementById('greeting-sub-text');
+    if (greetingSubEl) greetingSubEl.textContent = '';
+    document.querySelectorAll('.outlet-name-inline').forEach(el => { el.textContent = 'this outlet'; });
+  }
+
+  document.getElementById('auth-gate').style.display = 'none';
+  await loadFranchiseeData();
+  subscribeToOrders();
+}
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('auth-form-login').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('auth-form-signup').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('auth-tab-login').style.background = isLogin ? 'var(--brand,#8B1A1A)' : 'transparent';
+  document.getElementById('auth-tab-login').style.color = isLogin ? 'white' : 'var(--text2,#4a3420)';
+  document.getElementById('auth-tab-signup').style.background = isLogin ? 'transparent' : 'var(--brand,#8B1A1A)';
+  document.getElementById('auth-tab-signup').style.color = isLogin ? 'var(--text2,#4a3420)' : 'white';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) { showAuthError('Please enter email and password.'); return; }
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Log In';
+
+  if (error) { showAuthError(error.message); return; }
+  await loadProfileAndEnterApp(data.user.id);
+}
+
+async function doSignup() {
+  const full_name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const invite_code = document.getElementById('signup-invite').value.trim().toUpperCase();
+
+  if (!full_name || !email || !password || !invite_code) {
+    showAuthError('Please fill in all fields.'); return;
+  }
+  if (password.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+
+  const btn = document.getElementById('signup-btn');
+  btn.disabled = true; btn.textContent = 'Validating invite code...';
+
+  // Validate the invite code BEFORE creating the account
+  const { data: invite, error: inviteErr } = await sb.from('invite_codes')
+    .select('*').eq('code', invite_code).eq('role', 'franchisee').maybeSingle();
+
+  if (inviteErr || !invite) {
+    btn.disabled = false; btn.textContent = 'Create Account';
+    showAuthError('Invalid invite code.'); return;
+  }
+  if (invite.used_by) {
+    btn.disabled = false; btn.textContent = 'Create Account';
+    showAuthError('This invite code has already been used.'); return;
+  }
+  if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+    btn.disabled = false; btn.textContent = 'Create Account';
+    showAuthError('This invite code has expired.'); return;
+  }
+
+  btn.textContent = 'Creating account...';
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { role: 'franchisee', full_name, outlet_id: invite.outlet_id } }
+  });
+
+  if (error) {
+    btn.disabled = false; btn.textContent = 'Create Account';
+    showAuthError(error.message); return;
+  }
+  if (!data.session) {
+    btn.disabled = false; btn.textContent = 'Create Account';
+    showAuthError('Account created! Check your email to confirm, then log in.');
+    switchAuthTab('login');
+    return;
+  }
+
+  // Create the profile row directly (the DB trigger can't run on
+  // Supabase-managed auth.users, so we do this client-side instead)
+  const { error: profileErr } = await sb.from('profiles').upsert({
+    id: data.user.id, role: 'franchisee', full_name, outlet_id: invite.outlet_id, phone: null, brand_id: invite.brand_id
+  });
+  if (profileErr) {
+    btn.disabled = false; btn.textContent = 'Create Account';
+    showAuthError('Account created but profile setup failed: ' + profileErr.message);
+    return;
+  }
+
+  await sb.from('invite_codes').update({ used_by: data.user.id, used_at: new Date().toISOString() })
+    .eq('code', invite_code).is('used_by', null);
+
+  btn.disabled = false; btn.textContent = 'Create Account';
+  await loadProfileAndEnterApp(data.user.id);
+}
+
+async function loadFranchiseeData() {
+  try {
+    // Load today's ops
+    const today = new Date().toISOString().split('T')[0];
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    const [opsRes, ordersRes, stockRes, machineRes, rentRes, issuesRes, todayItemsRes, walkInsRes, lastDeliveryRes] = await Promise.all([
+      sb.from('daily_ops').select('*').eq('outlet_id', OUTLET_ID).eq('date', today).maybeSingle(),
+      sb.from('orders').select('*, order_items(*)').eq('outlet_id', OUTLET_ID)
+        .not('status','eq','completed').not('status','eq','cancelled').order('created_at'),
+      sb.from('stock').select('*').eq('outlet_id', OUTLET_ID),
+      sb.from('machines').select('*').eq('outlet_id', OUTLET_ID).maybeSingle(),
+      sb.from('rent_schedules').select('*').eq('outlet_id', OUTLET_ID).maybeSingle(),
+      sb.from('issues').select('id').eq('outlet_id', OUTLET_ID).eq('status','open'),
+      // Today's beverages — real order_items joined through today's completed orders for this outlet
+      sb.from('orders').select('id, order_items(name, emoji, quantity)').eq('outlet_id', OUTLET_ID)
+        .eq('status', 'completed').gte('created_at', todayStart.toISOString()),
+      // Recent walk-in transactions — completed orders logged at the counter (see submitSale())
+      sb.from('orders').select('*').eq('outlet_id', OUTLET_ID).eq('notes', 'Walk-in counter sale')
+        .order('created_at', { ascending: false }).limit(5),
+      // Cycle Summary — most recent fulfilled stock top-up request for this outlet
+      sb.from('stock_requests').select('*').eq('outlet_id', OUTLET_ID).eq('status', 'fulfilled')
+        .order('fulfilled_at', { ascending: false }).limit(2)
+    ]);
+
+    // Update hero stats from DB (always runs — shows real zeros when empty)
+    const ops = opsRes.data || { total_cups: 0, total_revenue: 0, machine_cleans: 0, machine_flushes: 0 };
+    document.querySelector('.hero-cups').innerHTML = `${ops.total_cups} <span>cups</span>`;
+    document.querySelector('.hero-revenue').textContent = `LKR ${(ops.total_revenue/100).toLocaleString()}`;
+    const heroStatVals = document.querySelectorAll('.hero-stat-val');
+    if (heroStatVals[0]) heroStatVals[0].textContent = ops.total_cups > 0 ? `LKR ${Math.round(ops.total_revenue/ops.total_cups/100)}` : 'LKR 0';
+    if (heroStatVals[1]) heroStatVals[1].textContent = ops.machine_cleans || 0;
+    if (heroStatVals[2]) heroStatVals[2].textContent = ops.machine_flushes || 0;
+
+    // Load live orders
+    if (ordersRes.data) {
+      window.LIVE_ORDERS = ordersRes.data.map(o => ({
+        id: o.id,
+        order_number: o.order_number,
+        outlet: o.outlet_id,
+        items: (o.order_items||[]).map(i => ({
+          emoji: i.emoji||'☕',
+          name: i.name,
+          detail: [i.size,i.temperature,i.milk].filter(Boolean).join(' / '),
+          qty: i.quantity,
+          price: Math.round(i.line_total/100)
+        })),
+        payment: o.payment_method,
+        total: Math.round(o.total/100),
+        status: o.payment_method==='cash'&&(o.status==='pending'||o.payment_status==='pending') ? 'cash' : (o.status==='pending'||o.status==='confirmed') ? 'new' : o.status,
+        time: new Date(o.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+        mode: o.order_type==='pickup' ? 'Pickup' : 'Delivery',
+        isCash: o.payment_method==='cash' && o.payment_status==='pending'
+      }));
+      renderOrders('all');
+      updateOrderCount();
+    }
+
+    // Update stock display from DB
+    if (stockRes.data) {
+      updateStockDisplay(stockRes.data);
+      window.STOCK_ITEMS_CACHE = stockRes.data; // used by openStockRequestModal's real item picklist
+    }
+
+    // (Machine page now loads its own data separately via loadMachinePage()
+    //  when that page is visited — see navigate() hook below)
+
+    // ── Update status strip (machine / stock / orders / rent / issues) ──
+    updateStatusStrip({
+      machine: machineRes.data,
+      stock: stockRes.data || [],
+      liveOrderCount: (ordersRes.data || []).length,
+      rent: rentRes.data,
+      openIssueCount: (issuesRes.data || []).length
+    });
+
+    // ── Today's beverages (replaces hardcoded demo bars) ──
+    updateTodaysBeverages(todayItemsRes.data || []);
+
+    // ── Recent walk-in transactions (replaces hardcoded demo rows) ──
+    updateRecentWalkIns(walkInsRes.data || []);
+
+    // ── Cycle Summary (replaces hardcoded demo dates) ──
+    await updateCycleSummary(lastDeliveryRes.data || [], stockRes.data || []);
+
+  } catch(e) {
+    console.error('loadFranchiseeData error:', e?.message || e);
+  }
+}
+
+// ── Build the status strip + AI insight from real data (replaces hardcoded demo text) ──
+function updateStatusStrip({ machine, stock, liveOrderCount, rent, openIssueCount }) {
+  const strip = document.querySelector('.status-strip');
+  if (!strip) return;
+
+  const chips = [];
+
+  // Machine
+  if (machine) {
+    const map = { ok:['sc-green','Machine OK'], due_soon:['sc-amber','Service due soon'],
+                  overdue:['sc-red','Machine overdue'], emergency:['sc-red','Machine emergency'] };
+    const [cls, label] = map[machine.status] || ['sc-green','Machine OK'];
+    chips.push(`<div class="status-chip ${cls}"><div class="dot sc-dot-${cls.split('-')[1]}"></div>${label}</div>`);
+  } else {
+    chips.push(`<div class="status-chip"><div class="dot"></div>No machine on file</div>`);
+  }
+
+  // Lowest stock item (most urgent)
+  if (stock.length) {
+    const lowest = stock.reduce((min, s) => (s.current_qty/s.max_qty) < (min.current_qty/min.max_qty) ? s : min);
+    const pct = Math.round((lowest.current_qty / lowest.max_qty) * 100);
+    const cls = pct < 25 ? 'sc-red' : pct < 50 ? 'sc-amber' : 'sc-green';
+    chips.push(`<div class="status-chip ${cls}"><div class="dot sc-dot-${cls.split('-')[1]}"></div>${lowest.item_name} ${pct}%</div>`);
+  } else {
+    chips.push(`<div class="status-chip"><div class="dot"></div>No stock tracked</div>`);
+  }
+
+  // Live orders
+  chips.push(`<div class="status-chip sc-blue"><div class="dot sc-dot-blue"></div>${liveOrderCount} live order${liveOrderCount===1?'':'s'}</div>`);
+
+  // Rent
+  if (rent) {
+    const map = { current:'sc-green', due_soon:'sc-amber', overdue:'sc-red' };
+    const cls = map[rent.status] || 'sc-green';
+    const daysLeft = rent.next_due_at ? Math.max(0, Math.ceil((new Date(rent.next_due_at) - new Date()) / 86400000)) : null;
+    chips.push(`<div class="status-chip ${cls}"><div class="dot sc-dot-${cls.split('-')[1]}"></div>Rent ${rent.status==='current'?'OK':rent.status.replace('_',' ')}${daysLeft!==null?' — '+daysLeft+'d':''}</div>`);
+  } else {
+    chips.push(`<div class="status-chip"><div class="dot"></div>No rent schedule</div>`);
+  }
+
+  // Open issues
+  if (openIssueCount > 0) {
+    chips.push(`<div class="status-chip sc-red"><div class="dot sc-dot-red"></div>${openIssueCount} open issue${openIssueCount===1?'':'s'}</div>`);
+  } else {
+    chips.push(`<div class="status-chip sc-green"><div class="dot sc-dot-green"></div>No open issues</div>`);
+  }
+
+  strip.innerHTML = chips.join('');
+
+  // AI insight box — simple real-data summary (replaces hardcoded narrative)
+  const tipEl = document.querySelector('.ai-tip-text');
+  if (tipEl) {
+    if (liveOrderCount === 0 && openIssueCount === 0) {
+      tipEl.textContent = 'All quiet right now — no live orders or open issues. Check back as orders come in.';
+    } else {
+      const parts = [];
+      if (liveOrderCount > 0) parts.push(`${liveOrderCount} active order${liveOrderCount===1?'':'s'} from the customer app`);
+      if (openIssueCount > 0) parts.push(`${openIssueCount} open issue${openIssueCount===1?'':'s'} need attention`);
+      tipEl.textContent = parts.join('. ') + '.';
+    }
+  }
+}
+
+// ── Today's beverages — real per-item breakdown from today's completed orders ──
+// (replaces the hardcoded 5-bar demo chart that never reflected actual sales)
+const BEV_COLORS = ['#c8922a','#1d4e89','#2d6a4f','#6b4f32','#ca6702','#8B1A1A','#5a3a8a'];
+function updateTodaysBeverages(orders) {
+  const body = document.getElementById('bev-list-body');
+  const totalEl = document.getElementById('bev-cups-total');
+  if (!body) return;
+
+  // Flatten order_items across all of today's completed orders, summing by name
+  const counts = {};
+  let totalCups = 0;
+  orders.forEach(o => {
+    (o.order_items || []).forEach(i => {
+      const name = i.name || 'Other';
+      counts[name] = (counts[name] || 0) + (i.quantity || 1);
+      totalCups += (i.quantity || 1);
+    });
+  });
+
+  if (totalEl) totalEl.textContent = `${totalCups} cup${totalCups===1?'':'s'} total`;
+
+  if (!totalCups) {
+    body.innerHTML = `<div style="padding:14px 0;color:var(--text3);font-size:12px;text-align:center">No sales recorded yet today</div>`;
+    return;
+  }
+
+  // Sort descending by count, take top items
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 6);
+  const maxCount = sorted[0][1];
+
+  body.innerHTML = sorted.map(([name, count], idx) => {
+    const pct = Math.round((count/totalCups)*100);
+    const barWidth = Math.round((count/maxCount)*100);
+    const color = BEV_COLORS[idx % BEV_COLORS.length];
+    return `<div class="bev-item"><div class="bev-color" style="background:${color}"></div><div class="bev-name">${name}</div><div class="bev-bar-wrap"><div class="bev-sbar"><div class="bev-fill" style="width:${barWidth}%;background:${color}"></div></div></div><div class="bev-count">${count}</div><div class="bev-pct">${pct}%</div></div>`;
+  }).join('');
+}
+
+// ── Recent walk-in transactions — real counter sales (see submitSale()) ──
+// (replaces 3 hardcoded demo rows that never reflected real walk-in sales)
+function updateRecentWalkIns(orders) {
+  const body = document.getElementById('walkins-list-body');
+  if (!body) return;
+
+  if (!orders.length) {
+    body.innerHTML = `<div style="padding:14px 0;color:var(--text3);font-size:12px;text-align:center">No walk-in sales logged yet</div>`;
+    return;
+  }
+
+  const methodCls = { card: 'pm-card', qr: 'pm-qr', cash: 'pm-cash' };
+  const methodLabel = { card: 'Card', qr: 'QR', cash: 'Cash' };
+
+  body.innerHTML = orders.map(o => {
+    const time = new Date(o.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const amount = `LKR ${Math.round(o.total/100).toLocaleString()}`;
+    // Walk-in sales are single-item (see submitSale()) — describe from order total/discount
+    // since order_items weren't joined in this query; coupon use is visible via discount > 0.
+    const desc = o.discount > 0 ? 'Walk-in sale — coupon applied' : 'Walk-in sale';
+    const cls = methodCls[o.payment_method] || 'pm-cash';
+    const label = methodLabel[o.payment_method] || o.payment_method;
+    return `<div class="pay-item"><span class="pay-method ${cls}">${label}</span><div class="pay-desc">${desc}</div><div class="pay-time">${time}</div><div class="pay-amount">${amount}</div></div>`;
+  }).join('');
+}
+
+// ── Cycle Summary — real delivery/fulfillment dates from stock_requests ──
+// (replaces hardcoded "Jun 1, 2024" / "Jun 14, 2024" demo dates)
+async function updateCycleSummary(fulfilledRequests, stock) {
+  const body = document.getElementById('cycle-summary-body');
+  const subEl = document.getElementById('cycle-summary-sub');
+  if (!body) return;
+
+  const [latest, previous] = fulfilledRequests; // already ordered desc by fulfilled_at, limit 2
+
+  const receivedLabel = latest
+    ? new Date(latest.fulfilled_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+    : 'No deliveries recorded yet';
+
+  // Estimate next delivery only if we have two real fulfillment dates to measure a real
+  // cycle length from — otherwise admit we don't know rather than inventing a date.
+  let nextLabel = 'Not enough history yet';
+  if (latest && previous) {
+    const cycleDays = Math.round((new Date(latest.fulfilled_at) - new Date(previous.fulfilled_at)) / 86400000);
+    if (cycleDays > 0) {
+      const estNext = new Date(latest.fulfilled_at);
+      estNext.setDate(estNext.getDate() + cycleDays);
+      nextLabel = estNext.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) + ' (est.)';
+    }
+  }
+
+  // Cups used this cycle — only meaningful once we have a delivery date to count from;
+  // otherwise this would silently undercount, so be explicit about the gap instead.
+  let cupsLabel = '—';
+  if (latest) {
+    const { data, error } = await sbCountOrdersSince(latest.fulfilled_at);
+    cupsLabel = error ? '—' : `${data} units`;
+  } else {
+    cupsLabel = 'No delivery on record';
+  }
+
+  const lowCount = stock.filter(s => (s.current_qty / s.max_qty) < 0.5).length;
+  const stockLabel = lowCount === 0 ? 'All items healthy' : `${lowCount} item${lowCount===1?'':'s'} low`;
+  const stockCls = lowCount === 0 ? 'green' : lowCount >= 2 ? 'red' : 'amber';
+
+  if (subEl) subEl.textContent = latest ? '' : 'No delivery history yet';
+
+  body.innerHTML = `
+    <div class="sum-row"><span class="sum-label">Delivery received</span><span class="sum-val">${receivedLabel}</span></div>
+    <div class="sum-row"><span class="sum-label">Next delivery est.</span><span class="sum-val">${nextLabel}</span></div>
+    <div class="sum-row"><span class="sum-label">Cups used this cycle</span><span class="sum-val">${cupsLabel}</span></div>
+    <div class="sum-row"><span class="sum-label">Stock status</span><span class="sum-val ${stockCls}">${stockLabel}</span></div>
+  `;
+}
+
+// Helper: count cups sold (completed order_items quantity) since a given timestamp,
+// for this outlet — used by Cycle Summary's "Cups used this cycle" row.
+async function sbCountOrdersSince(sinceTimestamp) {
+  try {
+    const { data, error } = await sb.from('orders')
+      .select('order_items(quantity)')
+      .eq('outlet_id', OUTLET_ID).eq('status', 'completed')
+      .gte('created_at', sinceTimestamp);
+    if (error) return { data: 0, error };
+    const total = (data || []).reduce((sum, o) =>
+      sum + (o.order_items || []).reduce((s, i) => s + (i.quantity || 0), 0), 0);
+    return { data: total, error: null };
+  } catch (e) {
+    return { data: 0, error: e };
+  }
+}
+
+function subscribeToOrders() {
+  if (!sb) return;
+  sb.channel('franchisee-orders-' + OUTLET_ID)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'orders',
+      filter: `outlet_id=eq.${OUTLET_ID}`
+    }, async payload => {
+      const order = payload.new;
+      // Client-side outlet filter (server-side filter needs REPLICA IDENTITY FULL)
+      if (order.outlet_id !== OUTLET_ID) return;
+      // Fetch order items
+      const { data: items } = await sb.from('order_items').select('*').eq('order_id', order.id);
+      const newOrder = {
+        id: order.id,
+        order_number: order.order_number,
+        items: (items||[]).map(i => ({
+          emoji: i.emoji||'☕', name: i.name,
+          detail: [i.size,i.temperature,i.milk].filter(Boolean).join(' / '),
+          qty: i.quantity, price: Math.round(i.line_total/100)
+        })),
+        payment: order.payment_method,
+        total: Math.round(order.total/100),
+        status: order.payment_method==='cash' ? 'cash' : 'new',
+        time: new Date(order.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+        mode: order.order_type==='pickup' ? 'Pickup' : 'Delivery',
+        isCash: order.payment_method==='cash'
+      };
+      // Add to top of orders list
+      window.LIVE_ORDERS = [newOrder, ...(window.LIVE_ORDERS||[])];
+      renderOrders('all');
+      updateOrderCount();
+      // Show popup notification
+      showNewOrderPopup(newOrder);
+      // Show cash banner if cash payment
+      if (newOrder.isCash) showCashPopup(newOrder);
+      // Update nav badge
+      const badge = document.getElementById('orders-badge');
+      if (badge) { badge.textContent = parseInt(badge.textContent||0)+1; }
+    })
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'orders',
+      filter: `outlet_id=eq.${OUTLET_ID}`
+    }, () => loadFranchiseeData())
+    .subscribe();
+}
+
+// Update order status in Supabase
+async function updateOrderStatusDB(orderId, newStatus) {
+  if (!sb || !orderId || orderId.length < 10) return; // skip for static/demo IDs
+  const updates = { status: newStatus };
+  if (newStatus === 'preparing' || (newStatus === 'confirmed')) updates.status = 'preparing';
+  if (newStatus === 'ready') updates.status = 'ready';
+  if (newStatus === 'done') updates.status = 'completed';
+  await sb.from('orders').update(updates).eq('id', orderId);
+}
+
+// Save machine log to Supabase
+async function saveMachineLog(eventType, notes) {
+  if (!sb) return;
+  await sb.from('machine_logs').insert({
+    outlet_id: OUTLET_ID,
+    event_type: eventType,
+    notes: notes || null
+  });
+}
+
+// Save stock request to Supabase
+async function saveStockRequest(items, urgency, notes) {
+  if (!sb) return { ok: false, error: 'Not connected' };
+  const { error } = await sb.from('stock_requests').insert({
+    outlet_id: OUTLET_ID,
+    brand_id: window.MY_PROFILE?.brand_id,
+    requested_by: window.MY_PROFILE?.id || null,
+    items: items,
+    urgency: urgency || 'normal',
+    notes: notes || null
+  });
+  if (error) console.error('saveStockRequest failed:', error.message, error);
+  return { ok: !error, error: error?.message };
+}
+
+// Save waste log to Supabase
+async function saveWasteLog(itemName, reason, quantity, cost) {
+  if (!sb) return false;
+  const { error } = await sb.from('waste_logs').insert({
+    outlet_id: OUTLET_ID,
+    logged_by: window.MY_PROFILE?.id || null,
+    item_name: itemName,
+    reason: reason,
+    quantity: quantity,
+    estimated_cost: cost ? cost * 100 : null
+  });
+  return !error;
+}
+
+// Save issue to Supabase
+async function saveIssue(category, severity, description) {
+  if (!sb) return false;
+  const { error } = await sb.from('issues').insert({
+    outlet_id: OUTLET_ID,
+    reported_by: window.MY_PROFILE?.id || null,
+    category: category,
+    severity: severity,
+    description: description
+  });
+  return !error;
+}
+
+// ── Modal submit wrappers — read the real form, validate, save, refresh ──
+async function submitWasteLog() {
+  const itemName = document.getElementById('waste-item-name').value;
+  const reason = document.getElementById('waste-reason').value;
+  const quantity = document.getElementById('waste-quantity').value.trim();
+  const costInput = document.getElementById('waste-cost').value;
+
+  if (!quantity) { showToast('Enter a quantity', '⚠️'); return; }
+  if (!sb) { showToast('Not connected', '⚠️'); return; }
+
+  const btn = document.getElementById('waste-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const ok = await saveWasteLog(itemName, reason, quantity, costInput ? parseFloat(costInput) : null);
+  btn.disabled = false; btn.textContent = 'Log Waste Item';
+
+  if (!ok) { showToast('Failed to log waste', '⚠️'); return; }
+  closeModal('modal-waste');
+  showToast('Waste logged ✓', '🗑️');
+  document.getElementById('waste-quantity').value = '';
+  document.getElementById('waste-cost').value = '';
+  if (typeof loadAlertsData === 'function') loadAlertsData();
+}
+
+async function submitIssue() {
+  const category = document.getElementById('issue-category').value;
+  const severityBtn = document.querySelector('#issue-severity-picker .method-btn.selected');
+  const severity = severityBtn ? severityBtn.dataset.severity : 'medium';
+  const description = document.getElementById('issue-description').value.trim();
+
+  if (!description) { showToast('Please describe the issue', '⚠️'); return; }
+  if (!sb) { showToast('Not connected', '⚠️'); return; }
+
+  const btn = document.getElementById('issue-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  const ok = await saveIssue(category, severity, description);
+  btn.disabled = false; btn.textContent = 'Submit Issue';
+
+  if (!ok) { showToast('Failed to submit issue', '⚠️'); return; }
+  closeModal('modal-issue');
+  showToast('Issue reported to franchisor ✓', '⚠️');
+  document.getElementById('issue-description').value = '';
+  if (typeof loadAlertsData === 'function') loadAlertsData();
+}
+
+async function submitStockRequest() {
+  const checked = document.querySelectorAll('#stock-req-items input[type="checkbox"]:checked');
+  // urgent now reflects whether the item was actually low stock when the
+  // checklist was built (see renderStockRequestItems) — previously this
+  // was always true for every checked box regardless of real stock level,
+  // since the selector already filtered to :checked only.
+  const stock = window.STOCK_ITEMS_CACHE || [];
+  const items = Array.from(checked).map(cb => {
+    const stockRow = stock.find(s => s.item_name === cb.dataset.item);
+    const pct = stockRow && stockRow.max_qty ? Math.round((stockRow.current_qty / stockRow.max_qty) * 100) : 100;
+    return { name: cb.dataset.item, urgent: pct < 30 };
+  });
+  const urgency = document.getElementById('stock-req-urgency').value;
+  const notes = document.getElementById('stock-req-notes').value.trim();
+
+  if (!items.length) { showToast('Select at least one item', '⚠️'); return; }
+  if (!sb) { showToast('Not connected', '⚠️'); return; }
+
+  const btn = document.getElementById('stock-req-submit-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  const result = await saveStockRequest(items, urgency, notes);
+  btn.disabled = false; btn.textContent = 'Send Request';
+
+  if (!result.ok) { showToast(result.error ? `Failed: ${result.error}` : 'Failed to send request', '⚠️'); return; }
+  closeModal('modal-stock-req');
+  showToast('Stock request sent to franchisor ✓', '📦');
+  document.getElementById('stock-req-notes').value = '';
+}
+
+// Update stock display
+function updateStockDisplay(stockData) {
+  const stockItems = document.querySelectorAll('.stock-item');
+  stockItems.forEach(el => {
+    const nameEl = el.querySelector('.stock-name');
+    if (!nameEl) return;
+    const name = nameEl.textContent.trim();
+    const dbItem = stockData.find(s => s.item_name === name);
+    if (!dbItem) {
+      // No stock record yet for this item — show a real empty state, not the demo numbers
+      const pctEl = el.querySelector('.stock-pct');
+      const bar = el.querySelector('.sbar-fill');
+      const subEl = el.querySelector('.stock-sub');
+      if (pctEl) { pctEl.textContent = '—'; pctEl.className = 'stock-pct'; }
+      if (subEl) subEl.textContent = 'Not tracked yet';
+      if (bar) { bar.style.width = '0%'; bar.className = 'sbar-fill'; }
+      return;
+    }
+    const pct = Math.round((dbItem.current_qty / dbItem.max_qty) * 100);
+    const pctEl = el.querySelector('.stock-pct');
+    const bar = el.querySelector('.sbar-fill');
+    const subEl = el.querySelector('.stock-sub');
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (subEl) subEl.textContent = `${dbItem.current_qty} ${dbItem.unit} remaining`;
+    if (bar) {
+      bar.style.width = pct + '%';
+      bar.className = 'sbar-fill ' + (pct < 25 ? 'sb-red' : pct < 50 ? 'sb-amber' : 'sb-green');
+    }
+    if (pctEl) {
+      pctEl.className = 'stock-pct ' + (pct < 25 ? 'pct-red' : pct < 50 ? 'pct-amber' : 'pct-green');
+    }
+  });
+}
+
+// ══ MACHINE CARE — real checklist + service status + event logging ══
+const CHECKLIST_ITEMS = [
+  { type:'clean', title:'Morning clean', sub:'Full rinse cycle before first use', window:[0,11] },
+  { type:'clean', title:'Midday clean', sub:'Steam wand + group head wipe', window:[11,15] },
+  { type:'flush', title:'System flush', sub:'Automatic flush completed', window:[0,24] },
+  { type:'clean', title:'Afternoon clean', sub:'Post-peak hour clean', window:[15,19] },
+  { type:'clean', title:'End-of-day deep clean', sub:'Full backflush + drip tray', window:[19,24] },
+];
+
+async function loadMachinePage() {
+  if (!sb || !OUTLET_ID) return;
+  const today = new Date().toISOString().split('T')[0];
+  const [machineRes, logsRes] = await Promise.all([
+    sb.from('machines').select('*').eq('outlet_id', OUTLET_ID).maybeSingle(),
+    sb.from('machine_logs').select('*').eq('outlet_id', OUTLET_ID)
+      .gte('logged_at', today + 'T00:00:00').order('logged_at')
+  ]);
+
+  const machine = machineRes.data;
+  const todayLogs = logsRes.data || [];
+  window.MACHINE_TODAY_LOGS = todayLogs;
+
+  document.getElementById('machine-subtitle').textContent = machine
+    ? `${machine.model}${machine.serial_number ? ' · Serial: '+machine.serial_number : ''}`
+    : 'No machine registered for this outlet yet';
+
+  renderChecklist(todayLogs);
+
+  const statusEl = document.getElementById('machine-service-status');
+  if (!machine) {
+    statusEl.innerHTML = `<div style="padding:10px;color:var(--text3);font-size:13px">No machine on file — contact your franchisor.</div>`;
+    return;
+  }
+  const cleansToday = todayLogs.filter(l => l.event_type === 'clean').length;
+  const daysUntil = machine.next_service_due ? Math.ceil((new Date(machine.next_service_due) - new Date()) / 86400000) : null;
+  const statusLabel = { ok:['Operating normally','green'], due_soon:['Service due soon','amber'], overdue:['Service overdue','red'], emergency:['Emergency','red'] }[machine.status] || ['Operating normally','green'];
+
+  statusEl.innerHTML = `
+    <div class="sum-row"><span class="sum-label">Last routine service</span><span class="sum-val">${machine.last_service_at ? new Date(machine.last_service_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'}</span></div>
+    <div class="sum-row"><span class="sum-label">Next service due</span><span class="sum-val ${daysUntil!==null && daysUntil<14 ? 'amber':''}">${machine.next_service_due ? new Date(machine.next_service_due).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'}</span></div>
+    <div class="sum-row"><span class="sum-label">Days until service</span><span class="sum-val">${daysUntil!==null ? daysUntil+' days' : '—'}</span></div>
+    <div class="sum-row"><span class="sum-label">Total cleans today</span><span class="sum-val green">${cleansToday} × ✓</span></div>
+    <div class="sum-row"><span class="sum-label">Machine status</span><span class="sum-val ${statusLabel[1]}">${statusLabel[0]}</span></div>`;
+}
+
+function renderChecklist(todayLogs) {
+  const el = document.getElementById('machine-checklist');
+  let usedLogIdxByType = {};
+  const rows = CHECKLIST_ITEMS.map((item, idx) => {
+    // Match this checklist slot to the next unused log of the same event_type
+    if (usedLogIdxByType[item.type] === undefined) usedLogIdxByType[item.type] = 0;
+    const matchingLogs = todayLogs.filter(l => l.event_type === item.type);
+    const log = matchingLogs[usedLogIdxByType[item.type]];
+    const done = !!log;
+    if (done) usedLogIdxByType[item.type]++;
+    const time = done ? new Date(log.logged_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+    return `<div class="check-item" onclick="quickLogChecklistItem(${idx})"><div class="check-box${done?' done':''}">${done?'✓':''}</div><div class="check-text"><div class="check-title">${item.title}</div><div class="check-sub">${item.sub}</div></div><div class="check-time">${time}</div></div>`;
+  });
+  el.innerHTML = rows.join('');
+  const doneCount = Object.values(usedLogIdxByType).reduce((s,v)=>s+v, 0);
+  document.getElementById('checklist-progress').textContent = `${doneCount} / ${CHECKLIST_ITEMS.length} done`;
+}
+
+async function quickLogChecklistItem(idx) {
+  const item = CHECKLIST_ITEMS[idx];
+  if (!sb || !OUTLET_ID) { showToast('Not connected', '⚠️'); return; }
+  const { error } = await sb.from('machine_logs').insert({
+    outlet_id: OUTLET_ID,
+    logged_by: window.MY_PROFILE?.id || null,
+    event_type: item.type,
+    notes: item.title
+  });
+  if (error) { showToast('Failed to log', '⚠️'); return; }
+  showToast(`${item.title} logged ✓`, '🔧');
+  loadMachinePage();
+}
+
+async function submitMachineEvent() {
+  const event_type = document.getElementById('machine-event-type').value;
+  const notes = document.getElementById('machine-event-notes').value.trim() || null;
+  if (!sb || !OUTLET_ID) { showToast('Not connected', '⚠️'); return; }
+
+  const btn = document.getElementById('machine-event-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const { error } = await sb.from('machine_logs').insert({
+    outlet_id: OUTLET_ID,
+    logged_by: window.MY_PROFILE?.id || null,
+    event_type, notes
+  });
+  btn.disabled = false; btn.textContent = 'Log Event';
+
+  if (error) { showToast('Failed to log event', '⚠️'); return; }
+  showToast('Machine event logged ✓', '🔧');
+  document.getElementById('machine-event-notes').value = '';
+  loadMachinePage();
+}
+
+// ══ FINANCE — real revenue, rent, payment method, and coupon breakdown ══
+async function loadFinancePage() {
+  if (!sb || !OUTLET_ID) return;
+  const today = new Date().toISOString().split('T')[0];
+  const startOfMonth = today.slice(0,7) + '-01';
+
+  const [rentRes, invoiceRes, ordersRes, redemptionsRes] = await Promise.all([
+    sb.from('rent_schedules').select('*').eq('outlet_id', OUTLET_ID).maybeSingle(),
+    sb.from('invoices').select('*').eq('outlet_id', OUTLET_ID).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    sb.from('orders').select('total, payment_method, customer_id, status').eq('outlet_id', OUTLET_ID)
+      .eq('status', 'completed').gte('created_at', startOfMonth),
+    sb.from('coupon_redemptions').select('*, coupons(code, discount_type, discount_value)').eq('outlet_id', OUTLET_ID)
+      .gte('redeemed_at', today + 'T00:00:00')
+  ]);
+
+  document.getElementById('finance-subtitle').textContent = `Payments, invoices & rent`;
+
+  // ── Rent status ──
+  const rentCard = document.getElementById('finance-rent-card');
+  const rent = rentRes.data;
+  if (!rent) {
+    rentCard.innerHTML = `<div class="rent-card"><div style="color:var(--text3);font-size:13px">No rent schedule on file for this outlet.</div></div>`;
+  } else {
+    const daysLeft = rent.next_due_at ? Math.max(0, Math.ceil((new Date(rent.next_due_at) - new Date()) / 86400000)) : null;
+    const statusCls = rent.status === 'overdue' ? 'overdue' : rent.status === 'due_soon' ? 'due-soon' : 'current';
+    rentCard.innerHTML = `<div class="rent-card ${statusCls}">
+      <div class="rent-label">Monthly franchise rent</div>
+      <div class="rent-amount">LKR ${Math.round(rent.monthly_amount/100).toLocaleString()}</div>
+      <div class="rent-due">Due: ${rent.next_due_at ? new Date(rent.next_due_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
+      <div class="rent-last">Last paid: ${rent.last_paid_at ? new Date(rent.last_paid_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' ✓' : 'No payment on record'}</div>
+      ${daysLeft!==null ? `<div class="rent-countdown"><div class="countdown-num">${daysLeft}</div><div class="countdown-lbl">days left</div></div>` : ''}
+    </div>`;
+  }
+
+  // ── Revenue this cycle (real orders this month, split app vs walk-in) ──
+  const orders = ordersRes.data || [];
+  const grossRevenue = orders.reduce((s,o) => s + o.total, 0);
+  const appRevenue = orders.filter(o => o.customer_id).reduce((s,o) => s + o.total, 0);
+  const walkInRevenue = grossRevenue - appRevenue;
+  const inv = invoiceRes.data;
+  const feePct = inv?.franchise_fee_pct || 12;
+  const franchiseFee = Math.round(grossRevenue * (feePct/100));
+  const netToYou = grossRevenue - franchiseFee;
+
+  document.getElementById('finance-revenue-card').innerHTML = `
+    <div class="sum-row"><span class="sum-label">Gross revenue (this month)</span><span class="sum-val">LKR ${Math.round(grossRevenue/100).toLocaleString()}</span></div>
+    <div class="sum-row"><span class="sum-label">App orders revenue</span><span class="sum-val blue">LKR ${Math.round(appRevenue/100).toLocaleString()}</span></div>
+    <div class="sum-row"><span class="sum-label">Walk-in revenue</span><span class="sum-val">LKR ${Math.round(walkInRevenue/100).toLocaleString()}</span></div>
+    <div class="sum-row"><span class="sum-label">Franchise fee (${feePct}%)</span><span class="sum-val red">− LKR ${Math.round(franchiseFee/100).toLocaleString()}</span></div>
+    <div class="sum-row"><span class="sum-label">Net to you (est.)</span><span class="sum-val green">LKR ${Math.round(netToYou/100).toLocaleString()}</span></div>
+    ${inv ? `<div class="sum-row"><span class="sum-label">Latest invoice (${inv.invoice_number})</span><span class="pill ${inv.status==='paid'?'pill-green':inv.status==='overdue'?'pill-red':'pill-amber'}">${inv.status==='paid'?'Paid ✓':inv.status==='overdue'?'Overdue':'Pending'}</span></div>` : `<div class="sum-row"><span class="sum-label">Invoices</span><span class="sum-val" style="color:var(--text3)">None issued yet</span></div>`}`;
+
+  // ── Payment methods today (separate fetch — the orders query above
+  // doesn't select created_at, so today's slice needs its own query) ──
+  const { data: todayOrdersFull } = await sb.from('orders').select('total, payment_method').eq('outlet_id', OUTLET_ID).eq('status','completed').gte('created_at', today+'T00:00:00');
+  const todays = todayOrdersFull || [];
+  const todayTotal = todays.reduce((s,o)=>s+o.total,0) || 1;
+  const methodGroups = ['card','cash','qr','voucher'].map(m => {
+    const matching = todays.filter(o => o.payment_method === m);
+    const sum = matching.reduce((s,o)=>s+o.total,0);
+    return { method: m, sum, count: matching.length, pct: Math.round((sum/todayTotal)*100) };
+  });
+  const methodLabels = { card: '💳 Card payments', cash: '💵 Cash', qr: '📱 QR / Transfer', voucher: '🎟️ Voucher' };
+  document.getElementById('finance-payment-methods').innerHTML = todays.length
+    ? methodGroups.map(g => `<div class="sum-row"><span class="sum-label">${methodLabels[g.method]}</span><div style="text-align:right"><div class="sum-val">LKR ${Math.round(g.sum/100).toLocaleString()}</div><div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${g.pct}% · ${g.count} txns</div></div></div>`).join('')
+    : `<div style="padding:10px;color:var(--text3);font-size:13px">No completed sales today yet.</div>`;
+
+  // ── Coupons used today ──
+  const redemptions = redemptionsRes.data || [];
+  const couponsEl = document.getElementById('finance-coupons');
+  if (!redemptions.length) {
+    couponsEl.innerHTML = `<div style="padding:10px;color:var(--text3);font-size:13px">No coupons redeemed today.</div>`;
+  } else {
+    const grouped = {};
+    redemptions.forEach(r => {
+      const code = r.coupons?.code || 'Unknown';
+      if (!grouped[code]) grouped[code] = { code, desc: r.coupons?.discount_type==='percent'?`${r.coupons.discount_value}% off`:r.coupons?.discount_type==='fixed'?`LKR ${Math.round(r.coupons.discount_value/100)} off`:'Free item', count:0, total:0 };
+      grouped[code].count++;
+      grouped[code].total += r.discount_given;
+    });
+    const rows = Object.values(grouped);
+    const totalDiscount = rows.reduce((s,r)=>s+r.total,0);
+    couponsEl.innerHTML = rows.map(r => `<div class="coupon-item"><div class="coupon-code">${r.code}</div><div class="coupon-desc">${r.desc}</div><div class="coupon-count">${r.count}×</div><div class="coupon-disc">−LKR ${Math.round(r.total/100).toLocaleString()}</div></div>`).join('') +
+      `<div class="sum-row" style="padding-top:10px;border-top:1px solid var(--border)"><span class="sum-label" style="font-weight:600">Total discounts given</span><span class="sum-val red">−LKR ${Math.round(totalDiscount/100).toLocaleString()}</span></div>`;
+  }
+}
+
+// ══ ALERTS — real open issues + today's waste log ══
+async function loadAlertsData() {
+  if (!sb || !OUTLET_ID) return;
+  const today = new Date().toISOString().split('T')[0];
+  const [issuesRes, wasteRes, stockRes] = await Promise.all([
+    sb.from('issues').select('*').eq('outlet_id', OUTLET_ID).neq('status','closed').order('created_at', { ascending: false }),
+    sb.from('waste_logs').select('*').eq('outlet_id', OUTLET_ID).gte('logged_at', today+'T00:00:00').order('logged_at', { ascending: false }),
+    sb.from('stock').select('*').eq('outlet_id', OUTLET_ID)
+  ]);
+
+  const issues = issuesRes.data || [];
+  const waste = wasteRes.data || [];
+  const stock = stockRes.data || [];
+
+  document.getElementById('alerts-subtitle').textContent = `${issues.length} open issue${issues.length===1?'':'s'}`;
+
+  // Low-stock banner — only shown if something is genuinely low
+  const lowest = stock.length ? stock.reduce((min,s) => (s.current_qty/s.max_qty) < (min.current_qty/min.max_qty) ? s : min) : null;
+  const banner = document.getElementById('alerts-banner-wrap');
+  if (lowest && Math.round((lowest.current_qty/lowest.max_qty)*100) < 30) {
+    const pct = Math.round((lowest.current_qty/lowest.max_qty)*100);
+    banner.innerHTML = `<div class="alert-banner ab-amber"><div class="ab-icon">⚠️</div><div class="ab-text">${lowest.item_name} at ${pct}% — request top-up before it runs out.</div></div>`;
+  } else {
+    banner.innerHTML = '';
+  }
+
+  // Open issues list
+  const issuesEl = document.getElementById('alerts-issues-list');
+  issuesEl.innerHTML = issues.length
+    ? issues.map(i => {
+        const sevCls = i.severity === 'high' ? 'sp-high' : i.severity === 'low' ? 'sp-low' : 'sp-med';
+        const timeAgo = timeAgoLabel(i.created_at);
+        const statusLabel = i.status === 'open' ? 'Submitted → Awaiting franchisor review' : 'In progress → Franchisor is on it';
+        return `<div class="complaint-item"><div class="comp-header"><span class="sev-pill ${sevCls}">${i.severity[0].toUpperCase()+i.severity.slice(1)}</span><span class="comp-time">${timeAgo}</span></div><div class="comp-text">${i.description}</div><div class="comp-status">Status: ${statusLabel}</div></div>`;
+      }).join('')
+    : `<div style="padding:10px;color:var(--text3);font-size:13px">No open issues right now ✓</div>`;
+
+  // Waste log list
+  const wasteEl = document.getElementById('alerts-waste-list');
+  if (!waste.length) {
+    wasteEl.innerHTML = `<div style="padding:10px;color:var(--text3);font-size:13px">No waste logged today.</div>`;
+  } else {
+    const reasonLabels = { spilled:'Spilled', disposed:'Disposed', expired:'Expired', quality_issue:'Quality issue', other:'Other' };
+    const reasonCls = { spilled:'wc-spilled', disposed:'wc-disposed', expired:'wc-disposed', quality_issue:'wc-spilled', other:'wc-disposed' };
+    const totalCost = waste.reduce((s,w) => s + (w.estimated_cost||0), 0);
+    wasteEl.innerHTML = waste.map(w => `<div class="waste-item"><span class="waste-cat ${reasonCls[w.reason]||''}">${reasonLabels[w.reason]||w.reason}</span><div class="waste-name">${w.item_name}</div><div class="waste-qty">${w.quantity}</div><div class="waste-cost">${w.estimated_cost ? '−LKR '+Math.round(w.estimated_cost/100) : '—'}</div></div>`).join('') +
+      `<div class="sum-row" style="border-top:1px solid var(--border);padding-top:10px"><span class="sum-label">Total waste cost today</span><span class="sum-val red">−LKR ${Math.round(totalCost/100).toLocaleString()}</span></div>`;
+  }
+}
+
+function timeAgoLabel(isoString) {
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours < 1) return 'Just now';
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours/24);
+  return days === 1 ? 'Yesterday' : `${days}d ago`;
+}
+
+// ══ STATS — real monthly performance + privacy-safe network ranking ══
+async function loadStatsPage() {
+  if (!sb || !OUTLET_ID) return;
+  const startOfMonth = new Date().toISOString().slice(0,7) + '-01';
+  const daysSoFar = new Date().getDate();
+
+  const [opsRes, appOrdersRes, redemptionsRes, machineLogsRes, rankRes] = await Promise.all([
+    sb.from('daily_ops').select('total_cups, total_revenue, machine_cleans, machine_flushes, date').eq('outlet_id', OUTLET_ID).gte('date', startOfMonth),
+    sb.from('orders').select('id', { count: 'exact', head: true }).eq('outlet_id', OUTLET_ID).not('customer_id','is',null).eq('status','completed').gte('created_at', startOfMonth),
+    sb.from('coupon_redemptions').select('id', { count: 'exact', head: true }).eq('outlet_id', OUTLET_ID).gte('redeemed_at', startOfMonth),
+    sb.from('machine_logs').select('logged_at').eq('outlet_id', OUTLET_ID).gte('logged_at', startOfMonth),
+    sb.rpc('get_my_outlet_ranking')
+  ]);
+
+  const ops = opsRes.data || [];
+  const totalCups = ops.reduce((s,o)=>s+(o.total_cups||0), 0);
+  const totalRevenue = ops.reduce((s,o)=>s+(o.total_revenue||0), 0);
+  const avgDailyCups = daysSoFar > 0 ? Math.round(totalCups/daysSoFar) : 0;
+  const appOrders = appOrdersRes.count || 0;
+  const couponsRedeemed = redemptionsRes.count || 0;
+
+  // Machine compliance: count distinct days this month with at least one log
+  const logDays = new Set((machineLogsRes.data||[]).map(l => l.logged_at.slice(0,10)));
+  const complianceDays = logDays.size;
+
+  document.getElementById('stats-subtitle').textContent = new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  document.getElementById('stats-month-summary').innerHTML = `
+    <div class="sum-row"><span class="sum-label">Total cups sold</span><span class="sum-val">${totalCups.toLocaleString()}</span></div>
+    <div class="sum-row"><span class="sum-label">Gross revenue</span><span class="sum-val">LKR ${Math.round(totalRevenue/100).toLocaleString()}</span></div>
+    <div class="sum-row"><span class="sum-label">App orders</span><span class="sum-val blue">${appOrders.toLocaleString()} orders</span></div>
+    <div class="sum-row"><span class="sum-label">Average daily cups</span><span class="sum-val">${avgDailyCups}</span></div>
+    <div class="sum-row"><span class="sum-label">Machine-logged days</span><span class="sum-val ${complianceDays>=daysSoFar?'green':'amber'}">${complianceDays} / ${daysSoFar}</span></div>
+    <div class="sum-row"><span class="sum-label">Coupons redeemed</span><span class="sum-val">${couponsRedeemed} uses</span></div>`;
+
+  // Network ranking — privacy-safe, via SECURITY DEFINER function
+  // (returns only this outlet's own rank, never other outlets' data)
+  const rankEl = document.getElementById('stats-network-ranking');
+  const rankData = rankRes.data && rankRes.data[0];
+  if (!rankData) {
+    rankEl.innerHTML = `<div style="padding:10px;color:var(--text3);font-size:13px">Ranking unavailable — ask your franchisor to run the ranking setup SQL if this persists.</div>`;
+  } else {
+    const medalFor = (rank) => rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
+    rankEl.innerHTML = `
+      <div class="sum-row"><span class="sum-label">Revenue rank</span><span class="sum-val" style="color:var(--gold)">${medalFor(rankData.revenue_rank)} #${rankData.revenue_rank} of ${rankData.total_outlets}</span></div>
+      <div class="sum-row"><span class="sum-label">App orders rank</span><span class="sum-val" style="color:var(--gold)">${medalFor(rankData.app_order_rank)} #${rankData.app_order_rank} of ${rankData.total_outlets}</span></div>
+      <div class="sum-row"><span class="sum-label">Machine compliance rank</span><span class="sum-val" style="color:var(--gold)">${medalFor(rankData.machine_compliance_rank)} #${rankData.machine_compliance_rank} of ${rankData.total_outlets}</span></div>
+      <div style="padding:10px 0 4px;font-size:12px;color:var(--text3);font-family:var(--font-mono);border-top:1px solid var(--border);margin-top:4px">Rankings are anonymous — you only see your own position</div>`;
+  }
+}
+
+// Use window.LIVE_ORDERS as primary, fall back to static ORDERS
+function getOrders() {
+  return window.LIVE_ORDERS || [];
+}
+
+
+// ── GREETING ──
+(function(){
+  const d=new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('greeting-time').textContent=days[d.getDay()]+' · '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+})();
+
+// ── NAVIGATION ──
+const navMap={home:'bnav-home',orders:'bnav-orders',stock:'bnav-stock',machine:'bnav-machine',finance:'bnav-finance',alerts:null,stats:'bnav-stats'};
+function navigate(id,tabEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);
+  if(pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if(tabEl) tabEl.classList.add('active');
+  else if(navMap[id]){const el=document.getElementById(navMap[id]);if(el)el.classList.add('active');}
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='orders') renderOrders('all');
+  if(id==='machine') loadMachinePage();
+  if(id==='finance') loadFinancePage();
+  if(id==='alerts') loadAlertsData();
+  if(id==='stats') loadStatsPage();
+}
+
+
+function renderOrders(filter){
+  const el=document.getElementById('order-list');
+  if(!el) return;
+  const allOrders = getOrders();
+  let list=allOrders;
+  if(filter==='cash') list=allOrders.filter(o=>o.status==='cash'||o.isCash);
+  else if(filter==='new') list=allOrders.filter(o=>o.status==='new');
+  else if(filter==='preparing') list=allOrders.filter(o=>o.status==='preparing');
+  else if(filter==='ready') list=allOrders.filter(o=>o.status==='ready');
+  else if(filter==='done') list=allOrders.filter(o=>o.status==='done');
+  if(list.length===0){el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);font-family:var(--font-mono);font-size:13px;">No ${filter==='all'?'active':filter} orders right now ☕</div>`;return;}
+
+  const statusLabels={new:'🆕 New',cash:'💵 Cash',preparing:'⏳ Preparing',ready:'✅ Ready',done:'Done'};
+  const statusClasses={new:'ls-new',cash:'ls-cash',preparing:'ls-prep',ready:'ls-ready',done:'ls-done'};
+  const cardClasses={new:' new-order',cash:' cash-pending',ready:' ready-to-serve',done:'',preparing:''};
+
+  el.innerHTML=list.map(o=>`
+    <div class="live-order-item${cardClasses[o.status]||''}">
+      <div class="loi-head">
+        <div class="loi-num">${o.id}</div>
+        <div class="loi-mode ${o.mode==='Pickup'?'lm-pickup':'lm-delivery'}">${o.mode}</div>
+        <div class="loi-time">${o.time}</div>
+        <div class="loi-status ${statusClasses[o.status]||'ls-done'}">${statusLabels[o.status]||o.status}</div>
+      </div>
+      ${o.isCash?`<div class="cash-alert-bar">💵 Customer chose cash payment — confirm LKR ${o.total.toLocaleString()} received in hand</div>`:''}
+      <div class="loi-body">
+        ${o.items.map(i=>`<div class="loi-item-row">
+          <div class="loi-emoji">${i.emoji||'☕'}</div>
+          <div style="flex:1">
+            <div class="loi-item-name">${i.name}</div>
+            <div class="loi-item-detail">${i.detail}</div>
+          </div>
+          <div class="loi-item-qty">×${i.qty}</div>
+          <div class="loi-item-price">LKR ${i.price.toLocaleString()}</div>
+        </div>`).join('')}
+      </div>
+      <div class="loi-foot">
+        <div class="loi-payment lp-${o.payment}">${o.payment==='card'?'💳 Card':o.payment==='cash'?'💵 Cash':o.payment==='voucher'?'🎟️ Voucher':'📱 QR'}</div>
+        <div class="loi-total">LKR ${o.total.toLocaleString()}</div>
+        ${o.status==='new'?`<button class="loi-action la-confirm" onclick="updateOrder('${o.id}','preparing')">Start Preparing</button>`:
+          o.status==='cash'?`<button class="loi-action la-cash" onclick="confirmOrderCash('${o.id}')">✓ Cash Received</button>`:
+          o.status==='preparing'?`<button class="loi-action la-ready" onclick="updateOrder('${o.id}','ready')">Mark Ready</button>`:
+          o.status==='ready'?`<button class="loi-action la-done" onclick="updateOrder('${o.id}','done')">Complete</button>`:
+          `<button class="loi-action la-done" disabled>Completed</button>`}
+      </div>
+    </div>`).join('');
+}
+
+function updateOrder(id,newStatus){
+  const orders=getOrders();
+  const o=orders.find(x=>x.id===id);
+  if(!o) return;
+  o.status=newStatus;o.isCash=false;
+  const msgs={preparing:'Now preparing — customer notified',ready:'Ready! Customer notified to collect',done:'Order completed ✓'};
+  showToast(msgs[newStatus]||'Order updated','✓');
+  updateOrderStatusDB(id,newStatus);
+  renderOrders('all');
+  updateOrderCount();
+}
+
+function confirmOrderCash(id){
+  const orders=getOrders();
+  const o=orders.find(x=>x.id===id);
+  if(!o) return;
+  o.status='preparing';o.isCash=false;
+  showToast('Cash confirmed — start preparing order','💵');
+  updateOrderStatusDB(id,'preparing');
+  dismissCash();
+  renderOrders('all');
+  updateOrderCount();
+}
+
+function filterOrders(f,btn){
+  document.querySelectorAll('.of-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders(f);
+}
+
+function updateOrderCount(){
+  const active=getOrders().filter(o=>o.status!=='done').length;
+  document.getElementById('orders-badge').textContent=active;
+  document.getElementById('orders-quick-badge').textContent=active;
+  const heroEl=document.getElementById('live-order-hero');
+  if(heroEl) heroEl.textContent=active;
+  // Live Orders page subtitle (previously hardcoded "4 active orders" regardless of reality)
+  const subEl=document.getElementById('orders-page-sub');
+  if(subEl){
+    const outletSpan = subEl.querySelector('.outlet-name-inline');
+    const outletHTML = outletSpan ? outletSpan.outerHTML : '<span class="outlet-name-inline">Loading...</span>';
+    subEl.innerHTML = `${active} active order${active===1?'':'s'} from customer app · ${outletHTML}`;
+  }
+}
+
+// ── CASH CONFIRM POPUP ──
+function showCashPopup(order){
+  document.getElementById('ccp-title').textContent='Cash Payment — '+order.id;
+  document.getElementById('ccp-sub').textContent=order.items[0].name+(order.items.length>1?` +${order.items.length-1} more`:'')+' · LKR '+order.total.toLocaleString()+' · Confirm received?';
+  document.getElementById('cash-confirm-popup').classList.add('show');
+}
+function confirmCash(){
+  const cashOrder=getOrders().find(o=>o.status==='cash');
+  if(cashOrder) confirmOrderCash(cashOrder.id);
+  else dismissCash();
+}
+function dismissCash(){document.getElementById('cash-confirm-popup').classList.remove('show');}
+
+// ── NEW ORDER POPUP ──
+function showNewOrderPopup(order){
+  document.getElementById('nop-title').textContent=order.items.map(i=>i.name+' ×'+i.qty).join(' + ');
+  document.getElementById('nop-sub').textContent=(order.payment==='card'?'Card':'Cash')+' payment · LKR '+order.total.toLocaleString()+' · '+order.mode;
+  const pop=document.getElementById('new-order-popup');
+  pop.classList.add('show');
+  setTimeout(()=>pop.classList.remove('show'),6000);
+}
+function goToOrders(){
+  document.getElementById('new-order-popup').classList.remove('show');
+  navigate('orders');
+  const tab=document.getElementById('bnav-orders');
+  if(tab){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');}
+}
+
+// ── MODALS ──
+async function openSaleModal(){
+  document.getElementById('modal-sale').classList.add('open');
+  qty = 1;
+  document.getElementById('qty-val').textContent = '1';
+  document.getElementById('sale-coupon').value = '';
+  if (!sb || !window.MENU_ITEMS_CACHE) {
+    const { data } = await sb.from('menu_items').select('id,name,emoji,base_price').eq('is_visible', true).order('name');
+    window.MENU_ITEMS_CACHE = data || [];
+  }
+  const sel = document.getElementById('sale-menu-item');
+  sel.innerHTML = window.MENU_ITEMS_CACHE.map(i => `<option value="${i.id}" data-price="${i.base_price}">${i.emoji||'☕'} ${i.name}</option>`).join('');
+  if (sel.options.length) updateSalePriceFromMenuItem();
+}
+function updateSalePriceFromMenuItem(){
+  const sel = document.getElementById('sale-menu-item');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt) document.getElementById('sale-price').value = Math.round(parseInt(opt.dataset.price||0)/100);
+}
+function openWasteModal(){document.getElementById('modal-waste').classList.add('open');}
+function openIssueModal(){document.getElementById('modal-issue').classList.add('open');}
+function openStockRequestModal(){
+  document.getElementById('modal-stock-req').classList.add('open');
+  renderStockRequestItems();
+}
+
+// Builds the "Items needed" checklist from the outlet's REAL stock rows
+// (previously hardcoded to 4 fixed item names — "Cup Lids", "Coffee Beans",
+// "Milk", "10oz Cups" — that wouldn't match any outlet with custom stock
+// items added via the franchisor's Stock Manager). Items below 30% are
+// pre-checked and flagged "urgent" automatically, replacing the old
+// always-checked-Cup-Lids guess with a real low-stock signal.
+function renderStockRequestItems(){
+  const wrap = document.getElementById('stock-req-items');
+  const stock = window.STOCK_ITEMS_CACHE || [];
+  if (!stock.length) {
+    wrap.innerHTML = `<div style="font-size:12px;color:var(--text3)">No stock items tracked yet for this outlet — ask your franchisor to add some first.</div>`;
+    return;
+  }
+  wrap.innerHTML = stock.map(s => {
+    const pct = s.max_qty ? Math.round((s.current_qty / s.max_qty) * 100) : 100;
+    const isLow = pct < 30;
+    return `<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)">
+      <input type="checkbox" ${isLow?'checked':''} data-item="${s.item_name}" style="width:16px;height:16px;accent-color:var(--gold)">
+      ${s.item_name}${isLow?' — low ('+pct+'%)':''}
+    </label>`;
+  }).join('');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});});
+document.addEventListener('change', (e) => { if (e.target.id === 'sale-menu-item') updateSalePriceFromMenuItem(); });
+
+// ── FORM HELPERS ──
+let qty=1;
+function stepQty(d){qty=Math.max(1,qty+d);document.getElementById('qty-val').textContent=qty;}
+function pickMethod(el){el.closest('.method-picker').querySelectorAll('.method-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+
+// Records a walk-in (counter) sale directly as a completed order — there's
+// no kitchen workflow for a sale that already happened, so it's inserted
+// as 'completed' immediately so it counts toward daily_ops totals right away.
+async function submitSale(){
+  if (!sb || !OUTLET_ID) { showToast('Not connected', '⚠️'); return; }
+
+  const sel = document.getElementById('sale-menu-item');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt) { showToast('Select a beverage', '⚠️'); return; }
+  const menuItemId = opt.value;
+  const itemName = opt.textContent.trim();
+  const emoji = itemName.split(' ')[0];
+
+  const priceInput = document.getElementById('sale-price').value;
+  const unitPrice = Math.round(parseFloat(priceInput || 0) * 100);
+  if (!unitPrice) { showToast('Enter a price', '⚠️'); return; }
+
+  const methodBtn = document.querySelector('#sale-payment-picker .method-btn.selected');
+  const paymentMethod = methodBtn ? methodBtn.dataset.method : 'cash';
+
+  const couponCode = document.getElementById('sale-coupon').value.trim().toUpperCase();
+  let coupon = null;
+  if (couponCode) {
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await sb.from('coupons').select('*').eq('code', couponCode).eq('is_active', true)
+      .or(`valid_until.is.null,valid_until.gte.${today}`).maybeSingle();
+    if (!data) { showToast('Invalid or expired coupon code', '⚠️'); return; }
+    coupon = data;
+  }
+
+  const subtotal = unitPrice * qty;
+  let discount = 0;
+  if (coupon) {
+    if (coupon.discount_type === 'percent') discount = Math.round(subtotal * (coupon.discount_value/100));
+    else if (coupon.discount_type === 'fixed') discount = coupon.discount_value;
+    else if (coupon.discount_type === 'free') discount = unitPrice;
+    discount = Math.min(discount, subtotal);
+  }
+  const total = Math.max(0, subtotal - discount);
+
+  const btn = document.getElementById('sale-submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  const { data: order, error: orderErr } = await sb.from('orders').insert({
+    outlet_id: OUTLET_ID,
+    customer_id: null,
+    order_type: 'pickup',
+    status: 'completed',
+    payment_method: paymentMethod,
+    payment_status: paymentMethod === 'cash' ? 'cash_confirmed' : 'paid',
+    coupon_id: coupon?.id || null,
+    subtotal, discount, total,
+    notes: 'Walk-in counter sale'
+  }).select().single();
+
+  if (orderErr) {
+    btn.disabled = false; btn.textContent = 'Record Sale';
+    showToast('Failed: ' + orderErr.message, '⚠️'); return;
+  }
+
+  await sb.from('order_items').insert({
+    order_id: order.id, menu_item_id: menuItemId, name: itemName.replace(/^\S+\s/, ''),
+    emoji, quantity: qty, unit_price: unitPrice, line_total: subtotal
+  });
+
+  if (coupon) {
+    await sb.from('coupon_redemptions').insert({
+      coupon_id: coupon.id, order_id: order.id, customer_id: null,
+      outlet_id: OUTLET_ID, discount_given: discount
+    });
+  }
+
+  btn.disabled = false; btn.textContent = 'Record Sale';
+  closeModal('modal-sale');
+  showToast('Walk-in sale recorded ✓', '☕');
+  qty = 1;
+  document.getElementById('qty-val').textContent = '1';
+  loadFranchiseeData();
+}
+
+// ── TOAST ──
+let toastT;
+function showToast(msg,icon){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;document.getElementById('toast-icon').textContent=icon||'✓';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);}
+
+
+
+
+
+
+// Initial render
+renderOrders('all');
+updateOrderCount();
+
+// Connect to Supabase
+initSupabase();
+</script>
+</body>
+</html>

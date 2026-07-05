@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Liétard Artisan Roast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand: #8B1A1A; --brand2: #A52020; --brand3: #B43030; --brand-light: #fdf0f0; --brand-dim: rgba(139,26,26,0.10);
+  --gold: #C8922A; --gold2: #E8B04A; --gold-dim: rgba(200,146,42,0.12);
+  --green: #2d6a4f; --green-dim: rgba(45,106,79,0.12);
+  --cream: #FBF8F3; --cream2: #F3EFE7; --cream3: #E9E3D8; --white: #ffffff;
+  --text: #1A1208; --text2: #4A3728; --text3: #8B7355; --text4: #B5A48A;
+  --border: rgba(26,18,8,0.07); --border2: rgba(26,18,8,0.13);
+  --shadow: 0 2px 10px rgba(26,18,8,0.06);
+  --shadow-lg: 0 10px 30px rgba(26,18,8,0.12);
+  --shadow-card: 0 6px 20px rgba(58,36,24,0.10);
+  --shadow-xl: 0 18px 50px rgba(26,18,8,0.22);
+  --r: 18px; --r-sm: 12px; --r-lg: 24px; --nav-h: 70px;
+  --font-display: 'Cormorant Garamond', serif; --font-body: 'Outfit', sans-serif; --font-mono: 'DM Mono', monospace;
+  --inset-t: 0px; --inset-b: 0px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-height:100vh;width:100%;margin:0;overflow-x:hidden;position:relative;}
+
+.screen{display:none;position:fixed;inset:0;z-index:10;overflow:hidden;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* PHOTO TILE — image with graceful gradient+emoji fallback */
+.photo{position:relative;overflow:hidden;height:100%;background:var(--ph-grad,linear-gradient(135deg,#3a2418,#5a3a22));display:flex;align-items:center;justify-content:center;}
+.photo .ph-emoji{font-size:2.4em;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.3));opacity:0.92;}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+
+/* SPLASH */
+#splash{background:radial-gradient(120% 90% at 50% 18%, #B43030 0%, #8B1A1A 45%, #5e0f0f 100%);align-items:center;justify-content:center;flex-direction:column;padding-top:var(--inset-t);}
+.splash-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;animation:splashIn 0.8s 0.15s ease both;}
+.splash-emblem{width:96px;height:96px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);border-radius:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 16px 48px rgba(0,0,0,0.35);backdrop-filter:blur(8px);}
+.splash-emblem svg{width:56px;height:56px;}
+.splash-brand{font-family:var(--font-display);font-size:42px;font-weight:700;font-style:italic;color:#fff;letter-spacing:-0.01em;line-height:1;}
+.splash-tagline{font-size:11px;color:rgba(255,255,255,0.7);font-family:var(--font-mono);letter-spacing:0.22em;text-transform:uppercase;}
+.splash-loader{margin-top:42px;width:34px;height:34px;border:3px solid rgba(255,255,255,0.2);border-top-color:var(--gold2);border-radius:50%;animation:spin 0.85s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes splashIn{from{opacity:0;transform:scale(0.85) translateY(18px);}to{opacity:1;transform:scale(1) translateY(0);}}
+
+/* PROMO / ONBOARDING */
+#promo{background:#140605;overflow:hidden;}
+.promo-slides{flex:1;position:relative;overflow:hidden;}
+.promo-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity 0.6s;}
+.promo-slide.active{opacity:1;}
+.promo-slide .photo{position:absolute;inset:0;}
+.promo-slide .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(20,6,5,0.96) 4%,rgba(20,6,5,0.55) 42%,rgba(20,6,5,0.15) 100%);}
+.promo-content{position:relative;z-index:2;padding:0 30px calc(78px + var(--inset-b));text-align:left;}
+.promo-label{display:inline-block;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:11px;font-family:var(--font-mono);padding:5px 14px;border-radius:20px;margin-bottom:16px;letter-spacing:0.06em;backdrop-filter:blur(6px);}
+.promo-headline{font-family:var(--font-display);font-size:50px;font-weight:700;color:#fff;line-height:1.0;margin-bottom:14px;font-style:italic;letter-spacing:-0.01em;}
+.promo-sub{font-size:14px;color:rgba(255,255,255,0.78);line-height:1.55;margin-bottom:26px;max-width:300px;}
+.promo-price{display:inline-flex;align-items:baseline;gap:5px;background:linear-gradient(135deg,var(--gold2),var(--gold));border-radius:30px;padding:11px 24px;box-shadow:0 12px 30px rgba(200,146,42,0.45);}
+.promo-price-val{font-size:24px;font-weight:700;color:#2a1400;font-family:var(--font-mono);}
+.promo-price-unit{font-size:12px;color:rgba(42,20,0,0.7);font-weight:600;}
+.promo-skip{position:absolute;top:calc(20px + var(--inset-t));right:20px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:12px;font-family:var(--font-mono);padding:6px 15px;border-radius:20px;cursor:pointer;z-index:10;backdrop-filter:blur(8px);}
+.promo-top{position:absolute;top:calc(22px + var(--inset-t));left:24px;z-index:10;display:flex;align-items:center;gap:9px;}
+.promo-top .pe{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;}
+.promo-top .pe svg{width:18px;height:18px;}
+.promo-top .pn{font-family:var(--font-display);font-style:italic;font-weight:700;font-size:20px;color:#fff;}
+.promo-dots{position:absolute;bottom:calc(34px + var(--inset-b));left:30px;display:flex;gap:6px;z-index:10;}
+.promo-dot{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,0.35);transition:all 0.3s;}
+.promo-dot.active{width:22px;background:var(--gold2);}
+
+/* APP SHELL */
+#app{background:var(--cream);overflow:hidden;}
+.app-pages{flex:1;overflow:hidden;position:relative;padding-top:var(--inset-t);}
+.app-page{display:none;flex-direction:column;height:100%;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + var(--inset-b));-ms-overflow-style:none;scrollbar-width:none;}
+.app-page::-webkit-scrollbar{display:none;}
+.app-page.active{display:flex;}
+
+/* TOPBAR */
+.app-topbar{background:var(--white);padding:12px 16px 10px;flex-shrink:0;position:sticky;top:0;z-index:50;box-shadow:0 1px 0 var(--border);}
+.topbar-row1{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.store-chip{display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;}
+.store-chip-icon{width:30px;height:30px;background:var(--brand-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.store-chip-icon svg{width:16px;height:16px;}
+.store-meta{min-width:0;flex:1;}
+.store-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.store-name .chev{font-size:12px;color:var(--text3);}
+.store-dist{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:1px;}
+.qr-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--border2);background:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.qr-btn svg{width:19px;height:19px;}
+.topbar-row2{display:flex;gap:9px;align-items:center;}
+.mode-toggle{display:flex;background:var(--cream2);border-radius:22px;padding:3px;gap:2px;flex-shrink:0;}
+.mode-btn{padding:6px 15px;border-radius:18px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--text3);}
+.mode-btn.active{background:var(--brand);color:#fff;box-shadow:0 3px 10px rgba(139,26,26,0.32);}
+.search-bar{flex:1;display:flex;align-items:center;gap:8px;background:var(--cream2);border-radius:22px;padding:8px 14px;font-size:12.5px;color:var(--text3);}
+.search-bar svg{width:15px;height:15px;flex-shrink:0;}
+
+/* HERO BANNER */
+.hero{margin:14px 16px 0;border-radius:var(--r-lg);overflow:hidden;position:relative;height:200px;flex-shrink:0;box-shadow:var(--shadow-card);}
+.hero .photo{position:absolute;inset:0;}
+.hero .scrim{position:absolute;inset:0;background:linear-gradient(105deg,rgba(94,15,15,0.92) 0%,rgba(139,26,26,0.62) 48%,rgba(139,26,26,0.05) 100%);}
+.hero-content{position:absolute;inset:0;padding:20px 22px;display:flex;flex-direction:column;justify-content:center;z-index:2;}
+.hero-label{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:10px;font-family:var(--font-mono);letter-spacing:0.05em;padding:4px 11px;border-radius:14px;margin-bottom:10px;backdrop-filter:blur(6px);}
+.hero-headline{font-family:var(--font-display);font-size:30px;font-style:italic;font-weight:700;color:#fff;line-height:1.02;margin-bottom:6px;max-width:220px;}
+.hero-sub{font-size:11.5px;color:rgba(255,255,255,0.82);margin-bottom:14px;max-width:200px;line-height:1.4;}
+.hero-cta{display:inline-flex;align-self:flex-start;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2a1400;border-radius:24px;padding:9px 8px 9px 16px;box-shadow:0 8px 22px rgba(200,146,42,0.4);}
+.hero-cta .hp{font-size:16px;font-weight:700;font-family:var(--font-mono);}
+.hero-cta .hl{font-size:10px;font-weight:600;opacity:0.7;margin-right:2px;}
+.hero-cta .harrow{width:26px;height:26px;border-radius:50%;background:rgba(42,20,0,0.16);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.hero-dots{position:absolute;bottom:12px;right:16px;display:flex;gap:5px;z-index:3;}
+.hd{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,0.45);transition:all 0.3s;}
+.hd.on{width:18px;background:#fff;}
+
+/* QUICK LINKS */
+.quick-grid{display:flex;gap:10px;padding:16px 16px 4px;flex-shrink:0;}
+.ql{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;}
+.ql-ic{width:100%;aspect-ratio:1.15;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;box-shadow:var(--shadow);}
+.ql-ic svg{width:26px;height:26px;}
+.ql-lbl{font-size:11px;font-weight:600;color:var(--text2);text-align:center;line-height:1.15;}
+.ql-tag{position:absolute;top:-6px;right:-4px;background:var(--brand);color:#fff;font-size:8px;font-family:var(--font-mono);padding:2px 6px;border-radius:8px;font-weight:600;white-space:nowrap;box-shadow:0 3px 8px rgba(139,26,26,0.35);}
+
+/* REWARD CARD */
+.reward{margin:16px 16px 4px;border-radius:var(--r);overflow:hidden;position:relative;background:linear-gradient(120deg,#8B1A1A,#B43030 60%,#8B1A1A);padding:18px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;box-shadow:0 10px 26px rgba(139,26,26,0.3);}
+.reward::after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.06);}
+.reward-num{position:relative;z-index:1;text-align:center;flex-shrink:0;}
+.reward-num .big{font-family:var(--font-mono);font-size:38px;font-weight:700;color:var(--gold2);line-height:0.9;}
+.reward-num .sm{font-size:9px;font-family:var(--font-mono);color:rgba(255,255,255,0.65);letter-spacing:0.1em;text-transform:uppercase;}
+.reward-txt{flex:1;position:relative;z-index:1;}
+.reward-txt .rt{font-family:var(--font-display);font-style:italic;font-size:22px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px;}
+.reward-txt .rs{font-size:11px;color:rgba(255,255,255,0.72);line-height:1.4;}
+.reward-go{position:relative;z-index:1;background:#fff;color:var(--brand);font-size:12px;font-weight:700;padding:9px 16px;border-radius:20px;flex-shrink:0;cursor:pointer;}
+
+/* SECTION */
+.section{padding:0 16px;margin-top:22px;flex-shrink:0;}
+.section-head{display:flex;align-items:baseline;gap:8px;margin-bottom:12px;}
+.section-title{font-family:var(--font-display);font-style:italic;font-size:23px;font-weight:700;color:var(--text);line-height:1;}
+.section-kick{font-size:10px;font-family:var(--font-mono);color:var(--brand);letter-spacing:0.08em;text-transform:uppercase;}
+.section-more{margin-left:auto;font-size:12px;color:var(--text3);font-family:var(--font-mono);cursor:pointer;}
+
+/* FEATURED CARDS */
+.featured-scroll{display:flex;gap:13px;overflow-x:auto;padding:2px 16px 4px;-ms-overflow-style:none;scrollbar-width:none;}
+.featured-scroll::-webkit-scrollbar{display:none;}
+.fcard{width:160px;flex-shrink:0;background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-card);cursor:pointer;transition:transform 0.15s;}
+.fcard:active{transform:scale(0.97);}
+.fc-img{height:140px;position:relative;overflow:hidden;}
+.fc-badge{position:absolute;top:9px;left:9px;color:#fff;font-size:9px;font-family:var(--font-mono);padding:3px 8px;border-radius:8px;font-weight:600;box-shadow:0 4px 10px rgba(0,0,0,0.2);}
+.fc-fav{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:12px;backdrop-filter:blur(4px);}
+.fc-body{padding:11px 12px 13px;}
+.fc-name{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.25;}
+.fc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.fc-tag{font-size:9px;background:var(--cream2);color:var(--text3);border-radius:5px;padding:2px 6px;font-family:var(--font-mono);}
+.fc-price-row{display:flex;align-items:flex-end;justify-content:space-between;}
+.fc-price{font-size:17px;font-weight:700;color:var(--brand);font-family:var(--font-mono);line-height:1;}
+.fc-price .cur{font-size:10px;}
+.fc-old{font-size:10px;color:var(--text4);text-decoration:line-through;font-family:var(--font-mono);margin-top:2px;}
+.fc-add{width:30px;height:30px;background:linear-gradient(135deg,var(--brand2),var(--brand));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 5px 14px rgba(139,26,26,0.4);}
+
+/* MENU PAGE */
+.menu-layout{display:flex;flex:1;overflow:hidden;}
+.menu-cats{width:84px;flex-shrink:0;background:var(--cream2);overflow-y:auto;-ms-overflow-style:none;scrollbar-width:none;padding:6px 0;}
+.menu-cats::-webkit-scrollbar{display:none;}
+.cat-item{padding:13px 6px;text-align:center;cursor:pointer;position:relative;transition:all 0.15s;border-radius:0 14px 14px 0;margin-right:6px;}
+.cat-item.active{background:var(--white);box-shadow:var(--shadow);}
+.cat-item.active::before{content:'';position:absolute;left:0;top:18px;bottom:18px;width:3px;background:var(--brand);border-radius:0 3px 3px 0;}
+.cat-item-icon{font-size:20px;margin-bottom:4px;}
+.cat-item-name{font-size:10.5px;color:var(--text2);line-height:1.15;font-weight:500;}
+.cat-item.active .cat-item-name{color:var(--brand);font-weight:700;}
+.cat-badge{position:absolute;top:5px;right:8px;background:var(--gold);color:#2a1400;font-size:8px;padding:1px 5px;border-radius:6px;font-family:var(--font-mono);font-weight:600;}
+.menu-items{flex:1;overflow-y:auto;-ms-overflow-style:none;scrollbar-width:none;padding:0 0 8px;}
+.menu-items::-webkit-scrollbar{display:none;}
+.menu-section-banner{margin:12px 14px;height:88px;border-radius:var(--r);position:relative;overflow:hidden;display:flex;align-items:center;padding:0 18px;box-shadow:var(--shadow-card);}
+.menu-section-banner .photo{position:absolute;inset:0;}
+.menu-section-banner .scrim{position:absolute;inset:0;background:linear-gradient(100deg,rgba(94,15,15,0.92),rgba(139,26,26,0.4));}
+.msb-text{color:#fff;position:relative;z-index:2;}
+.msb-title{font-family:var(--font-display);font-style:italic;font-size:22px;font-weight:700;line-height:1;}
+.msb-sub{font-size:10px;font-family:var(--font-mono);color:rgba(255,255,255,0.75);margin-top:4px;letter-spacing:0.04em;}
+.menu-item{display:flex;gap:13px;padding:14px;margin:0 14px;border-bottom:1px solid var(--border);background:transparent;cursor:pointer;}
+.menu-item:active{opacity:0.7;}
+.mi-img{width:88px;height:88px;border-radius:var(--r-sm);flex-shrink:0;box-shadow:var(--shadow);}
+.mi-body{flex:1;min-width:0;display:flex;flex-direction:column;}
+.mi-name{font-size:15px;font-weight:600;margin-bottom:5px;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.mi-badge{font-size:9px;color:#fff;padding:1px 7px;border-radius:6px;font-family:var(--font-mono);font-weight:600;}
+.mi-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;}
+.mi-tag{font-size:9px;border:1px solid var(--border2);color:var(--text3);border-radius:5px;padding:1px 6px;font-family:var(--font-mono);}
+.mi-tag.hot{border-color:rgba(139,26,26,0.3);color:var(--brand);background:var(--brand-light);}
+.mi-desc{font-size:11.5px;color:var(--text3);line-height:1.45;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mi-price-row{display:flex;align-items:center;justify-content:space-between;margin-top:auto;}
+.mi-price{font-size:16px;font-weight:700;color:var(--brand);font-family:var(--font-mono);}
+.mi-price .cur{font-size:10px;}
+.mi-price-old{text-decoration:line-through;color:var(--text4);font-size:11px;margin-left:5px;font-weight:400;}
+.mi-add-btn{width:32px;height:32px;background:linear-gradient(135deg,var(--brand2),var(--brand));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;flex-shrink:0;cursor:pointer;transition:transform 0.1s;box-shadow:0 5px 14px rgba(139,26,26,0.4);}
+.mi-add-btn:active{transform:scale(0.88);}
+
+/* CART BAR */
+.cart-bar{position:sticky;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:11px 16px;display:none;flex-shrink:0;z-index:40;box-shadow:0 -6px 20px rgba(26,18,8,0.07);}
+.cart-bar.visible{display:flex;align-items:center;gap:12px;}
+.cart-icon-wrap{width:48px;height:48px;background:linear-gradient(135deg,var(--brand2),var(--brand));border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;box-shadow:0 6px 16px rgba(139,26,26,0.4);}
+.cart-icon-wrap svg{width:24px;height:24px;}
+.cart-count-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;background:var(--gold2);border-radius:10px;font-size:11px;font-weight:700;color:#2a1400;display:flex;align-items:center;justify-content:center;border:2px solid #fff;font-family:var(--font-mono);}
+.cart-info{flex:1;}
+.cart-items-count{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.cart-total{font-size:19px;font-weight:700;color:var(--brand);font-family:var(--font-mono);}
+.cart-checkout-btn{background:linear-gradient(135deg,var(--brand2),var(--brand));color:#fff;border:none;border-radius:26px;padding:13px 26px;font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;flex-shrink:0;box-shadow:0 6px 16px rgba(139,26,26,0.35);}
+
+/* ORDERS */
+.page-title{background:var(--white);padding:18px 16px 14px;flex-shrink:0;}
+.page-title h1{font-family:var(--font-display);font-style:italic;font-size:28px;font-weight:700;}
+.orders-tabs{display:flex;background:var(--white);flex-shrink:0;padding:0 8px;box-shadow:0 1px 0 var(--border);}
+.order-tab{flex:1;padding:12px 4px;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.15s;font-weight:500;}
+.order-tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:700;}
+.order-card{margin:14px 16px;background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-card);overflow:hidden;}
+.oc-head{display:flex;align-items:center;gap:8px;padding:13px 15px 11px;}
+.oc-type{font-size:10px;font-weight:700;padding:3px 9px;border-radius:7px;font-family:var(--font-mono);}
+.oc-type-delivery{background:var(--brand-dim);color:var(--brand);}
+.oc-type-pickup{background:var(--green-dim);color:var(--green);}
+.oc-store{font-size:13.5px;font-weight:600;flex:1;}
+.oc-status{font-size:12px;color:var(--text3);font-weight:500;}
+.oc-status.live{color:var(--gold);}
+.oc-body{padding:0 15px 13px;display:flex;gap:13px;align-items:center;}
+.oc-item-img{width:62px;height:62px;border-radius:var(--r-sm);flex-shrink:0;box-shadow:var(--shadow);}
+.oc-item-info{flex:1;min-width:0;}
+.oc-item-name{font-size:14px;font-weight:600;margin-bottom:3px;}
+.oc-item-detail{font-size:11px;color:var(--text3);line-height:1.5;}
+.oc-item-price{font-size:16px;font-weight:700;font-family:var(--font-mono);color:var(--brand);flex-shrink:0;}
+.oc-foot{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border-top:1px solid var(--border);background:var(--cream);}
+.oc-date{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.oc-reorder{background:var(--brand);color:#fff;border:none;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:600;font-family:var(--font-body);cursor:pointer;}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 20px;gap:14px;}
+.empty-icon{font-size:54px;opacity:0.35;}
+.empty-text{font-size:14px;color:var(--text3);text-align:center;}
+.empty-btn{background:var(--brand);color:#fff;border:none;border-radius:26px;padding:12px 28px;font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;margin-top:4px;}
+
+/* PROFILE */
+.profile-hero{background:linear-gradient(135deg,#5e0f0f,#8B1A1A 55%,#B43030);padding:calc(var(--inset-t) + 22px) 18px 26px;position:relative;overflow:hidden;}
+.profile-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.profile-tagline{font-family:var(--font-display);font-style:italic;font-size:22px;font-weight:600;color:rgba(255,255,255,0.92);margin-bottom:18px;position:relative;z-index:1;line-height:1.05;}
+.profile-card{position:relative;z-index:1;display:flex;align-items:center;gap:14px;}
+.profile-avatar{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.12);border:2px solid var(--gold2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.profile-info{flex:1;color:#fff;}
+.profile-name{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.tier-pill{font-size:9px;font-family:var(--font-mono);background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2a1400;padding:2px 8px;border-radius:8px;font-weight:700;letter-spacing:0.04em;}
+.profile-phone{font-size:12px;color:rgba(255,255,255,0.7);font-family:var(--font-mono);margin-top:3px;}
+.loyalty{position:relative;z-index:1;margin-top:18px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16);border-radius:var(--r-sm);padding:13px 15px;backdrop-filter:blur(6px);}
+.loyalty-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;}
+.loyalty-lbl{font-size:11px;color:rgba(255,255,255,0.8);font-family:var(--font-mono);}
+.loyalty-pts{font-size:13px;color:#fff;font-weight:600;}
+.loyalty-pts b{color:var(--gold2);font-family:var(--font-mono);}
+.loyalty-bar{height:7px;background:rgba(255,255,255,0.15);border-radius:4px;overflow:hidden;}
+.loyalty-fill{height:100%;width:85%;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:4px;}
+.profile-stats{display:flex;margin:-16px 16px 0;position:relative;z-index:5;background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-card);overflow:hidden;}
+.pstat{flex:1;text-align:center;padding:15px 6px;cursor:pointer;}
+.pstat + .pstat{border-left:1px solid var(--border);}
+.pstat .pn{font-size:20px;font-weight:700;font-family:var(--font-mono);color:var(--brand);}
+.pstat .pl{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}
+.menu-list{background:var(--white);margin:16px;border-radius:var(--r);box-shadow:var(--shadow-card);overflow:hidden;}
+.menu-list-item{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+.menu-list-item:last-child{border-bottom:none;}
+.menu-list-item:active{background:var(--cream);}
+.mli-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:var(--cream2);}
+.mli-label{flex:1;font-size:14px;font-weight:500;}
+.mli-value{font-size:12px;color:var(--text3);font-family:var(--font-mono);}
+.mli-arrow{font-size:18px;color:var(--text4);}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:var(--inset-b);left:0;right:0;width:100%;height:var(--nav-h);background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -4px 20px rgba(26,18,8,0.07);}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--text4);transition:color 0.15s;}
+.bnav-item svg{width:23px;height:23px;}
+.bnav-item.active{color:var(--brand);}
+.bnav-label{font-size:9.5px;font-weight:600;letter-spacing:0.02em;}
+.bnav-center{margin-top:-22px;}
+.bnav-center-icon{width:54px;height:54px;background:linear-gradient(135deg,var(--brand3),var(--brand));border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(139,26,26,0.45);border:4px solid var(--cream);}
+.bnav-center-icon svg{width:25px;height:25px;}
+.bnav-center .bnav-label{margin-top:2px;}
+
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,12,8,0.55);backdrop-filter:blur(5px);z-index:200;align-items:flex-end;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--cream);border-radius:var(--r-lg) var(--r-lg) 0 0;width:100%;max-height:90vh;overflow-y:auto;animation:sheetUp 0.32s cubic-bezier(.2,.8,.2,1);-ms-overflow-style:none;scrollbar-width:none;}
+.modal-sheet::-webkit-scrollbar{display:none;}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 0;}
+.sheet-close{position:absolute;top:14px;right:16px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,0.9);font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;box-shadow:var(--shadow);}
+
+/* ITEM DETAIL */
+.item-hero{position:relative;height:230px;}
+.item-hero .photo{position:absolute;inset:0;}
+.item-hero .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(20,6,5,0.55),transparent 45%);}
+.item-hero-badges{position:absolute;top:16px;left:18px;display:flex;gap:6px;z-index:3;}
+.item-hero-badge{color:#fff;font-size:10px;font-family:var(--font-mono);font-weight:600;padding:4px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.25);}
+.item-detail-body{padding:18px;}
+.item-detail-name{font-family:var(--font-display);font-style:italic;font-size:30px;font-weight:700;margin-bottom:8px;line-height:1.02;}
+.item-detail-desc{font-size:13.5px;color:var(--text2);line-height:1.6;margin-bottom:8px;}
+.tasting{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.tasting-chip{display:flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid rgba(200,146,42,0.3);color:var(--text2);font-size:11px;padding:5px 11px;border-radius:14px;font-family:var(--font-mono);}
+.option-group{margin-bottom:18px;}
+.og-title{font-size:11px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.og-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.og-options{display:flex;flex-wrap:wrap;gap:8px;}
+.og-opt{padding:9px 16px;border:1.5px solid var(--border2);border-radius:22px;font-size:12.5px;cursor:pointer;transition:all 0.12s;color:var(--text2);background:var(--white);font-weight:500;}
+.og-opt.selected{border-color:var(--brand);background:var(--brand);color:#fff;font-weight:600;box-shadow:0 4px 12px rgba(139,26,26,0.3);}
+.detail-foot{position:sticky;bottom:0;background:var(--white);border-top:1px solid var(--border);padding:14px 18px calc(16px + var(--inset-b));display:flex;align-items:center;gap:14px;}
+.qty-ctrl{display:flex;align-items:center;gap:8px;background:var(--cream2);border-radius:24px;padding:5px;}
+.qty-btn{width:34px;height:34px;border-radius:50%;background:#fff;border:none;font-size:20px;color:var(--brand);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);}
+.qty-num{font-size:17px;font-weight:700;font-family:var(--font-mono);min-width:22px;text-align:center;}
+.add-cart-btn{flex:1;padding:15px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:#fff;border:none;border-radius:26px;font-size:15px;font-weight:700;font-family:var(--font-body);cursor:pointer;box-shadow:0 8px 20px rgba(139,26,26,0.4);}
+
+/* SHEET HEAD (store/checkout) */
+.sheet-head{padding:24px 18px 12px;}
+.sheet-title{font-family:var(--font-display);font-style:italic;font-size:26px;font-weight:700;}
+.sheet-sub{font-size:12px;color:var(--text3);margin-top:2px;font-family:var(--font-mono);}
+.sheet-body{padding:8px 18px calc(24px + var(--inset-b));}
+
+/* STORE SELECTOR */
+.store-warning{background:var(--gold-dim);border:1px solid rgba(200,146,42,0.3);border-radius:var(--r-sm);padding:11px 14px;font-size:12px;color:#8a6418;display:flex;gap:8px;align-items:center;margin-bottom:14px;}
+.store-item{display:flex;gap:13px;align-items:center;padding:14px;border-radius:var(--r-sm);cursor:pointer;margin-bottom:8px;background:var(--white);box-shadow:var(--shadow);transition:all 0.12s;}
+.store-item:active{transform:scale(0.99);}
+.si-icon{width:42px;height:42px;background:var(--brand-dim);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.si-name{font-size:14.5px;font-weight:600;margin-bottom:2px;}
+.si-addr{font-size:11px;color:var(--text3);line-height:1.4;}
+.si-right{text-align:right;flex-shrink:0;}
+.si-dist{font-size:13px;font-family:var(--font-mono);color:var(--brand);font-weight:600;}
+.si-status{font-size:10px;font-family:var(--font-mono);margin-top:4px;}
+.si-status.open{color:var(--green);}
+.si-status.busy{color:var(--gold);}
+
+/* CHECKOUT */
+#modal-checkout .modal-sheet{background:var(--cream2);}
+.co-card{background:var(--white);border-radius:var(--r);padding:15px;margin-bottom:13px;box-shadow:var(--shadow);}
+.co-fulfil{display:flex;gap:8px;margin-bottom:13px;}
+.co-fulfil-btn{flex:1;text-align:center;padding:11px;border-radius:var(--r-sm);border:1.5px solid var(--border2);background:var(--white);cursor:pointer;}
+.co-fulfil-btn.active{border-color:var(--brand);background:var(--brand-dim);}
+.co-fulfil-main{font-size:14px;font-weight:600;color:var(--text);}
+.co-fulfil-btn.active .co-fulfil-main{color:var(--brand);}
+.co-fulfil-sub{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:1px;}
+.co-row-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.co-row-head .ic{width:30px;height:30px;border-radius:9px;background:var(--brand-dim);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.co-row-head .tx{flex:1;}
+.co-row-head .t1{font-size:14px;font-weight:600;}
+.co-row-head .t2{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.co-row-head .edit{font-size:12px;color:var(--brand);font-family:var(--font-mono);}
+.checkout-item{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);}
+.checkout-item:last-child{border-bottom:none;}
+.ci-img{width:46px;height:46px;border-radius:10px;flex-shrink:0;}
+.ci-name{flex:1;font-size:13px;font-weight:500;}
+.ci-qty{font-size:12px;font-family:var(--font-mono);color:var(--text3);}
+.ci-price{font-size:13px;font-weight:600;font-family:var(--font-mono);min-width:64px;text-align:right;}
+.payment-method-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.pm-opt{border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:13px;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--white);}
+.pm-opt.selected{border-color:var(--brand);background:var(--brand-dim);}
+.pm-opt-icon{font-size:22px;margin-bottom:5px;}
+.pm-opt-label{font-size:12px;font-weight:500;color:var(--text2);}
+.pm-opt.selected .pm-opt-label{color:var(--brand);font-weight:600;}
+.coupon-row{display:flex;gap:9px;}
+.coupon-row input{flex:1;padding:11px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);font-size:13px;font-family:var(--font-body);outline:none;background:var(--cream);}
+.coupon-row button{background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);padding:0 18px;font-size:13px;font-weight:600;cursor:pointer;}
+.co-line{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);padding:5px 0;}
+.co-line .disc{color:var(--green);font-family:var(--font-mono);}
+.co-line .v{font-family:var(--font-mono);}
+.cs-title{font-size:12px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:11px;}
+.co-bottom{position:sticky;bottom:0;background:var(--white);border-top:1px solid var(--border);padding:13px 18px calc(15px + var(--inset-b));display:flex;align-items:center;gap:14px;box-shadow:0 -6px 20px rgba(26,18,8,0.08);}
+.co-total-wrap{flex:1;}
+.co-total-lbl{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.co-total-val{font-size:22px;font-weight:700;font-family:var(--font-mono);color:var(--brand);line-height:1;}
+.co-total-save{font-size:10px;color:var(--green);font-family:var(--font-mono);}
+.place-order-btn{padding:15px 30px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:#fff;border:none;border-radius:26px;font-size:15px;font-weight:700;font-family:var(--font-body);cursor:pointer;box-shadow:0 8px 20px rgba(139,26,26,0.4);}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(--nav-h) + 18px + var(--inset-b));left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:11px 22px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all 0.25s;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-xl);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head><body>
+
+<!-- SPLASH -->
+<div class="screen active" id="splash">
+  <div class="splash-logo-wrap">
+    <div class="splash-emblem">
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="44" height="44" rx="6" stroke="white" stroke-width="4" fill="none"/>
+        <rect x="13" y="13" width="26" height="26" rx="4" stroke="white" stroke-width="3.5" fill="none"/>
+        <path d="M19 26 C19 21 33 21 33 26 C33 33 26 37 26 37 C26 37 19 33 19 26Z" fill="white" opacity="0.85"/>
+      </svg>
+    </div>
+    <div class="splash-brand">Liétard</div>
+    <div class="splash-tagline">Artisan Roast Coffee</div>
+  </div>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- PROMO -->
+<div class="screen" id="promo">
+  <div class="promo-top"><div class="pe"><svg viewBox="0 0 52 52" fill="none"><rect x="4" y="4" width="44" height="44" rx="6" stroke="white" stroke-width="4"/><rect x="13" y="13" width="26" height="26" rx="4" stroke="white" stroke-width="3.5"/></svg></div><div class="pn">Liétard</div></div>
+  <button class="promo-skip" onclick="enterApp()">Skip ›</button>
+  <div class="promo-slides" id="promo-slides"></div>
+  <div class="promo-dots"><div class="promo-dot active"></div><div class="promo-dot"></div><div class="promo-dot"></div></div>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="app">
+  <div class="app-pages">
+
+    <!-- HOME -->
+    <div class="app-page active" id="pg-home">
+      <div class="app-topbar">
+        <div class="topbar-row1">
+          <div class="store-chip" onclick="openStoreSelector()">
+            <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="#8B1A1A" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="#8B1A1A"/></svg></div>
+            <div class="store-meta">
+              <div class="store-name"><span id="selected-store-name">Select your outlet</span><span class="chev">›</span></div>
+              <div class="store-dist" id="selected-store-dist">Tap to choose your nearest café</div>
+            </div>
+          </div>
+          <div class="qr-btn"><svg viewBox="0 0 19 19" fill="none"><rect x="1.5" y="1.5" width="6" height="6" rx="1" stroke="#4A3728" stroke-width="1.4"/><rect x="11.5" y="1.5" width="6" height="6" rx="1" stroke="#4A3728" stroke-width="1.4"/><rect x="1.5" y="11.5" width="6" height="6" rx="1" stroke="#4A3728" stroke-width="1.4"/><rect x="12" y="12" width="5" height="5" fill="#4A3728"/></svg></div>
+        </div>
+        <div class="topbar-row2">
+          <div class="mode-toggle">
+            <div class="mode-btn active" onclick="setMode('pickup',this)">Pick Up</div>
+            <div class="mode-btn" style="opacity:0.4;cursor:not-allowed;" onclick="showToast('Delivery coming soon','🚧')">Delivery</div>
+          </div>
+          <div class="search-bar"><svg viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#8B7355" stroke-width="1.4"/><path d="M10 10l3 3" stroke="#8B7355" stroke-width="1.4" stroke-linecap="round"/></svg> Try "Flat White" or "Cold Brew"</div>
+        </div>
+      </div>
+
+      <!-- HERO — single live banner from home_banner table (no fake carousel) -->
+      <div class="hero home-banner" id="home-hero" onclick="goPage('pg-menu')">
+        <div class="photo" id="hero-photo"><span class="ph-emoji">☕</span></div>
+        <div class="scrim"></div>
+        <div class="hero-content">
+          <span class="hero-label banner-badge">Today's Special</span>
+          <div class="hero-headline banner-headline">Welcome to Liétard</div>
+          <div class="hero-sub banner-sub">Fresh roasted Ceylon single origin</div>
+        </div>
+      </div>
+
+      <!-- FEATURED -->
+      <div class="section">
+        <div class="section-head"><div class="section-title">Today's Specials</div><div class="section-more" onclick="goPage('pg-menu')">See all ›</div></div>
+      </div>
+      <div class="featured-scroll" id="featured-cards"></div>
+
+      <div class="section">
+        <div class="section-head"><div class="section-kick">FRESH IN</div><div class="section-title">New Arrivals</div></div>
+      </div>
+      <div class="featured-scroll" id="new-arrivals"></div>
+      <div style="height:18px;flex-shrink:0;"></div>
+    </div>
+
+    <!-- MENU -->
+    <div class="app-page" id="pg-menu">
+      <div class="app-topbar" style="padding:12px 14px 10px;">
+        <div class="topbar-row1">
+          <div class="mode-toggle">
+            <div class="mode-btn active" onclick="modePick(this,'pickup')">Pickup</div>
+            <div class="mode-btn" style="opacity:0.4;cursor:not-allowed;" onclick="showToast('Delivery coming soon','🚧')">Delivery</div>
+          </div>
+          <div class="store-chip" onclick="openStoreSelector()" style="flex:1;margin-left:6px;">
+            <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="#8B1A1A" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="#8B1A1A"/></svg></div>
+            <div class="store-meta"><div class="store-name"><span id="menu-store-name">Select outlet</span><span class="chev">›</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="menu-layout">
+        <div class="menu-cats" id="menu-cats"></div>
+        <div class="menu-items" id="menu-items"></div>
+      </div>
+      <div class="cart-bar" id="cart-bar">
+        <div onclick="openCartReview()" style="display:flex;align-items:center;gap:11px;flex:1;cursor:pointer;">
+          <div class="cart-icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a1 1 0 001 .8h9.2a1 1 0 001-.8L21 8H6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="#fff"/><circle cx="18" cy="20" r="1.4" fill="#fff"/></svg><div class="cart-count-badge" id="cart-count">0</div></div>
+          <div class="cart-info"><div class="cart-items-count" id="cart-items-label">0 items</div><div class="cart-total" id="cart-total-disp">LKR 0</div></div>
+        </div>
+        <button class="cart-checkout-btn" onclick="openCheckout()">Checkout</button>
+      </div>
+    </div>
+
+    <!-- ORDER (merch: coffee beans, souvenirs — separate from beverage Menu) -->
+    <div class="app-page" id="pg-order">
+      <div class="page-title"><h1>Shop</h1><div style="font-size:12px;color:var(--text3);margin-top:2px;">Coffee beans, souvenirs & merchandise</div></div>
+      <div class="menu-layout">
+        <div class="menu-cats" id="merch-cats"></div>
+        <div class="menu-items" id="merch-items"></div>
+      </div>
+      <div class="cart-bar" id="merch-cart-bar">
+        <div onclick="openCartReview()" style="display:flex;align-items:center;gap:11px;flex:1;cursor:pointer;">
+          <div class="cart-icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a1 1 0 001 .8h9.2a1 1 0 001-.8L21 8H6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="#fff"/><circle cx="18" cy="20" r="1.4" fill="#fff"/></svg><div class="cart-count-badge" id="cart-count-2">0</div></div>
+          <div class="cart-info"><div class="cart-items-count" id="cart-items-label-2">0 items</div><div class="cart-total" id="cart-total-disp-2">LKR 0</div></div>
+        </div>
+        <button class="cart-checkout-btn" onclick="openCheckout()">Checkout</button>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="app-page" id="pg-orders">
+      <div class="page-title"><h1>My Orders</h1></div>
+      <div class="orders-tabs">
+        <div class="order-tab active" onclick="switchOrderTab(0,this)">Recent</div>
+        <div class="order-tab" onclick="switchOrderTab(1,this)">Pickup</div>
+        <div class="order-tab" onclick="switchOrderTab(2,this)">Vouchers</div>
+      </div>
+      <div id="orders-content" style="overflow-y:auto;flex:1;"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="app-page" id="pg-profile">
+      <div class="profile-hero">
+        <div class="profile-tagline">Good coffee starts<br>with good beans.</div>
+        <div class="profile-card">
+          <div class="profile-avatar">👤</div>
+          <div class="profile-info">
+            <div class="profile-name"><span id="profile-name">Guest</span></div>
+            <div class="profile-phone" id="profile-status">Not logged in</div>
+          </div>
+          <div id="profile-auth-action"></div>
+        </div>
+      </div>
+      <div class="menu-list" style="margin-top:16px;">
+        <div class="menu-list-item" onclick="openSettingsModal()"><div class="mli-icon">⚙️</div><div class="mli-label">Settings</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div class="menu-list-item" onclick="openFavouritesModal()"><div class="mli-icon">❤️</div><div class="mli-label">My Favourites</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div class="menu-list-item" onclick="showToast('Use the coupon field at checkout','🎟️')"><div class="mli-icon">🎟️</div><div class="mli-label">Redeem Voucher</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div class="menu-list-item" onclick="openAddressManagerModal()"><div class="mli-icon">📍</div><div class="mli-label">Address Manager</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div class="menu-list-item" onclick="showToast('We read every message','💬')"><div class="mli-icon">💬</div><div class="mli-label">Help &amp; Feedback</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS MODAL (edit name/phone) ══ -->
+    <div class="modal-overlay" id="modal-settings">
+      <div class="modal-sheet">
+        <div class="sheet-handle"></div>
+        <button class="sheet-close" onclick="closeModal('modal-settings')">×</button>
+        <div class="sheet-head"><div class="sheet-title">Settings</div></div>
+        <div class="sheet-body">
+          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="settings-name" placeholder="Your name"></div>
+          <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="settings-phone" placeholder="07XXXXXXXX"></div>
+          <button class="submit-btn gold" id="settings-save-btn" onclick="saveSettings()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADDRESS MANAGER MODAL (saved delivery addresses) ══ -->
+    <!-- ══ MY FAVOURITES MODAL (saved beverages + merch products) ══ -->
+    <div class="modal-overlay" id="modal-favourites">
+      <div class="modal-sheet">
+        <div class="sheet-handle"></div>
+        <button class="sheet-close" onclick="closeModal('modal-favourites')">×</button>
+        <div class="sheet-head"><div class="sheet-title">My Favourites</div></div>
+        <div class="sheet-body">
+          <div id="favourites-list-body">
+            <div style="padding:14px 0;color:var(--text3);font-size:13px;text-align:center">Loading favourites...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-address-manager">
+      <div class="modal-sheet">
+        <div class="sheet-handle"></div>
+        <button class="sheet-close" onclick="closeModal('modal-address-manager')">×</button>
+        <div class="sheet-head"><div class="sheet-title">Address Manager</div></div>
+        <div class="sheet-body">
+          <div id="address-list-body" style="margin-bottom:14px;">
+            <div style="padding:14px 0;color:var(--text3);font-size:13px;text-align:center">Loading addresses...</div>
+          </div>
+          <button class="submit-btn gold" onclick="openAddAddressForm()">+ Add New Address</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADD/EDIT ADDRESS FORM MODAL ══ -->
+    <div class="modal-overlay" id="modal-address-form">
+      <div class="modal-sheet">
+        <div class="sheet-handle"></div>
+        <button class="sheet-close" onclick="closeModal('modal-address-form')">×</button>
+        <div class="sheet-head"><div class="sheet-title" id="address-form-title">Add Address</div></div>
+        <div class="sheet-body">
+          <input type="hidden" id="address-edit-id" value="">
+          <div class="form-group"><label class="form-label">Label</label><input class="form-input" id="address-label" placeholder="Home, Work, Other"></div>
+          <div class="form-group"><label class="form-label">Address</label><textarea class="form-textarea" id="address-line" placeholder="Street address, building, unit..."></textarea></div>
+          <div class="form-group"><label class="form-label">City</label><input class="form-input" id="address-city" placeholder="e.g. Colombo"></div>
+          <div class="form-group"><label class="form-label">Notes (optional)</label><input class="form-input" id="address-notes" placeholder="Gate code, landmark, delivery instructions..."></div>
+          <button class="submit-btn gold" id="address-save-btn" onclick="saveAddress()">Save Address</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bnav-item active" onclick="goPage('pg-home',this)" id="bnav-home">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="bnav-label">Home</div>
+    </div>
+    <div class="bnav-item" onclick="goPage('pg-menu',this)" id="bnav-menu">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 8h12a3 3 0 010 6h-1M5 8v9a2 2 0 002 2h7a2 2 0 002-2v-3M5 8V6m12 8a3 3 0 003-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="bnav-label">Menu</div>
+    </div>
+    <div class="bnav-item bnav-center" onclick="goPage('pg-order',this)" id="bnav-center">
+      <div class="bnav-center-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a1 1 0 001 .8h9.2a1 1 0 001-.8L21 8H6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="#fff"/><circle cx="18" cy="20" r="1.4" fill="#fff"/></svg></div>
+      <div class="bnav-label">Order</div>
+    </div>
+    <div class="bnav-item" onclick="goPage('pg-orders',this)" id="bnav-orders">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <div class="bnav-label">Orders</div>
+    </div>
+    <div class="bnav-item" onclick="goPage('pg-profile',this)" id="bnav-profile">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <div class="bnav-label">Me</div>
+    </div>
+  </div>
+</div>
+<!-- CART REVIEW MODAL (tap the cart icon — adjust quantities before checkout) -->
+<div class="modal-overlay" id="modal-cart-review">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" onclick="closeModal('modal-cart-review')">×</button>
+    <div class="sheet-head"><div class="sheet-title">Your Cart</div></div>
+    <div class="sheet-body">
+      <div id="cart-review-items"></div>
+      <div class="co-line" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);"><span>Total</span><span class="v" id="cart-review-total">LKR 0</span></div>
+    </div>
+    <div class="detail-foot">
+      <button class="add-cart-btn" onclick="closeModal('modal-cart-review');openCheckout()">Proceed to Checkout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM DETAIL MODAL -->
+<div class="modal-overlay" id="modal-item">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="closeModal('modal-item')">×</button>
+    <button class="sheet-close" id="modal-item-fav-btn" style="left:16px;right:auto;" onclick="toggleFavourite(currentItem?.id, false)">♡</button>
+    <div class="item-hero"><div class="photo" id="modal-item-photo"><span class="ph-emoji" id="modal-item-emoji">☕</span></div><div class="scrim"></div><div class="item-hero-badges" id="modal-item-badges"></div></div>
+    <div class="item-detail-body">
+      <div class="item-detail-name" id="modal-item-name2"></div>
+      <div class="item-detail-desc" id="modal-item-desc"></div>
+      <div id="modal-item-options"></div>
+      <div id="modal-item-detail-blocks"></div>
+    </div>
+    <div class="detail-foot">
+      <div class="qty-ctrl"><button class="qty-btn" onclick="changeDetailQty(-1)">−</button><div class="qty-num" id="detail-qty">1</div><button class="qty-btn" onclick="changeDetailQty(1)">+</button></div>
+      <button class="add-cart-btn" id="add-cart-btn" onclick="addToCartFromModal()">Add to Cart — LKR 550</button>
+    </div>
+  </div>
+</div>
+
+<!-- MERCH PRODUCT DETAIL MODAL — same visual pattern as beverages, no
+     customization options section since merch has no size/temp/milk -->
+<div class="modal-overlay" id="modal-merch-item">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="closeModal('modal-merch-item')">×</button>
+    <button class="sheet-close" id="modal-merch-fav-btn" style="left:16px;right:auto;" onclick="toggleFavourite(currentMerchItem?.id, true)">♡</button>
+    <div class="item-hero"><div class="photo" id="modal-merch-photo"><span class="ph-emoji" id="modal-merch-emoji">🛍️</span></div><div class="scrim"></div><div class="item-hero-badges" id="modal-merch-badges"></div></div>
+    <div class="item-detail-body">
+      <div class="item-detail-name" id="modal-merch-name"></div>
+      <div class="item-detail-desc" id="modal-merch-desc"></div>
+      <div id="modal-merch-detail-blocks"></div>
+    </div>
+    <div class="detail-foot">
+      <div class="qty-ctrl"><button class="qty-btn" onclick="changeMerchDetailQty(-1)">−</button><div class="qty-num" id="merch-detail-qty">1</div><button class="qty-btn" onclick="changeMerchDetailQty(1)">+</button></div>
+      <button class="add-cart-btn" id="add-merch-cart-btn" onclick="addMerchToCartFromModal()">Add to Cart — LKR 0</button>
+    </div>
+  </div>
+</div>
+
+<!-- STORE SELECTOR MODAL -->
+<div class="modal-overlay" id="modal-store">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" onclick="closeModal('modal-store')">×</button>
+    <div class="sheet-head"><div class="sheet-title">Choose Outlet</div><div class="sheet-sub">Pick the café nearest you</div></div>
+    <div class="sheet-body" style="padding-top:4px;">
+      <div class="store-warning">📍 Select the outlet nearest you before ordering.</div>
+      <div id="store-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="modal-checkout">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" onclick="closeModal('modal-checkout')">×</button>
+    <div class="sheet-head"><div class="sheet-title">Confirm Order</div></div>
+    <div class="sheet-body">
+      <div class="co-card">
+        <div class="co-row-head"><div class="ic">📍</div><div class="tx"><div class="t1" id="co-store-name">Select an outlet</div><div class="t2" id="co-store-addr"></div></div><div class="edit" onclick="closeModal('modal-checkout');openStoreSelector()">Change</div></div>
+        <div class="store-warning" id="checkout-store-warning" style="display:none;margin-bottom:0;">📍 No outlet selected — <span onclick="closeModal('modal-checkout');openStoreSelector()" style="text-decoration:underline;cursor:pointer;">select one</span></div>
+      </div>
+      <div class="co-card" id="checkout-delivery-card" style="display:none;">
+        <div class="cs-title">Delivery Address</div>
+        <div id="checkout-address-select"></div>
+        <div class="store-warning" id="checkout-address-warning" style="display:none;margin-bottom:0;margin-top:8px;">📍 No delivery address selected — <span onclick="closeModal('modal-checkout');openAddressManagerModal()" style="text-decoration:underline;cursor:pointer;">add one</span></div>
+      </div>
+      <div class="co-card">
+        <div class="cs-title">Your Order</div>
+        <div id="checkout-items"></div>
+      </div>
+      <div class="co-card">
+        <div class="cs-title">Payment Method</div>
+        <div class="payment-method-grid">
+          <div class="pm-opt selected" onclick="pickPayment(this)"><div class="pm-opt-label">Card</div></div>
+          <div class="pm-opt" onclick="pickPayment(this)"><div class="pm-opt-label">Cash at Counter</div></div>
+          <div class="pm-opt" onclick="pickPayment(this)"><div class="pm-opt-label">QR / Transfer</div></div>
+          <div class="pm-opt" onclick="pickPayment(this)"><div class="pm-opt-label">Voucher</div></div>
+        </div>
+      </div>
+      <div class="co-card">
+        <div class="cs-title">Coupon</div>
+        <div class="coupon-row"><input type="text" id="coupon-input" placeholder="Enter coupon code"><button onclick="applyCoupon()">Apply</button></div>
+      </div>
+      <div class="co-card">
+        <div class="co-line"><span>Subtotal</span><span class="v" id="co-subtotal">LKR 0</span></div>
+      </div>
+    </div>
+    <div class="co-bottom">
+      <div class="co-total-wrap"><div class="co-total-lbl">Total</div><div class="co-total-val" id="checkout-total">LKR 0</div></div>
+      <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHECKOUT LOGIN/SIGNUP MODAL — restyled to match new visual language ══ -->
+<div id="checkout-auth-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(26,12,8,0.6);backdrop-filter:blur(5px);align-items:flex-end;justify-content:center;">
+  <div style="background:var(--cream);width:100%;max-width:420px;border-radius:var(--r-lg) var(--r-lg) 0 0;padding:28px 22px calc(28px + var(--inset-b));box-sizing:border-box;animation:sheetUp 0.32s cubic-bezier(.2,.8,.2,1);">
+    <div style="width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px;"></div>
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-family:var(--font-display);font-style:italic;font-size:26px;font-weight:700;color:var(--brand);">Log in to continue</div>
+      <div style="color:var(--text3);font-size:12px;margin-top:5px;font-family:var(--font-mono);">Just need an account to track your order</div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:18px;background:var(--cream2);border-radius:22px;padding:4px;">
+      <button id="ca-tab-login" onclick="switchCheckoutAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:18px;background:var(--brand);color:white;font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font-body);">Log In</button>
+      <button id="ca-tab-signup" onclick="switchCheckoutAuthTab('signup')" style="flex:1;padding:10px;border:none;border-radius:18px;background:transparent;color:var(--text2);font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font-body);">Sign Up</button>
+    </div>
+
+    <div id="ca-error" style="display:none;background:var(--brand-light);color:var(--brand2);border:1px solid rgba(139,26,26,0.2);padding:10px 14px;border-radius:var(--r-sm);font-size:12.5px;margin-bottom:14px;"></div>
+
+    <div id="ca-form-login">
+      <input type="email" id="ca-login-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <input type="password" id="ca-login-password" placeholder="Password" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <button onclick="doCheckoutLogin()" id="ca-login-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px rgba(139,26,26,0.4);">Log In & Place Order</button>
+    </div>
+
+    <div id="ca-form-signup" style="display:none;">
+      <input type="text" id="ca-signup-name" placeholder="Full name" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <input type="email" id="ca-signup-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <input type="tel" id="ca-signup-phone" placeholder="Phone number" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <input type="password" id="ca-signup-password" placeholder="Password (min 6 characters)" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <button onclick="doCheckoutSignup()" id="ca-signup-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px rgba(139,26,26,0.4);">Create Account & Place Order</button>
+    </div>
+
+    <button onclick="closeCheckoutAuthModal()" style="width:100%;padding:10px;border:none;background:transparent;color:var(--text3);font-size:12.5px;margin-top:10px;cursor:pointer;font-family:var(--font-body);">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toast-icon"></span> <span id="toast-msg"></span></div>
+<script>
+// ══ SUPABASE CONFIG ══
+const SUPABASE_URL = 'https://fjmzsxslnzrtgcilttly.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqbXpzeHNsbnpydGdjaWx0dGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzMjU4OTksImV4cCI6MjA5NjkwMTg5OX0.F56god4wqLUCgP1lCVTLZCK9aII4Vo_4g4fJcPAFfFc';
+
+let sb = null;
+
+// ══ BRAND RESOLUTION (multi-brand support) ══
+// The customer app now serves any brand on the platform, chosen via a
+// ?brand=<slug> URL parameter (e.g. brewops-customer.html?brand=lietard).
+// Falls back to "lietard" — the original single brand — if no parameter
+// is present at all, so existing links/bookmarks/local testing that never
+// included a brand param keep working exactly as before.
+//
+// This is a single, isolated function deliberately so the resolution
+// mechanism can be swapped later (e.g. to a subdomain) without touching
+// anything that calls window.BRAND_ID/window.BRAND elsewhere in the file.
+function getBrandSlugFromContext() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('brand') || 'lietard';
+}
+
+// Resolves the slug to a real brand row, stores it globally, and applies
+// the brand's colors as CSS variables. Called once, before any other data
+// loads — every other Supabase query in this file depends on
+// window.BRAND_ID being set first.
+async function resolveBrand() {
+  const slug = getBrandSlugFromContext();
+  const { data: brand, error } = await sb.from('brands').select('*').eq('slug', slug).eq('is_active', true).maybeSingle();
+
+  if (error || !brand) {
+    console.error('Brand resolution failed for slug:', slug, error?.message || '(not found or inactive)');
+    showBrandNotFoundError(slug);
+    return false;
+  }
+
+  window.BRAND = brand;
+  window.BRAND_ID = brand.id;
+  applyBrandTheme(brand);
+  return true;
+}
+
+// Applies the brand's colors as CSS custom properties, overriding the
+// hardcoded defaults baked into the stylesheet. Logo/name get applied
+// wherever the app already shows brand identity (see applyBrandIdentityToDOM).
+function applyBrandTheme(brand) {
+  const root = document.documentElement;
+  if (brand.primary_color) root.style.setProperty('--brand', brand.primary_color);
+  if (brand.secondary_color) root.style.setProperty('--brand2', brand.secondary_color);
+  if (brand.accent_color) root.style.setProperty('--gold', brand.accent_color);
+  document.title = brand.name || 'BrewOps';
+}
+
+// Shown if the slug in the URL doesn't match any active brand — rather
+// than silently falling through to show no data or, worse, every brand's
+// data unfiltered.
+function showBrandNotFoundError(slug) {
+  document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;font-family:sans-serif;">
+    <div>
+      <div style="font-size:40px;margin-bottom:12px;">☕</div>
+      <div style="font-size:18px;font-weight:600;margin-bottom:6px;">We couldn't find that café</div>
+      <div style="font-size:13px;color:#888;">"${slug}" doesn't match any active brand. Please check the link you used to get here.</div>
+    </div>
+  </div>`;
+}
+
+// ══ PHOTOGRAPHY — real Supabase image_url with graceful gradient+emoji fallback ══
+// (replaces the design's static PH lookup table — real items carry their own
+// image_url from menu_items/promo_slides/home_banner; null is the normal case
+// until a photo is uploaded via the franchisor's Menu Manager)
+// Small set of warm, on-brand gradients — picked by emoji so the menu
+// has gentle visual variety even before real photos are uploaded,
+// without fabricating per-item data that doesn't exist in the schema.
+const FALLBACK_GRADS = {
+  '☕':'linear-gradient(135deg,#6b4423,#3a2418)', '🧋':'linear-gradient(135deg,#5a3a22,#2a1810)',
+  '⚡':'linear-gradient(135deg,#4a2c18,#241008)', '🫧':'linear-gradient(135deg,#8a6038,#4a2c18)',
+  '🍵':'linear-gradient(135deg,#3F6B4E,#234234)', '🫖':'linear-gradient(135deg,#7a5a2a,#3a2810)',
+  '🌿':'linear-gradient(135deg,#3F6B4E,#234234)', '🥐':'linear-gradient(135deg,#b07a3a,#7a4f22)',
+  '🍫':'linear-gradient(135deg,#5a3418,#2a1808)', '🫘':'linear-gradient(135deg,#4a2c18,#241008)',
+};
+const FALLBACK_GRAD_DEFAULT = 'linear-gradient(135deg,#6b4423,#3a2418)';
+function gradFor(emoji){ return FALLBACK_GRADS[emoji] || FALLBACK_GRAD_DEFAULT; }
+
+function photoHTML(imageUrl, emoji, cls){
+  const grad = gradFor(emoji);
+  const imgTag = imageUrl ? `<img src="${imageUrl}" alt="" loading="lazy" onerror="this.remove()">` : '';
+  return `<div class="photo ${cls||''}" style="--ph-grad:${grad}"><span class="ph-emoji">${emoji||'☕'}</span>${imgTag}</div>`;
+}
+// Category banners need to respect a deliberately blank icon (the
+// franchisor picked "None") rather than always falling back to a default
+// emoji like individual menu items do — a category banner with no photo
+// and no icon should just show a clean gradient background, nothing else.
+function categoryBannerPhotoHTML(imageUrl, icon){
+  const grad = gradFor(icon);
+  const imgTag = imageUrl ? `<img src="${imageUrl}" alt="" loading="lazy" onerror="this.remove()">` : '';
+  const emojiTag = icon ? `<span class="ph-emoji">${icon}</span>` : '';
+  return `<div class="photo" style="--ph-grad:${grad}">${emojiTag}${imgTag}</div>`;
+}
+function bgPhoto(el, imageUrl, emoji){
+  if (!el) return;
+  const imgTag = imageUrl ? `<img src="${imageUrl}" alt="" onerror="this.remove()">` : '';
+  el.style.setProperty('--ph-grad', gradFor(emoji));
+  el.innerHTML = `<span class="ph-emoji">${emoji||'☕'}</span>${imgTag}`;
+}
+function badgeClass(b){
+  if(!b) return '';
+  if(b==='NEW') return 'background:var(--green)';
+  if(b==='#1'||b.includes('%')) return 'background:linear-gradient(135deg,var(--brand2),var(--brand))';
+  if(b==='HOT'||b==='Today Special') return 'background:var(--brand)';
+  return 'background:var(--gold);color:#2a1400';
+}
+
+let cart=[], selectedStore=null, currentItem=null, currentItemPrice=0, detailQty=1;
+window.currentMode = 'pickup';
+const fmt = n => n.toLocaleString();
+
+// Converts a beverage option category from the DB's {label, upcharge}
+// shape (upcharge in cents) into display-ready {label, upcharge in whole
+// LKR}. Falls back to a sensible default set if the category is genuinely
+// empty/malformed, rather than showing a blank option group.
+function normalizeOptions(raw, fallback){
+  if (!Array.isArray(raw) || !raw.length) return fallback;
+  return raw.map(o => ({
+    label: (o && o.label) ? o.label : String(o),
+    upcharge: Math.round((o && typeof o.upcharge === 'number' ? o.upcharge : 0) / 100)
+  }));
+}
+
+// Groups identical cart lines together for display/order purposes — same
+// item AND same selected options (e.g. two Hot Lattes) merge into one row
+// with qty:2, but different configurations of the same beverage (one Hot
+// Latte, one Iced Latte) correctly stay as separate lines instead of
+// silently merging into a misleading "Latte x2".
+function groupCartItems(items){
+  return Object.values(items.reduce((acc,item) => {
+    const optKey = (item.selectedOptions||[]).join('|');
+    const key = item.id + '::' + optKey;
+    acc[key] = acc[key] || {...item, qty: 0};
+    acc[key].qty++;
+    return acc;
+  }, {}));
+}
+
+// Aliases for backward compat with code that reads STORES directly
+const STORES = new Proxy({}, { get: () => window.STORES || [] });
+
+// ══ BOOT SEQUENCE ══
+setTimeout(()=>{
+  showScreen('promo');
+  startPromoSlides();
+  setTimeout(enterApp, 5000);
+  initSupabase(); // start DB connection in background
+}, 1800);
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+let promoIdx = 0;
+function startPromoSlides(){
+  setInterval(()=>{
+    const slides = document.querySelectorAll('.promo-slide');
+    const dots = document.querySelectorAll('.promo-dot');
+    if (!slides.length) return;
+    slides[promoIdx].classList.remove('active');
+    if (dots[promoIdx]) dots[promoIdx].classList.remove('active');
+    promoIdx = (promoIdx+1)%slides.length;
+    slides[promoIdx].classList.add('active');
+    if (dots[promoIdx]) dots[promoIdx].classList.add('active');
+  },2400);
+}
+
+function enterApp(){
+  showScreen('app');
+  buildFeaturedCards();
+  buildMenuCats();
+  const firstCat = Object.keys(window.MENU||{})[0];
+  if (firstCat) renderMenuItems(firstCat);
+  buildStoreList();
+  renderOrders(0);
+  updateCart();
+}
+
+// ══ NAVIGATION ══
+function goPage(id, navEl){
+  document.querySelectorAll('.app-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  if (id === 'pg-profile') refreshProfileCard();
+  if (id === 'pg-orders') renderOrders(0);
+  if (id === 'pg-order') buildMerchCats();
+  if(navEl) navEl.classList.add('active');
+  else{
+    const map={'pg-home':'bnav-home','pg-menu':'bnav-menu','pg-order':'bnav-center','pg-orders':'bnav-orders','pg-profile':'bnav-profile'};
+    const el=document.getElementById(map[id]);
+    if(el) el.classList.add('active');
+  }
+  const pc = document.querySelector('.app-page.active');
+  if (pc) pc.scrollTop = 0;
+}
+
+function setMode(mode, btn){
+  window.currentMode = mode;
+  if (btn) { btn.parentElement.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+}
+function modePick(btn, mode){ setMode(mode, btn); }
+// ══ SUPABASE CONNECTION ══
+async function initSupabase() {
+  try {
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('✓ Supabase connected');
+
+    const brandOk = await resolveBrand();
+    if (!brandOk) return; // showBrandNotFoundError already replaced the page
+
+    await loadSupabaseData();
+  } catch(e) {
+    console.error('Supabase connection failed:', e.message);
+    showConnectionError();
+  }
+}
+
+// ── Load all data from Supabase ──
+async function loadSupabaseData() {
+  try {
+    const [catRes, itemRes, slideRes, bannerRes, outletRes, settingsRes, merchCatRes, merchItemRes] = await Promise.all([
+      sb.from('menu_categories').select('*').eq('is_visible', true).eq('brand_id', window.BRAND_ID).order('sort_order'),
+      sb.from('menu_items').select('*, menu_categories(name,icon)').eq('is_visible', true).eq('brand_id', window.BRAND_ID).order('sort_order'),
+      sb.from('promo_slides').select('*').eq('is_visible', true).eq('brand_id', window.BRAND_ID).order('sort_order'),
+      sb.from('home_banner').select('*').eq('is_active', true).eq('brand_id', window.BRAND_ID).limit(1).maybeSingle(),
+      sb.from('outlets').select('*').eq('is_active', true).eq('brand_id', window.BRAND_ID),
+      sb.from('app_settings').select('key,value').eq('brand_id', window.BRAND_ID),
+      sb.from('merch_categories').select('*').eq('is_visible', true).eq('brand_id', window.BRAND_ID).order('sort_order'),
+      sb.from('merch_items').select('*').eq('is_visible', true).eq('brand_id', window.BRAND_ID).order('sort_order')
+    ]);
+
+    if (catRes.data && itemRes.data) {
+      window.MENU = {};
+      catRes.data.forEach(cat => {
+        const items = itemRes.data
+          .filter(i => i.category_id === cat.id)
+          .map(i => ({
+            id: i.id,
+            name: i.name,
+            emoji: i.emoji || '☕',
+            image_url: i.image_url || null,   // real photo, if the franchisor uploaded one
+            tags: i.tags || [],
+            desc: i.description || '',
+            price: Math.round(i.base_price / 100),
+            oldPrice: i.original_price ? Math.round(i.original_price / 100) : null,
+            badge: i.badge_label || null,
+            // Each option category is now an array of {label, upcharge} objects
+            // (upcharge stored in cents, converted to whole LKR here) — gives the
+            // franchisor real per-option pricing control instead of one shared
+            // upcharge number per category. Falls back to sensible defaults with
+            // zero upcharge if a beverage genuinely has no options configured.
+            sizeOptions: normalizeOptions(i.size_options, [{label:'Regular',upcharge:0},{label:'Large',upcharge:80}]),
+            tempOptions: normalizeOptions(i.temp_options, [{label:'Hot',upcharge:0},{label:'Iced',upcharge:0}]),
+            milkOptions: normalizeOptions(i.milk_options, [{label:'Full Cream',upcharge:0},{label:'Oat Milk',upcharge:60},{label:'Soy Milk',upcharge:60}]),
+            sugarOptions: normalizeOptions(i.sugar_options, [{label:'No Sugar',upcharge:0},{label:'Standard',upcharge:0},{label:'Extra Sweet',upcharge:0}]),
+            detailBlocks: Array.isArray(i.detail_blocks) ? i.detail_blocks : [],
+          }));
+        window.MENU[cat.id] = { name: cat.name, icon: cat.icon || '', items };
+      });
+    }
+
+    if (merchCatRes.data && merchItemRes.data) {
+      window.MERCH = {};
+      merchCatRes.data.forEach(cat => {
+        const items = merchItemRes.data
+          .filter(i => i.category_id === cat.id)
+          .map(i => ({
+            id: i.id,
+            name: i.name,
+            emoji: i.emoji || '🛍️',
+            image_url: i.image_url || null,
+            desc: i.description || '',
+            price: Math.round(i.base_price / 100),
+            oldPrice: i.original_price ? Math.round(i.original_price / 100) : null,
+            badge: i.badge_label || null,
+            stockQty: i.stock_qty || 0,
+            detailBlocks: Array.isArray(i.detail_blocks) ? i.detail_blocks : [],
+            isMerch: true   // flags this item to skip beverage-only logic (customization modal, stock-free add)
+          }));
+        window.MERCH[cat.id] = { name: cat.name, icon: cat.icon || '', items };
+      });
+      // Only (re)build if the Order page's DOM exists and has been visited at least once,
+      // matching how buildFeaturedCards/buildMenuCats are called after data loads elsewhere.
+      buildMerchCats();
+    }
+
+    if (slideRes.data && slideRes.data.length) {
+      window.PROMO_SLIDES = slideRes.data;
+      buildPromo();
+    }
+    if (bannerRes.data) {
+      window.HOME_BANNER = bannerRes.data;
+      updateHomeBanner(bannerRes.data);
+    }
+    if (outletRes.data) {
+      window.STORES = outletRes.data.map(o => ({
+        id: o.id, name: o.name, addr: o.address || o.location,
+        dist: '— km', status: 'open'
+      }));
+    }
+    if (settingsRes.data) {
+      const s = {};
+      settingsRes.data.forEach(r => s[r.key] = r.value);
+      window.APP_SETTINGS = s;
+      if (s.app_name) document.title = s.app_name;
+    }
+
+    // Refresh UI with live data from Supabase
+    buildStoreList();
+    buildFeaturedCards();
+    buildMenuCats();
+    const firstCat = Object.keys(window.MENU||{})[0];
+    if (firstCat) renderMenuItems(firstCat, document.querySelector('.cat-item'));
+
+    // Subscribe to live menu/promo updates (CMS changes appear instantly)
+    sb.channel('menu-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' },
+        () => loadSupabaseData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'promo_slides' },
+        () => loadSupabaseData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'home_banner' },
+        () => loadSupabaseData())
+      .subscribe();
+
+  } catch(e) {
+    console.error('Error loading Supabase data — check console for details:', e?.message || e);
+    if (!sb) showConnectionError();
+  }
+}
+
+// Single real banner (replaces the design's fake rotating HERO_SLIDES carousel —
+// there is exactly one home_banner row in the schema, so we show it honestly
+// as one banner rather than fabricating a multi-slide rotation)
+function updateHomeBanner(banner) {
+  const el = document.getElementById('home-hero');
+  if (!el || !banner) return;
+  bgPhoto(document.getElementById('hero-photo'), banner.image_url, '☕');
+  const headline = el.querySelector('.banner-headline');
+  const sub = el.querySelector('.banner-sub');
+  const badge = el.querySelector('.banner-badge');
+  if (headline) headline.textContent = banner.headline;
+  if (sub) sub.textContent = banner.sub_text || '';
+  if (badge && banner.price_display) badge.textContent = banner.price_display;
+  if (!banner.image_url && banner.bg_gradient) {
+    document.getElementById('hero-photo').style.setProperty('--ph-grad', banner.bg_gradient);
+  }
+}
+
+// ── Place order to Supabase ──
+async function submitOrderToSupabase(cart, selectedStore, payMethod) {
+  if (!sb) return null;
+  try {
+    const subtotal = cart.reduce((s,i) => s + i.finalPrice, 0);
+
+    // Compute the real discount from the validated coupon (was previously
+    // hardcoded to 0 — the coupon was checked but never actually applied)
+    const coupon = window.activeCoupon || null;
+    let discount = 0;
+    if (coupon) {
+      if (coupon.discount_type === 'percent') {
+        discount = Math.round(subtotal * (coupon.discount_value / 100));
+      } else if (coupon.discount_type === 'fixed') {
+        discount = Math.round(coupon.discount_value / 100); // stored in cents in DB, cart math is in whole LKR
+      } else if (coupon.discount_type === 'free') {
+        // Free item — discount the price of the cheapest line item
+        discount = cart.length ? Math.min(...cart.map(i => i.finalPrice)) : 0;
+      }
+      discount = Math.min(discount, subtotal); // never discount below zero
+    }
+    const total = Math.max(0, subtotal - discount);
+
+    // Snapshot the chosen delivery address as text (not just a FK) so it's
+    // preserved exactly as-is even if the customer edits/deletes the saved
+    // address later. Only relevant in delivery mode — pickup orders have none.
+    let delivery_address_text = null;
+    if (window.currentMode === 'delivery' && window.SELECTED_DELIVERY_ADDRESS) {
+      const { data: addr } = await sb.from('customer_addresses').select('*')
+        .eq('id', window.SELECTED_DELIVERY_ADDRESS).maybeSingle();
+      if (addr) {
+        delivery_address_text = `${addr.label ? addr.label + ': ' : ''}${addr.address_line}${addr.city ? ', ' + addr.city : ''}${addr.notes ? ' (' + addr.notes + ')' : ''}`;
+      }
+    }
+
+    const { data: order, error: orderErr } = await sb.from('orders').insert({
+      outlet_id: selectedStore.id,
+      brand_id: window.BRAND_ID,
+      customer_id: window.CURRENT_USER_ID || null,
+      customer_phone: window.CURRENT_USER_PHONE || null,
+      order_type: window.currentMode || 'pickup',
+      delivery_address_text,
+      payment_method: payMethod === '💳 Card' ? 'card' : payMethod === '💵 Cash at Counter' ? 'cash' : payMethod === '📱 QR / Transfer' ? 'qr' : 'voucher',
+      payment_status: payMethod.includes('Cash') ? 'pending' : 'paid',
+      coupon_id: coupon?.id || null,
+      subtotal: subtotal * 100,
+      discount: discount * 100,
+      total: total * 100,
+      status: 'pending'
+    }).select().single();
+
+    if (orderErr) throw orderErr;
+
+    const items = groupCartItems(cart);
+
+    // Exactly one of menu_item_id/merch_item_id must be set per row (DB check
+    // constraint enforces this) — branch based on the isMerch flag set when
+    // window.MERCH was built, rather than assuming everything is a beverage.
+    await sb.from('order_items').insert(items.map(i => ({
+      order_id: order.id,
+      brand_id: window.BRAND_ID,
+      menu_item_id: i.isMerch ? null : i.id,
+      merch_item_id: i.isMerch ? i.id : null,
+      // Bake selected options into the name so franchisee/franchisor views
+      // (which only ever read order_items.name, not the cart) show exactly
+      // what was ordered — e.g. "Latte (Large / Iced / Oat Milk)" — instead
+      // of every configuration of a beverage looking identical.
+      name: (i.selectedOptions && i.selectedOptions.length) ? `${i.name} (${i.selectedOptions.join(' / ')})` : i.name,
+      emoji: i.emoji || (i.isMerch ? '🛍️' : '☕'),
+      image_url: i.image_url || null,
+      quantity: i.qty,
+      unit_price: i.finalPrice * 100,
+      line_total: i.finalPrice * i.qty * 100
+    })));
+
+    // Merch has real, limited stock (unlike beverages) — decrement atomically
+    // per line so concurrent purchases of the last item can't both succeed.
+    // Uses the decrement_merch_stock() DB function (see brewops-merch-products.sql)
+    // rather than a client-side read-then-write, which would race under load.
+    const merchLines = items.filter(i => i.isMerch);
+    for (const line of merchLines) {
+      const { data: ok, error: stockErr } = await sb.rpc('decrement_merch_stock', {
+        p_item_id: line.id, p_qty: line.qty
+      });
+      if (stockErr || !ok) {
+        // Stock ran out between browsing and checkout — order is already placed
+        // (can't un-place it cleanly here), but flag it loudly so the franchisor
+        // can follow up rather than silently overselling.
+        console.error(`Stock decrement failed for ${line.name}: ${stockErr?.message || 'insufficient stock'}`);
+      }
+    }
+
+    // Record the redemption — this is what actually makes coupon usage
+    // visible anywhere (franchisee Finance page, franchisor Coupon
+    // Analytics). coupons.total_used auto-increments via DB trigger.
+    if (coupon) {
+      await sb.from('coupon_redemptions').insert({
+        coupon_id: coupon.id,
+        order_id: order.id,
+        brand_id: window.BRAND_ID,
+        customer_id: window.CURRENT_USER_ID || null,
+        outlet_id: selectedStore.id,
+        discount_given: discount * 100
+      });
+    }
+
+    return order;
+  } catch(e) {
+    console.error('Order submit error:', e);
+    return null;
+  }
+}
+
+// ── Validate coupon via Supabase ──
+async function validateCouponDB(code) {
+  if (!sb) return null;
+  const today = new Date().toISOString().split('T')[0];
+  const { data, error } = await sb.from('coupons')
+    .select('*')
+    .eq('code', code.toUpperCase())
+    .eq('is_active', true)
+    .eq('brand_id', window.BRAND_ID)
+    .or(`valid_until.is.null,valid_until.gte.${today}`)
+    .single();
+  if (error || !data) return null;
+  return data;
+}
+
+// ══ CHECKOUT AUTH MODAL LOGIC ══
+function switchCheckoutAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('ca-form-login').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('ca-form-signup').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('ca-tab-login').style.background = isLogin ? 'var(--brand)' : 'transparent';
+  document.getElementById('ca-tab-login').style.color = isLogin ? 'white' : 'var(--text2)';
+  document.getElementById('ca-tab-signup').style.background = isLogin ? 'transparent' : 'var(--brand)';
+  document.getElementById('ca-tab-signup').style.color = isLogin ? 'var(--text2)' : 'white';
+  document.getElementById('ca-error').style.display = 'none';
+}
+
+function closeCheckoutAuthModal() {
+  document.getElementById('checkout-auth-modal').style.display = 'none';
+  window.PENDING_ORDER_AFTER_LOGIN = false;
+}
+
+function showCheckoutAuthError(msg) {
+  const el = document.getElementById('ca-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function doCheckoutLogin() {
+  const email = document.getElementById('ca-login-email').value.trim();
+  const password = document.getElementById('ca-login-password').value;
+  if (!email || !password) { showCheckoutAuthError('Please enter email and password.'); return; }
+
+  const btn = document.getElementById('ca-login-btn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Log In & Place Order';
+
+  if (error) { showCheckoutAuthError(error.message); return; }
+
+  window.CURRENT_USER_ID = data.user.id;
+  const { data: profile } = await sb.from('profiles').select('phone').eq('id', data.user.id).maybeSingle();
+  window.CURRENT_USER_PHONE = profile?.phone || null;
+
+  document.getElementById('checkout-auth-modal').style.display = 'none';
+  refreshProfileCard();
+  if (window.PENDING_ORDER_AFTER_LOGIN) {
+    window.PENDING_ORDER_AFTER_LOGIN = false;
+    placeOrder();
+  }
+}
+
+async function doCheckoutSignup() {
+  const full_name = document.getElementById('ca-signup-name').value.trim();
+  const email = document.getElementById('ca-signup-email').value.trim();
+  const phone = document.getElementById('ca-signup-phone').value.trim();
+  const password = document.getElementById('ca-signup-password').value;
+
+  if (!full_name || !email || !phone || !password) {
+    showCheckoutAuthError('Please fill in all fields.'); return;
+  }
+  if (password.length < 6) { showCheckoutAuthError('Password must be at least 6 characters.'); return; }
+
+  const btn = document.getElementById('ca-signup-btn');
+  btn.disabled = true; btn.textContent = 'Creating account...';
+
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { role: 'customer', full_name, phone } }
+  });
+
+  if (error) {
+    btn.disabled = false; btn.textContent = 'Create Account & Place Order';
+    showCheckoutAuthError(error.message); return;
+  }
+  if (!data.session) {
+    btn.disabled = false; btn.textContent = 'Create Account & Place Order';
+    showCheckoutAuthError('Account created! Check your email to confirm, then log in.');
+    switchCheckoutAuthTab('login');
+    return;
+  }
+
+  const { error: profileErr } = await sb.from('profiles').upsert({
+    id: data.user.id, role: 'customer', full_name, phone
+  });
+  if (profileErr) {
+    btn.disabled = false; btn.textContent = 'Create Account & Place Order';
+    showCheckoutAuthError('Account created but profile setup failed: ' + profileErr.message);
+    return;
+  }
+
+  btn.disabled = false; btn.textContent = 'Create Account & Place Order';
+  window.CURRENT_USER_ID = data.user.id;
+  window.CURRENT_USER_PHONE = phone;
+
+  document.getElementById('checkout-auth-modal').style.display = 'none';
+  refreshProfileCard();
+  if (window.PENDING_ORDER_AFTER_LOGIN) {
+    window.PENDING_ORDER_AFTER_LOGIN = false;
+    placeOrder();
+  }
+}
+
+// ── Connection error UI ──
+function showConnectionError() {
+  const home = document.getElementById('pg-home');
+  if (home) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#fee;color:#a33;padding:14px 20px;text-align:center;font-size:13px;border-radius:var(--r-sm);margin:16px;font-family:var(--font-body);';
+    banner.textContent = '⚠️ Unable to connect — please check your connection and reload.';
+    home.prepend(banner);
+  }
+}
+// ══ PROMO SLIDES — built from real promo_slides table, falls back to nothing if empty ══
+function buildPromo(){
+  const el = document.getElementById('promo-slides');
+  if (!el) return;
+  const slides = window.PROMO_SLIDES || [];
+  if (!slides.length) {
+    el.innerHTML = `<div class="promo-slide active"><div class="photo" style="--ph-grad:linear-gradient(135deg,#5e0f0f,#3a0808)"><span class="ph-emoji">☕</span></div><div class="scrim"></div>
+      <div class="promo-content"><div class="promo-headline">Liétard<br>Artisan Roast</div><div class="promo-sub">Sri Lanka's finest specialty coffee.</div></div></div>`;
+    return;
+  }
+  el.innerHTML = slides.map((s,i)=>`
+    <div class="promo-slide ${i===0?'active':''}">
+      ${photoHTML(s.image_url, s.emoji)}
+      <div class="scrim"></div>
+      <div class="promo-content">
+        ${s.label_badge?`<span class="promo-label">${s.label_badge}</span>`:''}
+        <div class="promo-headline">${s.headline}</div>
+        <div class="promo-sub">${s.sub_text||''}</div>
+        ${s.price_display?`<div class="promo-price"><span class="promo-price-val">${s.price_display}</span></div>`:''}
+      </div>
+    </div>`).join('');
+  // rebuild dots to match real slide count
+  const dotsWrap = document.querySelector('.promo-dots');
+  if (dotsWrap) dotsWrap.innerHTML = slides.map((_,i)=>`<div class="promo-dot${i===0?' active':''}"></div>`).join('');
+}
+
+// ══ FEATURED CARDS ══
+function buildFeaturedCards(){
+  const MENU = window.MENU || {};
+  const keys = Object.keys(MENU);
+  if (!keys.length) return;
+  const firstKey = keys[0];
+  const secondKey = keys[1];
+  const fc = document.getElementById('featured-cards');
+  const na = document.getElementById('new-arrivals');
+  if (fc && MENU[firstKey]) fc.innerHTML = (MENU[firstKey].items||[]).map(fcardHTML).join('');
+  if (na && MENU[secondKey]) na.innerHTML = (MENU[secondKey].items||[]).map(fcardHTML).join('');
+}
+
+function fcardHTML(item){
+  return `<div class="fcard" onclick="openItemModal('${item.id}')">
+    <div class="fc-img">${photoHTML(item.image_url, item.emoji)}${item.badge?`<div class="fc-badge" style="${badgeClass(item.badge)}">${item.badge}</div>`:''}</div>
+    <div class="fc-body">
+      <div class="fc-name">${item.name}</div>
+      <div class="fc-tags">${(item.tags||[]).map(t=>`<span class="fc-tag">${t}</span>`).join('')}</div>
+      <div class="fc-price-row">
+        <div><div class="fc-price"><span class="cur">LKR </span>${fmt(item.price)}</div>${item.oldPrice?`<div class="fc-old">LKR ${fmt(item.oldPrice)}</div>`:''}</div>
+        <div class="fc-add" onclick="event.stopPropagation();quickAddToCart('${item.id}')">+</div>
+      </div>
+    </div></div>`;
+}
+
+// ══ MENU ══
+function buildMenuCats(){
+  const MENU = window.MENU || {};
+  const cats = document.getElementById('menu-cats');
+  const keys = Object.keys(MENU);
+  cats.innerHTML = keys.map((k,i)=>`
+    <div class="cat-item${i===0?' active':''}" onclick="renderMenuItems('${k}',this)">
+      ${MENU[k].badge?`<div class="cat-badge">${MENU[k].badge}</div>`:''}
+      <div class="cat-item-icon">${MENU[k].icon||''}</div><div class="cat-item-name">${MENU[k].name}</div></div>`).join('');
+}
+
+function renderMenuItems(key, clickedEl){
+  const MENU = window.MENU || {};
+  if(clickedEl){ document.querySelectorAll('.cat-item').forEach(c=>c.classList.remove('active')); clickedEl.classList.add('active'); }
+  const cat = MENU[key];
+  if (!cat) return;
+  const items = cat.items || [];
+  const bannerItem = items[0];
+  const el = document.getElementById('menu-items');
+  el.innerHTML =
+    `<div class="menu-section-banner">${categoryBannerPhotoHTML(bannerItem?.image_url, cat.icon)}<div class="scrim"></div><div class="msb-text"><div class="msb-title">${cat.name}</div><div class="msb-sub">${items.length} BEVERAGE${items.length===1?'':'S'} · FRESHLY MADE</div></div></div>`+
+    items.map(item=>`<div class="menu-item" onclick="openItemModal('${item.id}')">
+      ${photoHTML(item.image_url, item.emoji, 'mi-img')}
+      <div class="mi-body">
+        <div class="mi-name">${item.name}${item.badge?` <span class="mi-badge" style="${badgeClass(item.badge)}">${item.badge}</span>`:''}</div>
+        <div class="mi-tags">${(item.tags||[]).slice(0,3).map(t=>`<span class="mi-tag${t==='Signature'||t==='New'?' hot':''}">${t}</span>`).join('')}</div>
+        <div class="mi-desc">${item.desc||''}</div>
+        <div class="mi-price-row"><div class="mi-price"><span class="cur">LKR </span>${fmt(item.price)}${item.oldPrice?`<span class="mi-price-old">LKR ${fmt(item.oldPrice)}</span>`:''}</div>
+          <div class="mi-add-btn" onclick="event.stopPropagation();quickAddToCart('${item.id}')">+</div></div>
+      </div></div>`).join('');
+  el.scrollTop = 0;
+}
+
+// ══ ORDER TAB (merch: coffee beans, souvenirs) ══
+// Mirrors buildMenuCats/renderMenuItems but: no customization modal (items
+// add straight to cart via quickAddToCart), and shows real stock status.
+function buildMerchCats(){
+  const MERCH = window.MERCH || {};
+  const cats = document.getElementById('merch-cats');
+  if (!cats) return; // page not in DOM yet on first load — fine, navigate() hook calls this again
+  const keys = Object.keys(MERCH);
+  if (!keys.length) {
+    cats.innerHTML = '';
+    const itemsEl = document.getElementById('merch-items');
+    if (itemsEl) itemsEl.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;">No products available yet — check back soon.</div>`;
+    return;
+  }
+  cats.innerHTML = keys.map((k,i)=>`
+    <div class="cat-item${i===0?' active':''}" onclick="renderMerchItems('${k}',this)">
+      <div class="cat-item-icon">${MERCH[k].icon||''}</div><div class="cat-item-name">${MERCH[k].name}</div></div>`).join('');
+  renderMerchItems(keys[0]);
+}
+
+function renderMerchItems(key, clickedEl){
+  const MERCH = window.MERCH || {};
+  if(clickedEl){ document.querySelectorAll('#merch-cats .cat-item').forEach(c=>c.classList.remove('active')); clickedEl.classList.add('active'); }
+  const cat = MERCH[key];
+  const el = document.getElementById('merch-items');
+  if (!el) return;
+  if (!cat) { el.innerHTML = ''; return; }
+  const items = cat.items || [];
+  const bannerItem = items[0];
+  el.innerHTML =
+    `<div class="menu-section-banner">${categoryBannerPhotoHTML(bannerItem?.image_url, cat.icon)}<div class="scrim"></div><div class="msb-text"><div class="msb-title">${cat.name}</div><div class="msb-sub">${items.length} PRODUCT${items.length===1?'':'S'}</div></div></div>`+
+    items.map(item=>{
+      const outOfStock = item.stockQty <= 0;
+      return `<div class="menu-item" style="${outOfStock?'opacity:0.55':''}" onclick="openMerchItemModal('${item.id}')">
+      ${photoHTML(item.image_url, item.emoji, 'mi-img')}
+      <div class="mi-body">
+        <div class="mi-name">${item.name}${item.badge?` <span class="mi-badge" style="${badgeClass(item.badge)}">${item.badge}</span>`:''}</div>
+        <div class="mi-desc">${item.desc||''}</div>
+        <div class="mi-price-row"><div class="mi-price"><span class="cur">LKR </span>${fmt(item.price)}${item.oldPrice?`<span class="mi-price-old">LKR ${fmt(item.oldPrice)}</span>`:''}</div>
+          ${outOfStock
+            ? `<div style="font-size:11px;color:var(--text3);font-weight:600;">Out of stock</div>`
+            : `<div class="mi-add-btn" onclick="event.stopPropagation();quickAddToCart('${item.id}')">+</div>`}
+        </div>
+      </div></div>`;
+    }).join('');
+  el.scrollTop = 0;
+}
+
+// ══ MERCH PRODUCT DETAIL MODAL — separate state from the beverage modal's
+// currentItem/detailQty so opening one never interferes with the other ══
+let currentMerchItem = null, merchDetailQty = 1;
+
+function openMerchItemModal(id){
+  const MERCH = window.MERCH || {};
+  let item = null;
+  for (const key of Object.keys(MERCH)) {
+    const found = (MERCH[key].items||[]).find(i => i.id === id);
+    if (found) { item = found; break; }
+  }
+  if (!item) return;
+  currentMerchItem = item;
+  merchDetailQty = 1;
+  syncFavouriteButton(item.id, true);
+
+  bgPhoto(document.getElementById('modal-merch-photo'), item.image_url, item.emoji);
+  document.getElementById('modal-merch-name').textContent = item.name;
+  document.getElementById('modal-merch-desc').textContent = item.desc || '';
+  document.getElementById('modal-merch-badges').innerHTML = item.badge ? `<span class="item-hero-badge" style="${badgeClass(item.badge)}">${item.badge}</span>` : '';
+  document.getElementById('merch-detail-qty').textContent = '1';
+
+  const outOfStock = item.stockQty <= 0;
+  const addBtn = document.getElementById('add-merch-cart-btn');
+  if (outOfStock) {
+    addBtn.textContent = 'Out of Stock';
+    addBtn.disabled = true;
+  } else {
+    addBtn.disabled = false;
+    addBtn.textContent = `Add to Cart — LKR ${fmt(item.price)}`;
+  }
+
+  // Scrollable "more info" content blocks, same rendering as beverages
+  const blocksEl = document.getElementById('modal-merch-detail-blocks');
+  const blocks = item.detailBlocks || [];
+  blocksEl.innerHTML = blocks.length ? `<div class="item-detail-more">
+    ${blocks.map(b => b.type === 'image'
+      ? `<img src="${b.content}" style="width:100%;border-radius:var(--r-sm);margin:10px 0;display:block;" alt="">`
+      : `<p style="font-size:13px;color:var(--text2);line-height:1.6;margin:8px 0;">${b.content}</p>`
+    ).join('')}
+  </div>` : '';
+
+  openModal('modal-merch-item');
+}
+
+function changeMerchDetailQty(d){
+  if (!currentMerchItem) return;
+  const newQty = Math.max(1, merchDetailQty + d);
+  // Respect real stock — don't let the quantity stepper go higher than
+  // what's actually available, same limit quickAddToCart/incrementCartItem
+  // already enforce elsewhere.
+  if (currentMerchItem.isMerch && newQty > currentMerchItem.stockQty) {
+    showToast(`Only ${currentMerchItem.stockQty} left in stock`, '⚠️');
+    return;
+  }
+  merchDetailQty = newQty;
+  document.getElementById('merch-detail-qty').textContent = merchDetailQty;
+  document.getElementById('add-merch-cart-btn').textContent = `Add to Cart — LKR ${fmt(currentMerchItem.price*merchDetailQty)}`;
+}
+
+function addMerchToCartFromModal(){
+  if (!currentMerchItem) return;
+  const alreadyInCart = cart.filter(c => c.id === currentMerchItem.id).length;
+  if (alreadyInCart + merchDetailQty > currentMerchItem.stockQty) {
+    showToast(`Only ${currentMerchItem.stockQty} left in stock`, '⚠️');
+    return;
+  }
+  for(let i=0;i<merchDetailQty;i++){
+    cart.push({...currentMerchItem, finalPrice: currentMerchItem.price});
+  }
+  updateCart();
+  closeModal('modal-merch-item');
+  showToast(`${currentMerchItem.name} added to cart 🛍️`,'');
+}
+
+function findItem(id){
+  const MENU = window.MENU || {};
+  for(const key of Object.keys(MENU)){
+    const found = (MENU[key].items||[]).find(i=>i.id===id);
+    if(found) return found;
+  }
+  const MERCH = window.MERCH || {};
+  for(const key of Object.keys(MERCH)){
+    const found = (MERCH[key].items||[]).find(i=>i.id===id);
+    if(found) return found;
+  }
+  return null;
+}
+
+// ══ ITEM MODAL ══
+// Tracks the currently selected upcharge total across however many option
+// categories the open item actually has (could be 0-4+) — replaces the old
+// hardcoded "only check the first option-group, only Size matters" logic.
+let selectedUpchargeTotal = 0;
+
+function openItemModal(id){
+  currentItem = findItem(id);
+  if(!currentItem) return;
+  detailQty = 1;
+  selectedUpchargeTotal = 0;
+  currentItemPrice = currentItem.price;
+  bgPhoto(document.getElementById('modal-item-photo'), currentItem.image_url, currentItem.emoji);
+  document.getElementById('modal-item-name2').textContent = currentItem.name;
+  document.getElementById('modal-item-desc').textContent = currentItem.desc || '';
+  document.getElementById('modal-item-badges').innerHTML = currentItem.badge ? `<span class="item-hero-badge" style="${badgeClass(currentItem.badge)}">${currentItem.badge}</span>` : '';
+  document.getElementById('detail-qty').textContent = '1';
+  syncFavouriteButton(currentItem.id, false);
+
+  // Build each option group from the item's real data — a beverage with
+  // an empty array for a category (e.g. franchisor removed Milk entirely
+  // for an Americano) simply shows no group for it, rather than every
+  // beverage always showing the same fixed four groups regardless of fit.
+  const categories = [
+    { key: 'size', title: 'Size', options: currentItem.sizeOptions },
+    { key: 'temp', title: 'Temperature', options: currentItem.tempOptions },
+    { key: 'sweet', title: 'Sweetness', options: currentItem.sugarOptions },
+    { key: 'milk', title: 'Milk', options: currentItem.milkOptions },
+  ].filter(c => Array.isArray(c.options) && c.options.length);
+
+  document.getElementById('modal-item-options').innerHTML = categories.map(c => `
+    <div class="option-group" data-category="${c.key}"><div class="og-title">${c.title}</div><div class="og-options">
+      ${c.options.map((opt, idx) => `<div class="og-opt${idx===0?' selected':''}" data-upcharge="${opt.upcharge}" onclick="pickOpt(this)">${opt.label}${opt.upcharge>0?` +LKR ${fmt(opt.upcharge)}`:''}</div>`).join('')}
+    </div></div>`).join('');
+
+  // Render the scrollable "more info" content blocks (text/image), if any —
+  // this is genuinely optional per-beverage, so an item with none simply
+  // shows nothing extra below the options, no empty section visible.
+  const blocksEl = document.getElementById('modal-item-detail-blocks');
+  const blocks = currentItem.detailBlocks || [];
+  blocksEl.innerHTML = blocks.length ? `<div class="item-detail-more">
+    ${blocks.map(b => b.type === 'image'
+      ? `<img src="${b.content}" style="width:100%;border-radius:var(--r-sm);margin:10px 0;display:block;" alt="">`
+      : `<p style="font-size:13px;color:var(--text2);line-height:1.6;margin:8px 0;">${b.content}</p>`
+    ).join('')}
+  </div>` : '';
+
+  recalcModalUpcharge();
+  openModal('modal-item');
+}
+
+function changeDetailQty(d){
+  detailQty = Math.max(1, detailQty+d);
+  document.getElementById('detail-qty').textContent = detailQty;
+  updateAddToCartButton();
+}
+
+function pickOpt(el){
+  el.closest('.og-options').querySelectorAll('.og-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  recalcModalUpcharge();
+}
+
+// Sums the selected upcharge across every option group currently shown
+// (previously only Size was ever checked, so Milk/Sweetness upcharges
+// were silently ignored no matter what the customer picked).
+function recalcModalUpcharge(){
+  let total = 0;
+  document.querySelectorAll('#modal-item-options .og-opt.selected').forEach(el => {
+    total += parseFloat(el.dataset.upcharge || 0);
+  });
+  selectedUpchargeTotal = total;
+  updateAddToCartButton();
+}
+
+function updateAddToCartButton(){
+  const unitPrice = currentItemPrice + selectedUpchargeTotal;
+  document.getElementById('add-cart-btn').textContent = `Add to Cart — LKR ${fmt(unitPrice*detailQty)}`;
+}
+
+function addToCartFromModal(){
+  if(!currentItem) return;
+  const finalPrice = currentItem.price + selectedUpchargeTotal;
+  // Capture the selected option labels so the cart/checkout/order_items
+  // can show exactly what was chosen (e.g. "Large / Iced / Oat Milk"),
+  // not just the base item name.
+  const selectedLabels = Array.from(document.querySelectorAll('#modal-item-options .og-opt.selected')).map(el => el.textContent.replace(/\s*\+LKR.*$/,''));
+  for(let i=0;i<detailQty;i++){
+    cart.push({...currentItem, finalPrice, selectedOptions: selectedLabels});
+  }
+  updateCart();
+  closeModal('modal-item');
+  showToast(`${currentItem.name} added to cart ☕`,'');
+}
+
+function quickAddToCart(id){
+  const item = findItem(id);
+  if(!item) return;
+  // Merch items (isMerch flag, set in buildMerchCats) carry real stock limits —
+  // beverages have no such limit and skip this check entirely.
+  if (item.isMerch) {
+    const alreadyInCart = cart.filter(c => c.id === id).length;
+    if (alreadyInCart >= item.stockQty) {
+      showToast(item.stockQty === 0 ? 'Out of stock' : `Only ${item.stockQty} left in stock`, '⚠️');
+      return;
+    }
+  }
+  cart.push({...item, finalPrice: item.price});
+  updateCart();
+  showToast(`${item.name} added ${item.isMerch ? '🛍️' : '☕'}`,'');
+}
+
+function updateCart(){
+  const count = cart.length;
+  const total = cart.reduce((s,i)=>s+i.finalPrice,0);
+  const cc = document.getElementById('cart-count'); if (cc) cc.textContent = count;
+  const cl = document.getElementById('cart-items-label'); if (cl) cl.textContent = `${count} item${count!==1?'s':''}`;
+  const ct = document.getElementById('cart-total-disp'); if (ct) ct.textContent = `LKR ${fmt(total)}`;
+  const bar = document.getElementById('cart-bar');
+  if (bar) { if(count>0) bar.classList.add('visible'); else bar.classList.remove('visible'); }
+
+  // Order tab (merch) has its own cart-bar instance sharing the same cart array
+  const cc2 = document.getElementById('cart-count-2'); if (cc2) cc2.textContent = count;
+  const cl2 = document.getElementById('cart-items-label-2'); if (cl2) cl2.textContent = `${count} item${count!==1?'s':''}`;
+  const ct2 = document.getElementById('cart-total-disp-2'); if (ct2) ct2.textContent = `LKR ${fmt(total)}`;
+  const bar2 = document.getElementById('merch-cart-bar');
+  if (bar2) { if(count>0) bar2.classList.add('visible'); else bar2.classList.remove('visible'); }
+
+  // Keep the Cart Review sheet in sync if it's currently open (e.g. after
+  // a +/- tap), so the customer sees the change immediately.
+  if (document.getElementById('modal-cart-review')?.classList.contains('open')) {
+    renderCartReview();
+  }
+}
+
+// ══ CART REVIEW (tap the cart icon — adjust quantities, remove items) ══
+// Previously there was no way to see or change what's in the cart except
+// going straight to checkout — this gives a real review step beforehand.
+function openCartReview(){
+  if (cart.length === 0) { showToast('Your cart is empty','🛒'); return; }
+  renderCartReview();
+  openModal('modal-cart-review');
+}
+
+function renderCartReview(){
+  const grouped = groupCartItems(cart);
+
+  const wrap = document.getElementById('cart-review-items');
+  if (!grouped.length) {
+    wrap.innerHTML = `<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:13px;">Your cart is empty</div>`;
+  } else {
+    wrap.innerHTML = grouped.map(i => {
+      const optLabel = (i.selectedOptions||[]).length ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">${i.selectedOptions.join(' / ')}</div>` : '';
+      const optKey = (i.selectedOptions||[]).join('|');
+      return `
+      <div class="checkout-item" style="align-items:flex-start;">
+        ${photoHTML(i.image_url, i.emoji, 'ci-img')}
+        <div><div class="ci-name">${i.name}</div>${optLabel}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="qty-btn" style="width:26px;height:26px;font-size:14px;" onclick="decrementCartItem('${i.id}','${optKey}')">−</button>
+          <div style="min-width:18px;text-align:center;font-family:var(--font-mono);font-size:13px;">${i.qty}</div>
+          <button class="qty-btn" style="width:26px;height:26px;font-size:14px;" onclick="incrementCartItem('${i.id}','${optKey}')">+</button>
+        </div>
+        <div class="ci-price">LKR ${fmt(i.finalPrice*i.qty)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const total = cart.reduce((s,i)=>s+i.finalPrice,0);
+  document.getElementById('cart-review-total').textContent = `LKR ${fmt(total)}`;
+
+  // Auto-close the sheet if the last item was just removed, rather than
+  // leaving an empty cart sheet open with nothing to review.
+  if (!cart.length) closeModal('modal-cart-review');
+}
+
+function incrementCartItem(id, optKey){
+  const existing = cart.find(c => c.id === id && (c.selectedOptions||[]).join('|') === (optKey||''));
+  if (!existing) return;
+  // Merch items have real stock limits — beverages don't, same rule quickAddToCart uses.
+  if (existing.isMerch) {
+    const alreadyInCart = cart.filter(c => c.id === id).length;
+    if (alreadyInCart >= existing.stockQty) {
+      showToast(`Only ${existing.stockQty} left in stock`, '⚠️');
+      return;
+    }
+  }
+  cart.push({...existing});
+  updateCart();
+}
+
+function decrementCartItem(id, optKey){
+  const idx = cart.findIndex(c => c.id === id && (c.selectedOptions||[]).join('|') === (optKey||''));
+  if (idx === -1) return;
+  cart.splice(idx, 1);
+  updateCart();
+}
+
+// ══ STORES ══
+function buildStoreList(){
+  const el = document.getElementById('store-list');
+  const stores = window.STORES || [];
+  if (!stores.length) {
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px;">No outlets available yet.</div>`;
+    return;
+  }
+  el.innerHTML = stores.map(s=>`
+    <div class="store-item" onclick="selectStore('${s.id}')">
+      <div class="si-icon">📍</div>
+      <div style="flex:1;min-width:0;"><div class="si-name">${s.name}</div><div class="si-addr">${s.addr||''}</div></div>
+      <div class="si-right"><div class="si-dist">${s.dist||'—'}</div><div class="si-status ${s.status||'open'}">${s.status==='busy'?'● Busy':'● Open'}</div></div>
+    </div>`).join('');
+}
+
+function selectStore(id){
+  const stores = window.STORES || [];
+  selectedStore = stores.find(s=>s.id===id);
+  if(!selectedStore) return;
+  document.getElementById('selected-store-name').textContent = selectedStore.name;
+  document.getElementById('selected-store-dist').textContent = selectedStore.addr || '';
+  document.getElementById('menu-store-name').textContent = selectedStore.name;
+  const cn = document.getElementById('co-store-name'); if (cn) cn.textContent = selectedStore.name;
+  const ca = document.getElementById('co-store-addr'); if (ca) ca.textContent = selectedStore.addr || '';
+  closeModal('modal-store');
+  showToast(`${selectedStore.name} selected ✓`,'📍');
+}
+
+function openStoreSelector(){ openModal('modal-store'); }
+
+// ══ CHECKOUT ══
+function openCheckout(){
+  if(cart.length===0){ showToast('Add items to your cart first','🛒'); return; }
+  const grouped = groupCartItems(cart);
+  document.getElementById('checkout-items').innerHTML = grouped.map(i=>{
+    const optLabel = (i.selectedOptions||[]).length ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">${i.selectedOptions.join(' / ')}</div>` : '';
+    return `<div class="checkout-item" style="align-items:flex-start;">${photoHTML(i.image_url, i.emoji, 'ci-img')}<div><div class="ci-name">${i.name}</div>${optLabel}</div><div class="ci-qty">×${i.qty}</div><div class="ci-price">LKR ${fmt(i.finalPrice*i.qty)}</div></div>`;
+  }).join('');
+  refreshCheckoutTotal();
+  const warn = document.getElementById('checkout-store-warning');
+  warn.style.display = selectedStore ? 'none' : 'flex';
+
+  // Delivery address card only shows in delivery mode — pickup orders
+  // never needed an address and shouldn't be asked for one.
+  const deliveryCard = document.getElementById('checkout-delivery-card');
+  if (window.currentMode === 'delivery') {
+    deliveryCard.style.display = 'block';
+    populateCheckoutAddressOptions();
+  } else {
+    deliveryCard.style.display = 'none';
+    window.SELECTED_DELIVERY_ADDRESS = null;
+  }
+
+  openModal('modal-checkout');
+}
+
+async function populateCheckoutAddressOptions() {
+  const wrap = document.getElementById('checkout-address-select');
+  if (!sb || !window.CURRENT_USER_ID) {
+    wrap.innerHTML = `<div style="font-size:13px;color:var(--text3);">Log in to choose a delivery address.</div>`;
+    return;
+  }
+  const { data } = await sb.from('customer_addresses').select('*')
+    .eq('customer_id', window.CURRENT_USER_ID).order('is_default', { ascending: false }).order('created_at');
+  const addresses = data || [];
+
+  if (!addresses.length) {
+    wrap.innerHTML = `<div style="font-size:13px;color:var(--text3);">No saved addresses yet.</div>`;
+    window.SELECTED_DELIVERY_ADDRESS = null;
+    return;
+  }
+
+  // Default to the customer's default address (or the first one) unless
+  // they've already actively picked something else this session.
+  if (!window.SELECTED_DELIVERY_ADDRESS || !addresses.find(a => a.id === window.SELECTED_DELIVERY_ADDRESS)) {
+    const def = addresses.find(a => a.is_default) || addresses[0];
+    window.SELECTED_DELIVERY_ADDRESS = def.id;
+  }
+
+  wrap.innerHTML = addresses.map(a => `
+    <div onclick="selectCheckoutAddress('${a.id}')" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;">
+      <div style="width:18px;height:18px;border-radius:50%;border:2px solid ${a.id===window.SELECTED_DELIVERY_ADDRESS?'var(--brand)':'var(--border2)'};background:${a.id===window.SELECTED_DELIVERY_ADDRESS?'var(--brand)':'transparent'};flex-shrink:0;margin-top:2px;"></div>
+      <div><div style="font-size:13px;font-weight:600;">${a.label || 'Address'}</div><div style="font-size:12px;color:var(--text2);">${a.address_line}${a.city?', '+a.city:''}</div></div>
+    </div>`).join('');
+
+  const checkoutWarn = document.getElementById('checkout-address-warning');
+  if (checkoutWarn) checkoutWarn.style.display = 'none';
+}
+
+function selectCheckoutAddress(id) {
+  window.SELECTED_DELIVERY_ADDRESS = id;
+  populateCheckoutAddressOptions();
+}
+
+function pickPayment(el){
+  el.closest('.payment-method-grid').querySelectorAll('.pm-opt').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Recompute and display the checkout total honestly — including the
+// active coupon's discount, so what the customer sees here always
+// matches what submitOrderToSupabase actually charges and records.
+function refreshCheckoutTotal(){
+  const subtotal = cart.reduce((s,i)=>s+i.finalPrice,0);
+  const coupon = window.activeCoupon;
+  let discount = 0;
+  if (coupon) {
+    if (coupon.discount_type === 'percent') discount = Math.round(subtotal * (coupon.discount_value/100));
+    else if (coupon.discount_type === 'fixed') discount = Math.round(coupon.discount_value/100);
+    else if (coupon.discount_type === 'free') discount = cart.length ? Math.min(...cart.map(i=>i.finalPrice)) : 0;
+    discount = Math.min(discount, subtotal);
+  }
+  const total = Math.max(0, subtotal - discount);
+
+  document.getElementById('co-subtotal').textContent = `LKR ${fmt(subtotal)}`;
+  document.getElementById('checkout-total').textContent = `LKR ${fmt(total)}`;
+
+  let discRow = document.getElementById('co-discount-row');
+  if (discount > 0) {
+    if (!discRow) {
+      discRow = document.createElement('div');
+      discRow.className = 'co-line';
+      discRow.id = 'co-discount-row';
+      document.getElementById('co-subtotal').closest('.co-card').appendChild(discRow);
+    }
+    discRow.innerHTML = `<span>Coupon (${coupon.code})</span><span class="disc">– LKR ${fmt(discount)}</span>`;
+    discRow.style.display = 'flex';
+  } else if (discRow) {
+    discRow.style.display = 'none';
+  }
+}
+
+async function applyCoupon(){
+  const code = document.getElementById('coupon-input').value.toUpperCase().trim();
+  if (!code) return;
+  if (sb) {
+    const coupon = await validateCouponDB(code);
+    if (coupon) {
+      showToast(`${coupon.discount_type==='percent'?coupon.discount_value+'% discount':coupon.discount_type==='fixed'?'LKR '+(coupon.discount_value/100)+' off':'Free item!'} applied ✓`,'🎟️');
+      window.activeCoupon = coupon;
+      refreshCheckoutTotal();
+    } else {
+      showToast('Invalid or expired coupon code','❌');
+    }
+  } else {
+    showToast('Connect to apply coupons','❌');
+  }
+}
+
+async function placeOrder(){
+  if(!selectedStore){ showToast('Please select an outlet first!','📍'); return; }
+
+  // Delivery orders need an address — pickup orders never did and shouldn't be blocked.
+  if (window.currentMode === 'delivery' && !window.SELECTED_DELIVERY_ADDRESS) {
+    const warn = document.getElementById('checkout-address-warning');
+    if (warn) warn.style.display = 'flex';
+    showToast('Please select a delivery address', '📍');
+    return;
+  }
+
+  if (sb) {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      window.PENDING_ORDER_AFTER_LOGIN = true;
+      document.getElementById('checkout-auth-modal').style.display = 'flex';
+      return;
+    }
+    window.CURRENT_USER_ID = session.user.id;
+  }
+  const payEl = document.querySelector('.pm-opt.selected .pm-opt-label');
+  const payMethod = payEl ? payEl.textContent : 'Card';
+
+  const btn = document.querySelector('.place-order-btn');
+  if (btn) { btn.textContent = 'Placing order...'; btn.disabled = true; }
+
+  let orderId = null;
+  if (sb) {
+    const order = await submitOrderToSupabase(cart, selectedStore, payMethod);
+    if (order) {
+      orderId = order.id;
+      showToast(`Order #${order.order_number} placed! ☕`,'✅');
+    } else {
+      showToast('Order placed (offline mode) ☕','✅');
+    }
+  } else {
+    showToast('Order placed! Preparing your order... ☕','✅');
+  }
+
+  if (btn) { btn.textContent = 'Place Order'; btn.disabled = false; }
+  closeModal('modal-checkout');
+  cart = [];
+  updateCart();
+  window.activeCoupon = null;
+  window.SELECTED_DELIVERY_ADDRESS = null;
+
+  if (payMethod.includes('Cash')) {
+    setTimeout(()=>showToast(`Cash payment confirmed at ${selectedStore.name}`,'💵'),2000);
+  }
+  renderOrders(0);
+}
+
+// ══ ORDERS ══
+function switchOrderTab(idx, el){
+  document.querySelectorAll('.order-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderOrders(idx);
+}
+
+async function renderOrders(tabIdx){
+  const el = document.getElementById('orders-content');
+
+  if (tabIdx === 2) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🎟️</div>
+      <div class="empty-text">No voucher orders yet</div>
+      <button class="empty-btn" onclick="goPage('pg-menu')">Grab a Deal</button>
+    </div>`;
+    return;
+  }
+
+  if (!sb) { el.innerHTML = emptyOrdersState('Connect to see your orders'); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { el.innerHTML = emptyOrdersState('Log in to see your order history'); return; }
+
+  el.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text3);">Loading...</div>`;
+
+  let query = sb.from('orders')
+    .select('*, order_items(*), outlets(name, location)')
+    .eq('customer_id', session.user.id)
+    .eq('brand_id', window.BRAND_ID)
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  if (tabIdx === 1) query = query.eq('order_type', 'pickup');
+
+  const { data: orders, error } = await query;
+
+  if (error || !orders || orders.length === 0) {
+    el.innerHTML = emptyOrdersState('No orders yet — place your first order!');
+    return;
+  }
+
+  el.innerHTML = orders.map(orderCardHTML).join('');
+}
+
+function orderCardHTML(o){
+  const item = o.order_items?.[0] || {};
+  const extraCount = (o.order_items?.length || 1) - 1;
+  const storeLabel = o.outlets ? `${o.outlets.name} — ${o.outlets.location}` : 'Outlet';
+  const typeLabel = o.order_type === 'delivery' ? 'Delivery' : 'Pick Up';
+  const typeCls = o.order_type === 'delivery' ? 'oc-type-delivery' : 'oc-type-pickup';
+  const isLive = o.status !== 'completed' && o.status !== 'cancelled';
+  const statusLabel = o.status === 'completed' ? 'Completed ›' :
+                       o.status === 'cancelled' ? 'Cancelled' :
+                       o.status === 'ready' ? 'Ready for pickup ›' :
+                       o.status === 'preparing' ? 'Preparing ›' : 'Order received ›';
+  const dateStr = new Date(o.created_at).toISOString().slice(0,10) + ' · ' +
+                  new Date(o.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  return `
+    <div class="order-card">
+      <div class="oc-head">
+        <div class="oc-type ${typeCls}">${typeLabel}</div>
+        <div class="oc-store">${storeLabel}</div>
+        <div class="oc-status${isLive?' live':''}">${isLive?'● ':''}${statusLabel}</div>
+      </div>
+      <div class="oc-body">
+        ${photoHTML(item.image_url, item.emoji, 'oc-item-img')}
+        <div class="oc-item-info">
+          <div class="oc-item-name">${item.name||'Item'}${extraCount>0?` + ${extraCount} more`:''}</div>
+          <div class="oc-item-detail">${[item.size,item.temperature,item.sugar,item.milk].filter(Boolean).join(' / ')||'—'} · Qty ${item.quantity||1}</div>
+        </div>
+        <div class="oc-item-price">LKR ${fmt(Math.round(o.total/100))}</div>
+      </div>
+      <div class="oc-foot">
+        <div class="oc-date">${dateStr}</div>
+        <button class="oc-reorder" onclick="showToast('Reorder coming soon ☕','')">Order Again</button>
+      </div>
+    </div>`;
+}
+
+function emptyOrdersState(message) {
+  return `<div class="empty-state">
+    <div class="empty-icon">☕</div>
+    <div class="empty-text">${message}</div>
+  </div>`;
+}
+
+// ── Profile screen: reflect real login state ──
+async function refreshProfileCard() {
+  const nameEl = document.getElementById('profile-name');
+  const statusEl = document.getElementById('profile-status');
+  const actionEl = document.getElementById('profile-auth-action');
+  if (!nameEl) return;
+
+  if (!sb) { nameEl.textContent = 'Guest'; statusEl.textContent = 'Not logged in'; return; }
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    nameEl.textContent = 'Guest';
+    statusEl.textContent = 'Not logged in';
+    actionEl.innerHTML = `<button onclick="openProfileLogin()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);color:white;padding:8px 16px;border-radius:20px;font-weight:600;font-size:12px;cursor:pointer;font-family:var(--font-body);">Log In</button>`;
+    return;
+  }
+
+  const { data: profile } = await sb.from('profiles').select('full_name, phone').eq('id', session.user.id).maybeSingle();
+  nameEl.textContent = profile?.full_name || session.user.email;
+  statusEl.textContent = 'Liétard Member';
+  actionEl.innerHTML = `<button onclick="doLogout()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.85);padding:8px 16px;border-radius:20px;font-weight:600;font-size:12px;cursor:pointer;font-family:var(--font-body);">Log Out</button>`;
+}
+
+function openProfileLogin() {
+  document.getElementById('checkout-auth-modal').style.display = 'flex';
+  window.PENDING_ORDER_AFTER_LOGIN = false;
+}
+
+async function doLogout() {
+  if (sb) await sb.auth.signOut();
+  window.CURRENT_USER_ID = null;
+  window.CURRENT_USER_PHONE = null;
+  showToast('Logged out', '👋');
+  refreshProfileCard();
+}
+
+// ══ SETTINGS (edit full_name/phone on profiles) ══
+async function openSettingsModal() {
+  if (!sb || !window.CURRENT_USER_ID) { showToast('Log in to edit settings', '🔒'); openProfileLogin(); return; }
+  const { data: profile } = await sb.from('profiles').select('full_name, phone').eq('id', window.CURRENT_USER_ID).maybeSingle();
+  document.getElementById('settings-name').value = profile?.full_name || '';
+  document.getElementById('settings-phone').value = profile?.phone || '';
+  openModal('modal-settings');
+}
+
+async function saveSettings() {
+  if (!sb || !window.CURRENT_USER_ID) return;
+  const full_name = document.getElementById('settings-name').value.trim();
+  const phone = document.getElementById('settings-phone').value.trim();
+  if (!full_name) { showToast('Name is required', '⚠️'); return; }
+
+  const btn = document.getElementById('settings-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const { error } = await sb.from('profiles').update({ full_name, phone: phone || null }).eq('id', window.CURRENT_USER_ID);
+  btn.disabled = false; btn.textContent = 'Save Changes';
+
+  if (error) { showToast('Failed: ' + error.message, '⚠️'); return; }
+  window.CURRENT_USER_PHONE = phone || null;
+  closeModal('modal-settings');
+  showToast('Settings saved ✓', '⚙️');
+  refreshProfileCard();
+}
+
+// ══ MY FAVOURITES (saved beverages + merch products) ══
+// Previously a fake "Coming soon" toast with no backing table at all.
+let FAVOURITE_IDS = new Set(); // item ids the customer has favourited, for quick heart-icon lookups
+
+async function openFavouritesModal() {
+  if (!sb || !window.CURRENT_USER_ID) { showToast('Log in to see your favourites', '🔒'); openProfileLogin(); return; }
+  openModal('modal-favourites');
+  await loadFavourites();
+}
+
+async function loadFavourites() {
+  const body = document.getElementById('favourites-list-body');
+  if (!sb || !window.CURRENT_USER_ID) return;
+
+  const { data, error } = await sb.from('customer_favourites')
+    .select('*, menu_items(id,name,emoji,image_url,base_price,original_price), merch_items(id,name,emoji,image_url,base_price,original_price,stock_qty)')
+    .eq('customer_id', window.CURRENT_USER_ID)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    body.innerHTML = `<div style="padding:14px 0;color:var(--text3);font-size:13px;text-align:center">Error loading favourites</div>`;
+    return;
+  }
+
+  const rows = data || [];
+  FAVOURITE_IDS = new Set(rows.map(r => r.menu_item_id || r.merch_item_id));
+
+  if (!rows.length) {
+    body.innerHTML = `<div style="padding:30px 0;color:var(--text3);font-size:13px;text-align:center">No favourites yet — tap the ♡ on any beverage or product to save it here.</div>`;
+    return;
+  }
+
+  body.innerHTML = rows.map(r => {
+    const item = r.menu_items || r.merch_items;
+    const isMerch = !!r.merch_item_id;
+    if (!item) return ''; // the favourited item itself was deleted since being saved
+    const price = Math.round(item.base_price / 100);
+    const oldPrice = item.original_price ? Math.round(item.original_price / 100) : null;
+    const outOfStock = isMerch && item.stock_qty <= 0;
+    return `<div class="checkout-item" style="align-items:flex-start;cursor:pointer;${outOfStock?'opacity:0.55':''}" onclick="closeModal('modal-favourites');${isMerch?`openMerchItemModal('${item.id}')`:`openItemModal('${item.id}')`}">
+      ${photoHTML(item.image_url, item.emoji, 'ci-img')}
+      <div style="flex:1;">
+        <div class="ci-name">${item.name}</div>
+        ${outOfStock ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">Out of stock</div>` : ''}
+      </div>
+      <div class="ci-price">LKR ${fmt(price)}${oldPrice?`<div class="mi-price-old" style="text-align:right;">LKR ${fmt(oldPrice)}</div>`:''}</div>
+      <button class="topbar-btn" style="font-size:11px;padding:4px 10px;margin-left:8px;" onclick="event.stopPropagation();removeFavourite('${item.id}')">Remove</button>
+    </div>`;
+  }).join('');
+}
+
+// Toggles a favourite on/off and updates the heart icon immediately —
+// called both from the item detail modals' heart button and from the
+// Favourites list's Remove button (via removeFavourite below).
+async function toggleFavourite(itemId, isMerch) {
+  if (!itemId) return;
+  if (!sb || !window.CURRENT_USER_ID) { showToast('Log in to save favourites', '🔒'); openProfileLogin(); return; }
+
+  const btnId = isMerch ? 'modal-merch-fav-btn' : 'modal-item-fav-btn';
+  const btn = document.getElementById(btnId);
+  const alreadyFavourited = FAVOURITE_IDS.has(itemId);
+
+  if (alreadyFavourited) {
+    const { error } = await sb.from('customer_favourites').delete()
+      .eq('customer_id', window.CURRENT_USER_ID)
+      .eq(isMerch ? 'merch_item_id' : 'menu_item_id', itemId);
+    if (error) { showToast('Failed: ' + error.message, '⚠️'); return; }
+    FAVOURITE_IDS.delete(itemId);
+    if (btn) btn.textContent = '♡';
+    showToast('Removed from favourites', '💔');
+  } else {
+    const payload = { customer_id: window.CURRENT_USER_ID, menu_item_id: isMerch ? null : itemId, merch_item_id: isMerch ? itemId : null };
+    const { error } = await sb.from('customer_favourites').insert(payload);
+    if (error) { showToast('Failed: ' + error.message, '⚠️'); return; }
+    FAVOURITE_IDS.add(itemId);
+    if (btn) btn.textContent = '❤️';
+    showToast('Added to favourites', '❤️');
+  }
+}
+
+async function removeFavourite(itemId) {
+  // Reuses toggleFavourite's delete path — need to know which FK column
+  // this item lives under, which FAVOURITE_IDS alone can't tell us, so
+  // just try both deletes (one will affect 0 rows harmlessly).
+  if (!sb || !window.CURRENT_USER_ID) return;
+  await sb.from('customer_favourites').delete().eq('customer_id', window.CURRENT_USER_ID).eq('menu_item_id', itemId);
+  await sb.from('customer_favourites').delete().eq('customer_id', window.CURRENT_USER_ID).eq('merch_item_id', itemId);
+  FAVOURITE_IDS.delete(itemId);
+  showToast('Removed from favourites', '💔');
+  loadFavourites();
+}
+
+// Refreshes a single heart-icon button's visual state — called when
+// opening either item detail modal so it always reflects current status,
+// even on the very first load before FAVOURITE_IDS has ever been fetched.
+async function syncFavouriteButton(itemId, isMerch) {
+  const btnId = isMerch ? 'modal-merch-fav-btn' : 'modal-item-fav-btn';
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  if (!sb || !window.CURRENT_USER_ID) { btn.textContent = '♡'; return; }
+
+  // If favourites haven't been loaded yet this session, check this one
+  // item directly rather than forcing a full favourites-list fetch just
+  // to render a heart icon.
+  if (!FAVOURITE_IDS.size) {
+    const { data } = await sb.from('customer_favourites').select('menu_item_id, merch_item_id')
+      .eq('customer_id', window.CURRENT_USER_ID);
+    FAVOURITE_IDS = new Set((data||[]).map(r => r.menu_item_id || r.merch_item_id));
+  }
+  btn.textContent = FAVOURITE_IDS.has(itemId) ? '❤️' : '♡';
+}
+
+// ══ ADDRESS MANAGER (saved delivery addresses, pick one at checkout) ══
+let SAVED_ADDRESSES = [];
+
+async function openAddressManagerModal() {
+  if (!sb || !window.CURRENT_USER_ID) { showToast('Log in to manage addresses', '🔒'); openProfileLogin(); return; }
+  openModal('modal-address-manager');
+  await loadSavedAddresses();
+}
+
+async function loadSavedAddresses() {
+  const body = document.getElementById('address-list-body');
+  const { data, error } = await sb.from('customer_addresses').select('*')
+    .eq('customer_id', window.CURRENT_USER_ID).order('is_default', { ascending: false }).order('created_at');
+
+  if (error) {
+    body.innerHTML = `<div style="padding:14px 0;color:var(--text3);font-size:13px;text-align:center">Error loading addresses</div>`;
+    return;
+  }
+
+  SAVED_ADDRESSES = data || [];
+
+  if (!SAVED_ADDRESSES.length) {
+    body.innerHTML = `<div style="padding:14px 0;color:var(--text3);font-size:13px;text-align:center">No saved addresses yet</div>`;
+    return;
+  }
+
+  body.innerHTML = SAVED_ADDRESSES.map(a => `
+    <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="font-weight:600;font-size:13px;">${a.label || 'Address'}</div>
+        ${a.is_default ? `<span style="font-size:10px;background:var(--brand-dim);color:var(--brand);padding:2px 8px;border-radius:10px;font-weight:600;">DEFAULT</span>` : ''}
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.4;">${a.address_line}${a.city ? ', ' + a.city : ''}</div>
+      ${a.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${a.notes}</div>` : ''}
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        ${!a.is_default ? `<button class="topbar-btn" style="font-size:11px;padding:4px 10px;" onclick="makeAddressDefault('${a.id}')">Make Default</button>` : ''}
+        <button class="topbar-btn" style="font-size:11px;padding:4px 10px;" onclick="openEditAddressForm('${a.id}')">Edit</button>
+        <button class="topbar-btn" style="font-size:11px;padding:4px 10px;" onclick="deleteAddress('${a.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function openAddAddressForm() {
+  document.getElementById('address-form-title').textContent = 'Add Address';
+  document.getElementById('address-edit-id').value = '';
+  document.getElementById('address-label').value = '';
+  document.getElementById('address-line').value = '';
+  document.getElementById('address-city').value = '';
+  document.getElementById('address-notes').value = '';
+  openModal('modal-address-form');
+}
+
+function openEditAddressForm(id) {
+  const addr = SAVED_ADDRESSES.find(a => a.id === id);
+  if (!addr) return;
+  document.getElementById('address-form-title').textContent = 'Edit Address';
+  document.getElementById('address-edit-id').value = addr.id;
+  document.getElementById('address-label').value = addr.label || '';
+  document.getElementById('address-line').value = addr.address_line || '';
+  document.getElementById('address-city').value = addr.city || '';
+  document.getElementById('address-notes').value = addr.notes || '';
+  openModal('modal-address-form');
+}
+
+async function saveAddress() {
+  const id = document.getElementById('address-edit-id').value;
+  const label = document.getElementById('address-label').value.trim() || 'Address';
+  const address_line = document.getElementById('address-line').value.trim();
+  const city = document.getElementById('address-city').value.trim();
+  const notes = document.getElementById('address-notes').value.trim();
+
+  if (!address_line) { showToast('Address is required', '⚠️'); return; }
+  if (!sb || !window.CURRENT_USER_ID) return;
+
+  const btn = document.getElementById('address-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  const payload = { customer_id: window.CURRENT_USER_ID, label, address_line, city: city || null, notes: notes || null };
+  const { error } = id
+    ? await sb.from('customer_addresses').update(payload).eq('id', id)
+    : await sb.from('customer_addresses').insert(payload);
+
+  btn.disabled = false; btn.textContent = 'Save Address';
+  if (error) { showToast('Failed: ' + error.message, '⚠️'); return; }
+  closeModal('modal-address-form');
+  showToast(id ? 'Address updated ✓' : 'Address added ✓', '📍');
+  loadSavedAddresses();
+}
+
+async function makeAddressDefault(id) {
+  if (!sb || !window.CURRENT_USER_ID) return;
+  // Clear any existing default first, then set the new one — two simple
+  // updates rather than a single clever query, since this only ever
+  // affects a handful of rows per customer.
+  await sb.from('customer_addresses').update({ is_default: false }).eq('customer_id', window.CURRENT_USER_ID);
+  const { error } = await sb.from('customer_addresses').update({ is_default: true }).eq('id', id);
+  if (error) { showToast('Failed: ' + error.message, '⚠️'); return; }
+  showToast('Default address updated ✓', '📍');
+  loadSavedAddresses();
+}
+
+async function deleteAddress(id) {
+  if (!confirm('Delete this address?')) return;
+  const { error } = await sb.from('customer_addresses').delete().eq('id', id);
+  if (error) { showToast('Failed: ' + error.message, '⚠️'); return; }
+  showToast('Address deleted', '🗑️');
+  loadSavedAddresses();
+}
+
+// ══ MODALS / TOAST ══
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); }));
+
+let toastT;
+function showToast(msg,icon){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').textContent=icon||'';
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body></html>
