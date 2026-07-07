@@ -370,8 +370,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     </div>
 
     <div id="auth-tabs" style="display:flex;gap:8px;margin-bottom:20px;background:rgba(0,0,0,0.04);border-radius:10px;padding:4px;">
-      <button id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--brand,#8B1A1A);color:white;font-weight:600;font-size:14px;cursor:pointer;">Log In</button>
-      <button id="auth-tab-signup" onclick="switchAuthTab('signup')" style="flex:1;padding:10px;border:none;border-radius:8px;background:transparent;color:var(--text2,#4a3420);font-weight:600;font-size:14px;cursor:pointer;">Sign Up</button>
+      <button id="auth-tab-login" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--brand,#8B1A1A);color:white;font-weight:600;font-size:14px;cursor:pointer;">Log In</button>
+      <button id="auth-tab-signup" style="flex:1;padding:10px;border:none;border-radius:8px;background:transparent;color:var(--text2,#4a3420);font-weight:600;font-size:14px;cursor:pointer;">Sign Up</button>
     </div>
 
     <div id="auth-error" style="display:none;background:#fee;color:#a33;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;"></div>
@@ -380,7 +380,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div id="auth-form-login">
       <input type="email" id="login-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
       <input type="password" id="login-password" placeholder="Password" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:16px;font-size:14px;box-sizing:border-box;">
-      <button onclick="doLogin()" id="login-btn" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--brand,#8B1A1A);color:white;font-weight:700;font-size:15px;cursor:pointer;">Log In</button>
+      <button id="login-btn" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--brand,#8B1A1A);color:white;font-weight:700;font-size:15px;cursor:pointer;">Log In</button>
     </div>
 
     <!-- SIGNUP FORM (requires invite code) -->
@@ -389,7 +389,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <input type="email" id="signup-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
       <input type="password" id="signup-password" placeholder="Password (min 6 characters)" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
       <input type="text" id="signup-invite" placeholder="Invite code (from your franchisor)" style="width:100%;padding:13px 14px;border:1px solid var(--border2,#ddd);border-radius:10px;margin-bottom:16px;font-size:14px;box-sizing:border-box;text-transform:uppercase;">
-      <button onclick="doSignup()" id="signup-btn" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--brand,#8B1A1A);color:white;font-weight:700;font-size:15px;cursor:pointer;">Create Account</button>
+      <button id="signup-btn" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--brand,#8B1A1A);color:white;font-weight:700;font-size:15px;cursor:pointer;">Create Account</button>
     </div>
   </div>
 </div>
@@ -402,8 +402,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="ccp-title" id="ccp-title">Cash Payment — ORD-4819</div>
     <div class="ccp-sub" id="ccp-sub">Latte × 1 · LKR 520 · Confirm cash received?</div>
   </div>
-  <button class="ccp-confirm" onclick="confirmCash()">✓ Received</button>
-  <button class="ccp-dismiss" onclick="dismissCash()">Dismiss</button>
+  <button id="oc-fee-5" class="ccp-confirm">✓ Received</button>
+  <button id="oc-fee-6" class="ccp-dismiss">Dismiss</button>
 </div>
 
 <!-- NEW ORDER POPUP (slides from bottom above nav) -->
@@ -414,14 +414,14 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="nop-title" id="nop-title">Flat White × 2 + Cold Brew</div>
     <div class="nop-sub" id="nop-sub">Card payment · LKR 1,590 · Pickup</div>
   </div>
-  <button class="nop-btn" onclick="goToOrders()">View →</button>
+  <button id="oc-fee-7" class="nop-btn">View →</button>
 </div>
 
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-logo">Brew<span>Ops</span></div>
   <div class="outlet-chip"><div class="dot-live"></div><span id="topbar-outlet-name">Loading...</span></div>
-  <div class="notif-btn" id="notif-btn" onclick="navigate('alerts')">
+  <div class="notif-btn" id="notif-btn">
     🔔
     <div class="notif-count" id="notif-count">3</div>
   </div>
@@ -438,7 +438,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <div class="greeting-name" id="greeting-name-text">Good morning, <em>Nimal.</em></div>
         <div class="greeting-sub" id="greeting-sub-text">Loading outlet info...</div>
       </div>
-      <button onclick="doFranchiseeLogout()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:7px 14px;border-radius:18px;font-size:12px;cursor:pointer;font-family:var(--font-body);flex-shrink:0;margin-top:2px;">Log Out</button>
+      <button id="oc-fee-9" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:7px 14px;border-radius:18px;font-size:12px;cursor:pointer;font-family:var(--font-body);flex-shrink:0;margin-top:2px;">Log Out</button>
     </div>
 
     <div class="daily-hero">
@@ -471,28 +471,28 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 
     <div class="section-label">Quick actions</div>
     <div class="quick-grid">
-      <div class="quick-btn" onclick="navigate('orders')">
+      <div id="oc-fee-10" class="quick-btn">
         <div class="quick-icon qi-orders">⚡</div>
         <div class="quick-label">Live Orders</div>
         <div class="quick-btn-badge green" id="orders-quick-badge">4</div>
       </div>
-      <div class="quick-btn" onclick="openSaleModal()">
+      <div id="oc-fee-11" class="quick-btn">
         <div class="quick-icon qi-sale">☕</div>
         <div class="quick-label">Log Walk-in</div>
       </div>
-      <div class="quick-btn" onclick="navigate('stock')">
+      <div id="oc-fee-12" class="quick-btn">
         <div class="quick-icon qi-stock">📦</div>
         <div class="quick-label">Update Stock</div>
       </div>
-      <div class="quick-btn" onclick="navigate('machine')">
+      <div id="oc-fee-13" class="quick-btn">
         <div class="quick-icon qi-machine">🔧</div>
         <div class="quick-label">Machine Log</div>
       </div>
-      <div class="quick-btn" onclick="navigate('finance')">
+      <div id="oc-fee-14" class="quick-btn">
         <div class="quick-icon qi-payment">💳</div>
         <div class="quick-label">Payments</div>
       </div>
-      <div class="quick-btn" onclick="openIssueModal()">
+      <div id="oc-fee-15" class="quick-btn">
         <div class="quick-icon qi-issue">⚠️</div>
         <div class="quick-label">Report Issue</div>
       </div>
@@ -527,12 +527,12 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     </div>
 
     <div class="order-filter-row">
-      <div class="of-chip active" onclick="filterOrders('all',this)">All</div>
-      <div class="of-chip" onclick="filterOrders('cash',this)">💵 Cash Confirm</div>
-      <div class="of-chip" onclick="filterOrders('new',this)">New</div>
-      <div class="of-chip" onclick="filterOrders('preparing',this)">Preparing</div>
-      <div class="of-chip" onclick="filterOrders('ready',this)">Ready</div>
-      <div class="of-chip" onclick="filterOrders('done',this)">Done</div>
+      <div id="oc-fee-16" class="of-chip active">All</div>
+      <div id="oc-fee-17" class="of-chip">💵 Cash Confirm</div>
+      <div id="oc-fee-18" class="of-chip">New</div>
+      <div id="oc-fee-19" class="of-chip">Preparing</div>
+      <div id="oc-fee-20" class="of-chip">Ready</div>
+      <div id="oc-fee-21" class="of-chip">Done</div>
     </div>
 
     <div id="order-list"></div>
@@ -566,7 +566,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <div class="sum-row"><span class="sum-label">Stock status</span><span class="sum-val amber">1 item low</span></div>
       </div>
     </div>
-    <button class="submit-btn gold" onclick="openStockRequestModal()">Request Stock Top-Up</button>
+    <button id="oc-fee-22" class="submit-btn gold">Request Stock Top-Up</button>
   </div>
 
   <!-- MACHINE PAGE -->
@@ -599,10 +599,10 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
           <option value="part_replaced">Part Replaced</option>
         </select></div>
         <div class="form-group"><label class="form-label">Notes (optional)</label><textarea class="form-textarea" id="machine-event-notes" placeholder="Describe what was done..."></textarea></div>
-        <button class="submit-btn" id="machine-event-submit-btn" onclick="submitMachineEvent()">Log Event</button>
+        <button class="submit-btn" id="machine-event-submit-btn">Log Event</button>
       </div>
     </div>
-    <button class="submit-btn red" style="margin-top:4px" onclick="openIssueModal()">🚨 Report Emergency Issue</button>
+    <button id="oc-fee-24" class="submit-btn red" style="margin-top:4px">🚨 Report Emergency Issue</button>
   </div>
 
   <!-- FINANCE PAGE -->
@@ -654,8 +654,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
       </div>
     </div>
-    <button class="submit-btn gold" onclick="openIssueModal()">+ Report New Issue</button>
-    <button class="submit-btn" style="margin-top:10px;background:var(--brown3)" onclick="openWasteModal()">+ Log Waste</button>
+    <button id="oc-fee-25" class="submit-btn gold">+ Report New Issue</button>
+    <button id="oc-fee-26" class="submit-btn" style="margin-top:10px;background:var(--brown3)">+ Log Waste</button>
   </div>
 
   <!-- STATS PAGE -->
@@ -682,24 +682,24 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <div class="nav-tab" onclick="navigate('home',this)" id="bnav-home">
+  <div class="nav-tab" id="bnav-home">
     <div class="nav-icon">⌂</div><div class="nav-label">Home</div>
   </div>
-  <div class="nav-tab" onclick="navigate('orders',this)" id="bnav-orders">
+  <div class="nav-tab" id="bnav-orders">
     <div class="nav-icon">⚡</div><div class="nav-label">Orders</div>
     <div class="nav-badge green-badge pulse" id="orders-badge">4</div>
   </div>
-  <div class="nav-tab" onclick="navigate('stock',this)" id="bnav-stock">
+  <div class="nav-tab" id="bnav-stock">
     <div class="nav-icon">▦</div><div class="nav-label">Stock</div>
     <div class="nav-badge">1</div>
   </div>
-  <div class="nav-tab" onclick="navigate('machine',this)" id="bnav-machine">
+  <div class="nav-tab" id="bnav-machine">
     <div class="nav-icon">⊞</div><div class="nav-label">Machine</div>
   </div>
-  <div class="nav-tab" onclick="navigate('finance',this)" id="bnav-finance">
+  <div class="nav-tab" id="bnav-finance">
     <div class="nav-icon">◇</div><div class="nav-label">Finance</div>
   </div>
-  <div class="nav-tab" onclick="navigate('stats',this)" id="bnav-stats">
+  <div class="nav-tab" id="bnav-stats">
     <div class="nav-icon">◉</div><div class="nav-label">Stats</div>
   </div>
 </div>
@@ -708,24 +708,24 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <div class="modal-overlay" id="modal-sale">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><div class="sheet-title">Log Walk-in Sale</div><div class="sheet-close" onclick="closeModal('modal-sale')">×</div></div>
+    <div class="sheet-head"><div class="sheet-title">Log Walk-in Sale</div><div id="oc-fee-33" class="sheet-close">×</div></div>
     <div class="sheet-body">
       <div class="form-group"><label class="form-label">Beverage</label>
         <select class="form-select" id="sale-menu-item"><option value="">Loading menu...</option></select>
       </div>
       <div class="form-group"><label class="form-label">Quantity</label>
-        <div class="stepper"><button class="step-btn" onclick="stepQty(-1)">−</button><div class="step-val" id="qty-val">1</div><button class="step-btn" onclick="stepQty(1)">+</button></div>
+        <div class="stepper"><button id="oc-fee-34" class="step-btn">−</button><div class="step-val" id="qty-val">1</div><button id="oc-fee-35" class="step-btn">+</button></div>
       </div>
       <div class="form-group"><label class="form-label">Payment method</label>
         <div class="method-picker" id="sale-payment-picker">
-          <div class="method-btn selected" data-method="card" onclick="pickMethod(this)">💳 Card</div>
-          <div class="method-btn" data-method="cash" onclick="pickMethod(this)">💵 Cash</div>
-          <div class="method-btn" data-method="qr" onclick="pickMethod(this)">📱 QR</div>
+          <div id="oc-fee-36" class="method-btn selected" data-method="card">💳 Card</div>
+          <div id="oc-fee-37" class="method-btn" data-method="cash">💵 Cash</div>
+          <div id="oc-fee-38" class="method-btn" data-method="qr">📱 QR</div>
         </div>
       </div>
       <div class="form-group"><label class="form-label">Coupon code (optional)</label><input type="text" class="form-input" id="sale-coupon" placeholder="e.g. BREW20" style="text-transform:uppercase"></div>
       <div class="form-group"><label class="form-label">Price (LKR)</label><input type="number" class="form-input" id="sale-price" value="0"></div>
-      <button class="submit-btn gold" id="sale-submit-btn" onclick="submitSale()">Record Sale</button>
+      <button class="submit-btn gold" id="sale-submit-btn">Record Sale</button>
     </div>
   </div>
 </div>
@@ -733,7 +733,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <div class="modal-overlay" id="modal-waste">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><div class="sheet-title">Log Waste</div><div class="sheet-close" onclick="closeModal('modal-waste')">×</div></div>
+    <div class="sheet-head"><div class="sheet-title">Log Waste</div><div id="oc-fee-40" class="sheet-close">×</div></div>
     <div class="sheet-body">
       <div class="form-group"><label class="form-label">Item type</label><select class="form-select" id="waste-item-name"><option>Coffee Beans</option><option>Milk</option><option>10oz Cups</option><option>Cup Lids</option><option>Cup Sleeves</option><option>Other</option></select></div>
       <div class="form-group"><label class="form-label">Reason</label><select class="form-select" id="waste-reason">
@@ -746,7 +746,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <div class="form-group"><label class="form-label">Quantity</label><input type="text" class="form-input" id="waste-quantity" placeholder="e.g. 0.5 L"></div>
         <div class="form-group"><label class="form-label">Est. cost (LKR)</label><input type="number" class="form-input" id="waste-cost" placeholder="0"></div>
       </div>
-      <button class="submit-btn red" id="waste-submit-btn" onclick="submitWasteLog()">Log Waste Item</button>
+      <button class="submit-btn red" id="waste-submit-btn">Log Waste Item</button>
     </div>
   </div>
 </div>
@@ -754,7 +754,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <div class="modal-overlay" id="modal-issue">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><div class="sheet-title">Report Issue</div><div class="sheet-close" onclick="closeModal('modal-issue')">×</div></div>
+    <div class="sheet-head"><div class="sheet-title">Report Issue</div><div id="oc-fee-42" class="sheet-close">×</div></div>
     <div class="sheet-body">
       <div class="form-group"><label class="form-label">Issue category</label><select class="form-select" id="issue-category">
         <option>Machine — Emergency</option>
@@ -767,13 +767,13 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       </select></div>
       <div class="form-group"><label class="form-label">Severity</label>
         <div class="method-picker" id="issue-severity-picker">
-          <div class="method-btn selected" data-severity="high" onclick="pickMethod(this)" style="background:var(--red-light);border-color:var(--red);color:var(--red)">🔴 High</div>
-          <div class="method-btn" data-severity="medium" onclick="pickMethod(this)">🟡 Medium</div>
-          <div class="method-btn" data-severity="low" onclick="pickMethod(this)">🟢 Low</div>
+          <div id="oc-fee-43" class="method-btn selected" data-severity="high" style="background:var(--red-light);border-color:var(--red);color:var(--red)">🔴 High</div>
+          <div id="oc-fee-44" class="method-btn" data-severity="medium">🟡 Medium</div>
+          <div id="oc-fee-45" class="method-btn" data-severity="low">🟢 Low</div>
         </div>
       </div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="issue-description" placeholder="Describe the issue in detail..."></textarea></div>
-      <button class="submit-btn red" id="issue-submit-btn" onclick="submitIssue()">Submit Issue</button>
+      <button class="submit-btn red" id="issue-submit-btn">Submit Issue</button>
     </div>
   </div>
 </div>
@@ -781,7 +781,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <div class="modal-overlay" id="modal-stock-req">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><div class="sheet-title">Request Stock Top-Up</div><div class="sheet-close" onclick="closeModal('modal-stock-req')">×</div></div>
+    <div class="sheet-head"><div class="sheet-title">Request Stock Top-Up</div><div id="oc-fee-47" class="sheet-close">×</div></div>
     <div class="sheet-body">
       <div class="form-group"><label class="form-label">Items needed</label>
         <div style="display:flex;flex-direction:column;gap:8px;" id="stock-req-items">
@@ -794,7 +794,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <option value="normal">Next delivery</option>
       </select></div>
       <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="stock-req-notes" placeholder="Any specific quantities..."></textarea></div>
-      <button class="submit-btn gold" id="stock-req-submit-btn" onclick="submitStockRequest()">Send Request</button>
+      <button class="submit-btn gold" id="stock-req-submit-btn">Send Request</button>
     </div>
   </div>
 </div>
@@ -802,6 +802,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <!-- TOAST -->
 <div class="toast" id="toast"><span id="toast-icon"></span><span id="toast-msg"></span></div>
 
+<script src="shared.js"></script>
 <script>
 // ══ SUPABASE CONFIG ══
 // Replace with your values from supabase.com → Settings → API
@@ -1984,8 +1985,7 @@ function renderStockRequestItems(){
     </label>`;
   }).join('');
 }
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});});
+// closeModal / modal-overlay click-to-close — see shared.js
 document.addEventListener('change', (e) => { if (e.target.id === 'sale-menu-item') updateSalePriceFromMenuItem(); });
 
 // ── FORM HELPERS ──
@@ -2073,9 +2073,7 @@ async function submitSale(){
   loadFranchiseeData();
 }
 
-// ── TOAST ──
-let toastT;
-function showToast(msg,icon){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;document.getElementById('toast-icon').textContent=icon||'✓';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);}
+// ── TOAST ── see shared.js
 
 
 
@@ -2089,5 +2087,6 @@ updateOrderCount();
 // Connect to Supabase
 initSupabase();
 </script>
+<script src="franchisee-wiring.js"></script>
 </body>
 </html>

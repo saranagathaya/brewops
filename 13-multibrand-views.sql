@@ -19,8 +19,16 @@
 --   does query it.
 -- ════════════════════════════════════════════════════════════════
 
+-- `security_invoker = true` is required here (added after the fact, see
+-- 15-rls-orders-and-view-security-fixes.sql): without it, this view runs
+-- against its underlying tables with the view OWNER's privileges, not the
+-- querying user's, which silently bypasses RLS entirely for anyone who
+-- queries the view directly -- confirmed live as a cross-brand data leak.
+-- Baked in here (not left to migration 15 alone) so re-running this file
+-- in the future -- disaster recovery, a fresh environment -- can't
+-- silently drop the fix by recreating the view without it.
 drop view if exists outlet_health;
-create view outlet_health as
+create view outlet_health with (security_invoker = true) as
 SELECT o.id,
     o.name,
     o.location,
@@ -43,8 +51,9 @@ SELECT o.id,
      LEFT JOIN rent_schedules r ON r.outlet_id = o.id
   WHERE o.is_active = true;
 
+-- Same security_invoker requirement as outlet_health above.
 drop view if exists network_revenue;
-create view network_revenue as
+create view network_revenue with (security_invoker = true) as
 SELECT
     o.brand_id,
     sum(d.total_revenue) AS total_today,

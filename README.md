@@ -1,9 +1,14 @@
 # BrewOps
 
-Multi-tenant coffee franchise management platform. Three self-contained
-HTML apps (no build tooling) backed by a shared Supabase project (Postgres +
-Auth + Realtime + Storage), with full multi-brand data isolation enforced at
-the database (RLS) layer.
+Multi-tenant coffee franchise management platform. Three HTML apps (no
+build tooling, no bundler) backed by a shared Supabase project (Postgres +
+Auth + Realtime + Storage). Sensitive/transactional data (orders, invoices,
+stock, machines, financials) is brand/outlet-isolated at the database (RLS)
+layer. Read-only catalog and directory data (menu/merch listings, promos,
+coupons, the outlet directory) is intentionally readable across brands at
+the RLS layer — the apps apply their own brand filter for that — so "full
+isolation" only applies to the former, not the latter. See
+`tools/rls-check` for the regression check that verifies this.
 
 ## Apps
 
@@ -28,18 +33,19 @@ only show up on a genuinely fresh brand.
 
 ## Database setup
 
-Run every file in `migrations/` **in numeric order** against your Supabase
-project's SQL editor. Each file is idempotent where practical (`if not
-exists` / `drop ... if exists` before `create`), but they are NOT
+Run every numbered `NN-*.sql` file in the repo root **in numeric order**
+against your Supabase project's SQL editor — they live at the top level,
+not in a `migrations/` subfolder. Each file is idempotent where practical
+(`if not exists` / `drop ... if exists` before `create`), but they are NOT
 independent — later files assume earlier ones already ran, especially the
 multi-brand steps (08 through 13), which must run in that exact sequence.
 
-There is no `migrations/00-*` file for the very original schema (profiles,
-outlets, orders, menu_items, etc.) — that foundational schema predates this
-repo's migration history and isn't captured here yet. If setting this up
-from a completely empty Supabase project, you'll need that base schema
-first; check the project's Supabase dashboard directly or ask for it to be
-reconstructed.
+`00-base-schema.sql` covers the original schema (profiles, outlets,
+orders, menu_items, etc.) that predates this repo's numbered migration
+history — reconstructed from the live project via `pg_catalog`
+introspection, not a hand-written migration, so treat it as a
+point-in-time snapshot. Run it first on a fresh Supabase project, before
+`01-*` through `15-*`.
 
 ## Local development
 
@@ -52,9 +58,13 @@ npx http-server -p 8000
 Then open `http://localhost:8000/brewops-customer.html` (add `?brand=<slug>`
 to test a specific brand), or the franchisee/franchisor apps directly.
 
-Each HTML file has its Supabase URL and anon key hardcoded near the top of
-its `<script>` tag (search for `SUPABASE_URL`) — update these if pointing at
-a different Supabase project.
+Each app has its Supabase URL and anon key hardcoded near the top of its
+JS (search for `SUPABASE_URL`) — update these if pointing at a different
+Supabase project. For `brewops-customer.html` and `brewops-franchisee-v2.html`
+that's inline in the file's own `<script>` tag; for
+`brewops-franchisor-v4.html` it's in `franchisor-init.js`, one of the 7
+`franchisor-*.js` files that app's script is split across (loaded via
+`<script src>` in a specific order — see CLAUDE.md before reordering them).
 
 ## Known gaps / open items
 
@@ -69,3 +79,9 @@ a different Supabase project.
   are fixed across all brands.
 - Three App Settings cards (Outlet Config, Payment Settings, Notifications)
   in the franchisor app are UI-only, not wired to any backend.
+- `outlets` and `daily_ops` have RLS read policies open to any
+  anon/authenticated caller with no brand filter — `outlets` exposes
+  name/location (low sensitivity, arguably fine), `daily_ops` exposes
+  exact per-outlet daily revenue and machine-cleaning counts across every
+  brand (higher sensitivity, worth reconsidering). Run `tools/rls-check`
+  to see current exposure.

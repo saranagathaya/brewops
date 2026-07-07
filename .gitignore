@@ -4,3 +4,4 @@ brewops-notifications-setup/
 *.zip
 *.jpg
 *.JPG
+node_modules/

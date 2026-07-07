@@ -389,7 +389,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <!-- PROMO -->
 <div class="screen" id="promo">
   <div class="promo-top"><div class="pe"><svg viewBox="0 0 52 52" fill="none"><rect x="4" y="4" width="44" height="44" rx="6" stroke="white" stroke-width="4"/><rect x="13" y="13" width="26" height="26" rx="4" stroke="white" stroke-width="3.5"/></svg></div><div class="pn">Liétard</div></div>
-  <button class="promo-skip" onclick="enterApp()">Skip ›</button>
+  <button id="oc-cust-1" class="promo-skip">Skip ›</button>
   <div class="promo-slides" id="promo-slides"></div>
   <div class="promo-dots"><div class="promo-dot active"></div><div class="promo-dot"></div><div class="promo-dot"></div></div>
 </div>
@@ -402,7 +402,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="app-page active" id="pg-home">
       <div class="app-topbar">
         <div class="topbar-row1">
-          <div class="store-chip" onclick="openStoreSelector()">
+          <div id="oc-cust-2" class="store-chip">
             <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="#8B1A1A" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="#8B1A1A"/></svg></div>
             <div class="store-meta">
               <div class="store-name"><span id="selected-store-name">Select your outlet</span><span class="chev">›</span></div>
@@ -413,15 +413,15 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         </div>
         <div class="topbar-row2">
           <div class="mode-toggle">
-            <div class="mode-btn active" onclick="setMode('pickup',this)">Pick Up</div>
-            <div class="mode-btn" style="opacity:0.4;cursor:not-allowed;" onclick="showToast('Delivery coming soon','🚧')">Delivery</div>
+            <div id="oc-cust-3" class="mode-btn active">Pick Up</div>
+            <div id="oc-cust-4" class="mode-btn" style="opacity:0.4;cursor:not-allowed;">Delivery</div>
           </div>
           <div class="search-bar"><svg viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#8B7355" stroke-width="1.4"/><path d="M10 10l3 3" stroke="#8B7355" stroke-width="1.4" stroke-linecap="round"/></svg> Try "Flat White" or "Cold Brew"</div>
         </div>
       </div>
 
       <!-- HERO — single live banner from home_banner table (no fake carousel) -->
-      <div class="hero home-banner" id="home-hero" onclick="goPage('pg-menu')">
+      <div class="hero home-banner" id="home-hero">
         <div class="photo" id="hero-photo"><span class="ph-emoji">☕</span></div>
         <div class="scrim"></div>
         <div class="hero-content">
@@ -433,7 +433,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 
       <!-- FEATURED -->
       <div class="section">
-        <div class="section-head"><div class="section-title">Today's Specials</div><div class="section-more" onclick="goPage('pg-menu')">See all ›</div></div>
+        <div class="section-head"><div class="section-title">Today's Specials</div><div id="oc-cust-6" class="section-more">See all ›</div></div>
       </div>
       <div class="featured-scroll" id="featured-cards"></div>
 
@@ -449,10 +449,10 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <div class="app-topbar" style="padding:12px 14px 10px;">
         <div class="topbar-row1">
           <div class="mode-toggle">
-            <div class="mode-btn active" onclick="modePick(this,'pickup')">Pickup</div>
-            <div class="mode-btn" style="opacity:0.4;cursor:not-allowed;" onclick="showToast('Delivery coming soon','🚧')">Delivery</div>
+            <div id="oc-cust-7" class="mode-btn active">Pickup</div>
+            <div id="oc-cust-8" class="mode-btn" style="opacity:0.4;cursor:not-allowed;">Delivery</div>
           </div>
-          <div class="store-chip" onclick="openStoreSelector()" style="flex:1;margin-left:6px;">
+          <div id="oc-cust-9" class="store-chip" style="flex:1;margin-left:6px;">
             <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="#8B1A1A" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="#8B1A1A"/></svg></div>
             <div class="store-meta"><div class="store-name"><span id="menu-store-name">Select outlet</span><span class="chev">›</span></div></div>
           </div>
@@ -463,11 +463,11 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <div class="menu-items" id="menu-items"></div>
       </div>
       <div class="cart-bar" id="cart-bar">
-        <div onclick="openCartReview()" style="display:flex;align-items:center;gap:11px;flex:1;cursor:pointer;">
+        <div id="oc-cust-10" style="display:flex;align-items:center;gap:11px;flex:1;cursor:pointer;">
           <div class="cart-icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a1 1 0 001 .8h9.2a1 1 0 001-.8L21 8H6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="#fff"/><circle cx="18" cy="20" r="1.4" fill="#fff"/></svg><div class="cart-count-badge" id="cart-count">0</div></div>
           <div class="cart-info"><div class="cart-items-count" id="cart-items-label">0 items</div><div class="cart-total" id="cart-total-disp">LKR 0</div></div>
         </div>
-        <button class="cart-checkout-btn" onclick="openCheckout()">Checkout</button>
+        <button id="oc-cust-11" class="cart-checkout-btn">Checkout</button>
       </div>
     </div>
 
@@ -479,11 +479,11 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <div class="menu-items" id="merch-items"></div>
       </div>
       <div class="cart-bar" id="merch-cart-bar">
-        <div onclick="openCartReview()" style="display:flex;align-items:center;gap:11px;flex:1;cursor:pointer;">
+        <div id="oc-cust-12" style="display:flex;align-items:center;gap:11px;flex:1;cursor:pointer;">
           <div class="cart-icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a1 1 0 001 .8h9.2a1 1 0 001-.8L21 8H6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="#fff"/><circle cx="18" cy="20" r="1.4" fill="#fff"/></svg><div class="cart-count-badge" id="cart-count-2">0</div></div>
           <div class="cart-info"><div class="cart-items-count" id="cart-items-label-2">0 items</div><div class="cart-total" id="cart-total-disp-2">LKR 0</div></div>
         </div>
-        <button class="cart-checkout-btn" onclick="openCheckout()">Checkout</button>
+        <button id="oc-cust-13" class="cart-checkout-btn">Checkout</button>
       </div>
     </div>
 
@@ -491,9 +491,9 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="app-page" id="pg-orders">
       <div class="page-title"><h1>My Orders</h1></div>
       <div class="orders-tabs">
-        <div class="order-tab active" onclick="switchOrderTab(0,this)">Recent</div>
-        <div class="order-tab" onclick="switchOrderTab(1,this)">Pickup</div>
-        <div class="order-tab" onclick="switchOrderTab(2,this)">Vouchers</div>
+        <div id="oc-cust-14" class="order-tab active">Recent</div>
+        <div id="oc-cust-15" class="order-tab">Pickup</div>
+        <div id="oc-cust-16" class="order-tab">Vouchers</div>
       </div>
       <div id="orders-content" style="overflow-y:auto;flex:1;"></div>
     </div>
@@ -512,11 +512,11 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         </div>
       </div>
       <div class="menu-list" style="margin-top:16px;">
-        <div class="menu-list-item" onclick="openSettingsModal()"><div class="mli-icon">⚙️</div><div class="mli-label">Settings</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
-        <div class="menu-list-item" onclick="openFavouritesModal()"><div class="mli-icon">❤️</div><div class="mli-label">My Favourites</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
-        <div class="menu-list-item" onclick="showToast('Use the coupon field at checkout','🎟️')"><div class="mli-icon">🎟️</div><div class="mli-label">Redeem Voucher</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
-        <div class="menu-list-item" onclick="openAddressManagerModal()"><div class="mli-icon">📍</div><div class="mli-label">Address Manager</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
-        <div class="menu-list-item" onclick="showToast('We read every message','💬')"><div class="mli-icon">💬</div><div class="mli-label">Help &amp; Feedback</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div id="oc-cust-17" class="menu-list-item"><div class="mli-icon">⚙️</div><div class="mli-label">Settings</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div id="oc-cust-18" class="menu-list-item"><div class="mli-icon">❤️</div><div class="mli-label">My Favourites</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div id="oc-cust-19" class="menu-list-item"><div class="mli-icon">🎟️</div><div class="mli-label">Redeem Voucher</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div id="oc-cust-20" class="menu-list-item"><div class="mli-icon">📍</div><div class="mli-label">Address Manager</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
+        <div id="oc-cust-21" class="menu-list-item"><div class="mli-icon">💬</div><div class="mli-label">Help &amp; Feedback</div><div class="mli-value"></div><div class="mli-arrow">›</div></div>
       </div>
     </div>
 
@@ -524,12 +524,12 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="modal-overlay" id="modal-settings">
       <div class="modal-sheet">
         <div class="sheet-handle"></div>
-        <button class="sheet-close" onclick="closeModal('modal-settings')">×</button>
+        <button id="oc-cust-22" class="sheet-close">×</button>
         <div class="sheet-head"><div class="sheet-title">Settings</div></div>
         <div class="sheet-body">
           <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="settings-name" placeholder="Your name"></div>
           <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="settings-phone" placeholder="07XXXXXXXX"></div>
-          <button class="submit-btn gold" id="settings-save-btn" onclick="saveSettings()">Save Changes</button>
+          <button class="submit-btn gold" id="settings-save-btn">Save Changes</button>
         </div>
       </div>
     </div>
@@ -539,7 +539,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="modal-overlay" id="modal-favourites">
       <div class="modal-sheet">
         <div class="sheet-handle"></div>
-        <button class="sheet-close" onclick="closeModal('modal-favourites')">×</button>
+        <button id="oc-cust-24" class="sheet-close">×</button>
         <div class="sheet-head"><div class="sheet-title">My Favourites</div></div>
         <div class="sheet-body">
           <div id="favourites-list-body">
@@ -552,13 +552,13 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="modal-overlay" id="modal-address-manager">
       <div class="modal-sheet">
         <div class="sheet-handle"></div>
-        <button class="sheet-close" onclick="closeModal('modal-address-manager')">×</button>
+        <button id="oc-cust-25" class="sheet-close">×</button>
         <div class="sheet-head"><div class="sheet-title">Address Manager</div></div>
         <div class="sheet-body">
           <div id="address-list-body" style="margin-bottom:14px;">
             <div style="padding:14px 0;color:var(--text3);font-size:13px;text-align:center">Loading addresses...</div>
           </div>
-          <button class="submit-btn gold" onclick="openAddAddressForm()">+ Add New Address</button>
+          <button id="oc-cust-26" class="submit-btn gold">+ Add New Address</button>
         </div>
       </div>
     </div>
@@ -567,7 +567,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div class="modal-overlay" id="modal-address-form">
       <div class="modal-sheet">
         <div class="sheet-handle"></div>
-        <button class="sheet-close" onclick="closeModal('modal-address-form')">×</button>
+        <button id="oc-cust-27" class="sheet-close">×</button>
         <div class="sheet-head"><div class="sheet-title" id="address-form-title">Add Address</div></div>
         <div class="sheet-body">
           <input type="hidden" id="address-edit-id" value="">
@@ -575,7 +575,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
           <div class="form-group"><label class="form-label">Address</label><textarea class="form-textarea" id="address-line" placeholder="Street address, building, unit..."></textarea></div>
           <div class="form-group"><label class="form-label">City</label><input class="form-input" id="address-city" placeholder="e.g. Colombo"></div>
           <div class="form-group"><label class="form-label">Notes (optional)</label><input class="form-input" id="address-notes" placeholder="Gate code, landmark, delivery instructions..."></div>
-          <button class="submit-btn gold" id="address-save-btn" onclick="saveAddress()">Save Address</button>
+          <button class="submit-btn gold" id="address-save-btn">Save Address</button>
         </div>
       </div>
     </div>
@@ -583,23 +583,23 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
   </div>
 
   <div class="bottom-nav">
-    <div class="bnav-item active" onclick="goPage('pg-home',this)" id="bnav-home">
+    <div class="bnav-item active" id="bnav-home">
       <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div class="bnav-label">Home</div>
     </div>
-    <div class="bnav-item" onclick="goPage('pg-menu',this)" id="bnav-menu">
+    <div class="bnav-item" id="bnav-menu">
       <svg viewBox="0 0 24 24" fill="none"><path d="M5 8h12a3 3 0 010 6h-1M5 8v9a2 2 0 002 2h7a2 2 0 002-2v-3M5 8V6m12 8a3 3 0 003-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div class="bnav-label">Menu</div>
     </div>
-    <div class="bnav-item bnav-center" onclick="goPage('pg-order',this)" id="bnav-center">
+    <div class="bnav-item bnav-center" id="bnav-center">
       <div class="bnav-center-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a1 1 0 001 .8h9.2a1 1 0 001-.8L21 8H6" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="#fff"/><circle cx="18" cy="20" r="1.4" fill="#fff"/></svg></div>
       <div class="bnav-label">Order</div>
     </div>
-    <div class="bnav-item" onclick="goPage('pg-orders',this)" id="bnav-orders">
+    <div class="bnav-item" id="bnav-orders">
       <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <div class="bnav-label">Orders</div>
     </div>
-    <div class="bnav-item" onclick="goPage('pg-profile',this)" id="bnav-profile">
+    <div class="bnav-item" id="bnav-profile">
       <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <div class="bnav-label">Me</div>
     </div>
@@ -609,14 +609,14 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <div class="modal-overlay" id="modal-cart-review">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <button class="sheet-close" onclick="closeModal('modal-cart-review')">×</button>
+    <button id="oc-cust-34" class="sheet-close">×</button>
     <div class="sheet-head"><div class="sheet-title">Your Cart</div></div>
     <div class="sheet-body">
       <div id="cart-review-items"></div>
       <div class="co-line" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);"><span>Total</span><span class="v" id="cart-review-total">LKR 0</span></div>
     </div>
     <div class="detail-foot">
-      <button class="add-cart-btn" onclick="closeModal('modal-cart-review');openCheckout()">Proceed to Checkout</button>
+      <button id="oc-cust-35" class="add-cart-btn">Proceed to Checkout</button>
     </div>
   </div>
 </div>
@@ -624,8 +624,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <!-- ITEM DETAIL MODAL -->
 <div class="modal-overlay" id="modal-item">
   <div class="modal-sheet">
-    <button class="sheet-close" onclick="closeModal('modal-item')">×</button>
-    <button class="sheet-close" id="modal-item-fav-btn" style="left:16px;right:auto;" onclick="toggleFavourite(currentItem?.id, false)">♡</button>
+    <button id="oc-cust-36" class="sheet-close">×</button>
+    <button class="sheet-close" id="modal-item-fav-btn" style="left:16px;right:auto;">♡</button>
     <div class="item-hero"><div class="photo" id="modal-item-photo"><span class="ph-emoji" id="modal-item-emoji">☕</span></div><div class="scrim"></div><div class="item-hero-badges" id="modal-item-badges"></div></div>
     <div class="item-detail-body">
       <div class="item-detail-name" id="modal-item-name2"></div>
@@ -634,8 +634,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <div id="modal-item-detail-blocks"></div>
     </div>
     <div class="detail-foot">
-      <div class="qty-ctrl"><button class="qty-btn" onclick="changeDetailQty(-1)">−</button><div class="qty-num" id="detail-qty">1</div><button class="qty-btn" onclick="changeDetailQty(1)">+</button></div>
-      <button class="add-cart-btn" id="add-cart-btn" onclick="addToCartFromModal()">Add to Cart — LKR 550</button>
+      <div class="qty-ctrl"><button id="oc-cust-38" class="qty-btn">−</button><div class="qty-num" id="detail-qty">1</div><button id="oc-cust-39" class="qty-btn">+</button></div>
+      <button class="add-cart-btn" id="add-cart-btn">Add to Cart — LKR 550</button>
     </div>
   </div>
 </div>
@@ -644,8 +644,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
      customization options section since merch has no size/temp/milk -->
 <div class="modal-overlay" id="modal-merch-item">
   <div class="modal-sheet">
-    <button class="sheet-close" onclick="closeModal('modal-merch-item')">×</button>
-    <button class="sheet-close" id="modal-merch-fav-btn" style="left:16px;right:auto;" onclick="toggleFavourite(currentMerchItem?.id, true)">♡</button>
+    <button id="oc-cust-41" class="sheet-close">×</button>
+    <button class="sheet-close" id="modal-merch-fav-btn" style="left:16px;right:auto;">♡</button>
     <div class="item-hero"><div class="photo" id="modal-merch-photo"><span class="ph-emoji" id="modal-merch-emoji">🛍️</span></div><div class="scrim"></div><div class="item-hero-badges" id="modal-merch-badges"></div></div>
     <div class="item-detail-body">
       <div class="item-detail-name" id="modal-merch-name"></div>
@@ -653,8 +653,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <div id="modal-merch-detail-blocks"></div>
     </div>
     <div class="detail-foot">
-      <div class="qty-ctrl"><button class="qty-btn" onclick="changeMerchDetailQty(-1)">−</button><div class="qty-num" id="merch-detail-qty">1</div><button class="qty-btn" onclick="changeMerchDetailQty(1)">+</button></div>
-      <button class="add-cart-btn" id="add-merch-cart-btn" onclick="addMerchToCartFromModal()">Add to Cart — LKR 0</button>
+      <div class="qty-ctrl"><button id="oc-cust-43" class="qty-btn">−</button><div class="qty-num" id="merch-detail-qty">1</div><button id="oc-cust-44" class="qty-btn">+</button></div>
+      <button class="add-cart-btn" id="add-merch-cart-btn">Add to Cart — LKR 0</button>
     </div>
   </div>
 </div>
@@ -663,7 +663,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <div class="modal-overlay" id="modal-store">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <button class="sheet-close" onclick="closeModal('modal-store')">×</button>
+    <button id="oc-cust-46" class="sheet-close">×</button>
     <div class="sheet-head"><div class="sheet-title">Choose Outlet</div><div class="sheet-sub">Pick the café nearest you</div></div>
     <div class="sheet-body" style="padding-top:4px;">
       <div class="store-warning">📍 Select the outlet nearest you before ordering.</div>
@@ -676,17 +676,17 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 <div class="modal-overlay" id="modal-checkout">
   <div class="modal-sheet">
     <div class="sheet-handle"></div>
-    <button class="sheet-close" onclick="closeModal('modal-checkout')">×</button>
+    <button id="oc-cust-47" class="sheet-close">×</button>
     <div class="sheet-head"><div class="sheet-title">Confirm Order</div></div>
     <div class="sheet-body">
       <div class="co-card">
-        <div class="co-row-head"><div class="ic">📍</div><div class="tx"><div class="t1" id="co-store-name">Select an outlet</div><div class="t2" id="co-store-addr"></div></div><div class="edit" onclick="closeModal('modal-checkout');openStoreSelector()">Change</div></div>
-        <div class="store-warning" id="checkout-store-warning" style="display:none;margin-bottom:0;">📍 No outlet selected — <span onclick="closeModal('modal-checkout');openStoreSelector()" style="text-decoration:underline;cursor:pointer;">select one</span></div>
+        <div class="co-row-head"><div class="ic">📍</div><div class="tx"><div class="t1" id="co-store-name">Select an outlet</div><div class="t2" id="co-store-addr"></div></div><div id="oc-cust-48" class="edit">Change</div></div>
+        <div class="store-warning" id="checkout-store-warning" style="display:none;margin-bottom:0;">📍 No outlet selected — <span id="oc-cust-49" style="text-decoration:underline;cursor:pointer;">select one</span></div>
       </div>
       <div class="co-card" id="checkout-delivery-card" style="display:none;">
         <div class="cs-title">Delivery Address</div>
         <div id="checkout-address-select"></div>
-        <div class="store-warning" id="checkout-address-warning" style="display:none;margin-bottom:0;margin-top:8px;">📍 No delivery address selected — <span onclick="closeModal('modal-checkout');openAddressManagerModal()" style="text-decoration:underline;cursor:pointer;">add one</span></div>
+        <div class="store-warning" id="checkout-address-warning" style="display:none;margin-bottom:0;margin-top:8px;">📍 No delivery address selected — <span id="oc-cust-50" style="text-decoration:underline;cursor:pointer;">add one</span></div>
       </div>
       <div class="co-card">
         <div class="cs-title">Your Order</div>
@@ -695,15 +695,15 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <div class="co-card">
         <div class="cs-title">Payment Method</div>
         <div class="payment-method-grid">
-          <div class="pm-opt selected" onclick="pickPayment(this)"><div class="pm-opt-label">Card</div></div>
-          <div class="pm-opt" onclick="pickPayment(this)"><div class="pm-opt-label">Cash at Counter</div></div>
-          <div class="pm-opt" onclick="pickPayment(this)"><div class="pm-opt-label">QR / Transfer</div></div>
-          <div class="pm-opt" onclick="pickPayment(this)"><div class="pm-opt-label">Voucher</div></div>
+          <div id="oc-cust-51" class="pm-opt selected"><div class="pm-opt-label">Card</div></div>
+          <div id="oc-cust-52" class="pm-opt"><div class="pm-opt-label">Cash at Counter</div></div>
+          <div id="oc-cust-53" class="pm-opt"><div class="pm-opt-label">QR / Transfer</div></div>
+          <div id="oc-cust-54" class="pm-opt"><div class="pm-opt-label">Voucher</div></div>
         </div>
       </div>
       <div class="co-card">
         <div class="cs-title">Coupon</div>
-        <div class="coupon-row"><input type="text" id="coupon-input" placeholder="Enter coupon code"><button onclick="applyCoupon()">Apply</button></div>
+        <div class="coupon-row"><input type="text" id="coupon-input" placeholder="Enter coupon code"><button id="oc-cust-55">Apply</button></div>
       </div>
       <div class="co-card">
         <div class="co-line"><span>Subtotal</span><span class="v" id="co-subtotal">LKR 0</span></div>
@@ -711,7 +711,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     </div>
     <div class="co-bottom">
       <div class="co-total-wrap"><div class="co-total-lbl">Total</div><div class="co-total-val" id="checkout-total">LKR 0</div></div>
-      <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
+      <button id="oc-cust-56" class="place-order-btn">Place Order</button>
     </div>
   </div>
 </div>
@@ -726,8 +726,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:18px;background:var(--cream2);border-radius:22px;padding:4px;">
-      <button id="ca-tab-login" onclick="switchCheckoutAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:18px;background:var(--brand);color:white;font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font-body);">Log In</button>
-      <button id="ca-tab-signup" onclick="switchCheckoutAuthTab('signup')" style="flex:1;padding:10px;border:none;border-radius:18px;background:transparent;color:var(--text2);font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font-body);">Sign Up</button>
+      <button id="ca-tab-login" style="flex:1;padding:10px;border:none;border-radius:18px;background:var(--brand);color:white;font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font-body);">Log In</button>
+      <button id="ca-tab-signup" style="flex:1;padding:10px;border:none;border-radius:18px;background:transparent;color:var(--text2);font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font-body);">Sign Up</button>
     </div>
 
     <div id="ca-error" style="display:none;background:var(--brand-light);color:var(--brand2);border:1px solid rgba(139,26,26,0.2);padding:10px 14px;border-radius:var(--r-sm);font-size:12.5px;margin-bottom:14px;"></div>
@@ -735,7 +735,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div id="ca-form-login">
       <input type="email" id="ca-login-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
       <input type="password" id="ca-login-password" placeholder="Password" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
-      <button onclick="doCheckoutLogin()" id="ca-login-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px rgba(139,26,26,0.4);">Log In & Place Order</button>
+      <button id="ca-login-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px rgba(139,26,26,0.4);">Log In & Place Order</button>
     </div>
 
     <div id="ca-form-signup" style="display:none;">
@@ -743,14 +743,15 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <input type="email" id="ca-signup-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
       <input type="tel" id="ca-signup-phone" placeholder="Phone number" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
       <input type="password" id="ca-signup-password" placeholder="Password (min 6 characters)" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
-      <button onclick="doCheckoutSignup()" id="ca-signup-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px rgba(139,26,26,0.4);">Create Account & Place Order</button>
+      <button id="ca-signup-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px rgba(139,26,26,0.4);">Create Account & Place Order</button>
     </div>
 
-    <button onclick="closeCheckoutAuthModal()" style="width:100%;padding:10px;border:none;background:transparent;color:var(--text3);font-size:12.5px;margin-top:10px;cursor:pointer;font-family:var(--font-body);">Cancel</button>
+    <button id="oc-cust-61" style="width:100%;padding:10px;border:none;background:transparent;color:var(--text3);font-size:12.5px;margin-top:10px;cursor:pointer;font-family:var(--font-body);">Cancel</button>
   </div>
 </div>
 
 <div class="toast" id="toast"><span id="toast-icon"></span> <span id="toast-msg"></span></div>
+<script src="shared.js"></script>
 <script>
 // ══ SUPABASE CONFIG ══
 const SUPABASE_URL = 'https://fjmzsxslnzrtgcilttly.supabase.co';
@@ -2334,19 +2335,7 @@ async function deleteAddress(id) {
   loadSavedAddresses();
 }
 
-// ══ MODALS / TOAST ══
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); }));
-
-let toastT;
-function showToast(msg,icon){
-  const t=document.getElementById('toast');
-  document.getElementById('toast-msg').textContent=msg;
-  document.getElementById('toast-icon').textContent=icon||'';
-  t.classList.add('show');
-  clearTimeout(toastT);
-  toastT=setTimeout(()=>t.classList.remove('show'),2800);
-}
+// ══ MODALS / TOAST ══ — see shared.js (openModal, closeModal, showToast)
 </script>
+<script src="customer-wiring.js"></script>
 </body></html>
