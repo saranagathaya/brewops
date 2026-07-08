@@ -141,12 +141,20 @@ introspection (not `pg_dump`) and validated by parsing it with Postgres's
 own SQL parser before being committed, so treat it as a point-in-time
 snapshot rather than a hand-maintained migration — add new base-level
 tables/functions/policies as a new numbered file, not by editing this one.
-Its header also flags a security issue worth fixing rather than
-reproducing: three `*-alert` triggers call an edge function with a
-`service_role` key hardcoded directly in the trigger DDL (visible to
-anyone who can read `pg_catalog`) — that key was redacted from the file
-and should be moved to Supabase Vault or an env var if this schema is ever
-rebuilt.
+Its header flags (and `16-notification-triggers-drop-service-role.sql`
+fixes) a security issue: three `*-alert` triggers called an edge function
+with a `service_role` key hardcoded in the trigger DDL (readable by anyone
+with DB access via `pg_catalog`). The `send-notification` function's
+"Verify JWT with legacy secret" only needs *any* legacy JWT — the anon key
+satisfies it — so migration 16 swapped all three triggers to the public
+anon key, removing the RLS-bypassing key from the database. (Vault isn't an
+option here: a trigger's `EXECUTE FUNCTION` args must be literal constants,
+so the token can't be a dynamic Vault lookup; the anon key is public by
+design, so hardcoding it is fine.) Note this is only the in-database half —
+fully invalidating the previously-exposed `service_role` key *string* still
+requires migrating the apps off the legacy anon key onto the new
+publishable/secret keys and disabling the legacy keys in the dashboard,
+which hadn't been done as of migration 16.
 
 Three role-aware Postgres helper functions power essentially every RLS
 policy: `get_my_role()`, `get_my_brand_id()`, `get_my_outlet()`. `brand_id`
@@ -190,14 +198,17 @@ made every outlet-scoped table look suspiciously all-zero — a test data
 artifact, not a policy bug, but worth remembering if this script's
 "zero own-brand visibility" warnings ever look surprising again.
 
-Known remaining gap: `outlet_health` and `network_revenue` still surface
-cross-brand rows because the underlying `outlets` and `daily_ops` tables
-have `using (true)` read policies with no brand filter at all (`outlets`
-exposes name/location, `daily_ops` exposes exact per-outlet revenue and
-machine-cleaning counts) — the view fix removed the ownership bypass but
-isolation still depends on those table-level policies, which haven't been
-tightened yet pending a decision on whether `daily_ops` in particular
-needs to stay that open.
+`daily_ops` was tightened in `17-daily-ops-rls-tighten.sql` — its
+`using (true)` open-read policy (which exposed exact per-outlet revenue and
+machine-cleaning counts across all brands) was dropped, leaving only the
+outlet-scoped franchisee and brand-scoped franchisor policies. `outlets`
+intentionally keeps its public read policy: the anonymous customer app
+needs it to list a brand's stores, and outlet name/location is public
+information — so `outlet_health`/`network_revenue` can still surface other
+brands' outlet *names* to a franchisor who queries the view without a
+brand filter, but no longer their revenue (that came from `daily_ops`).
+That residual name/location visibility is the accepted public-catalog
+tradeoff, not an open bug.
 
 ## Known gaps / open items
 

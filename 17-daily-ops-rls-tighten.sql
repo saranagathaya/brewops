@@ -1,0 +1,25 @@
+-- ════════════════════════════════════════════════════════════════
+-- Close the daily_ops cross-brand read gap.
+--
+-- daily_ops holds exact per-outlet daily revenue, cups sold, and
+-- machine-cleaning counts. It had a `daily_ops_anon_read` policy of
+-- `using (true)` for anon+authenticated — i.e. every outlet's daily
+-- financials readable by anyone, across all brands.
+--
+-- Verified no app depends on that open policy:
+--   - The franchisee app reads daily_ops only for its OWN outlet
+--     (brewops-franchisee-v2.html) — covered by daily_ops_franchisee_own
+--     (outlet_id = get_my_outlet()).
+--   - The franchisor reads it via the outlet_health view, scoped by brand
+--     — covered by daily_ops_franchisor_all (franchisor + own brand_id).
+--   - The customer app never touches daily_ops.
+-- So dropping the open policy removes world-read with zero app impact, and
+-- also stops the (security_invoker) outlet_health view from surfacing other
+-- brands' revenue.
+--
+-- Note: `outlets` intentionally keeps its public read policy — the
+-- anonymous customer app needs it to list a brand's stores, and outlet
+-- name/location is public information. That one is not a leak to close.
+-- ════════════════════════════════════════════════════════════════
+
+drop policy if exists "daily_ops_anon_read" on daily_ops;
