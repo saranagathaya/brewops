@@ -24,11 +24,12 @@
   --shadow-xl:0 16px 48px rgba(30,20,8,0.18);
   --r:16px;--r-sm:10px;--r-xs:6px;
   --nav-h:64px;--topbar-h:60px;
+  --app-width:480px; /* phone default; widened to ~720px on tablet via the min-width:768px breakpoint below. Single knob for every width cap. */
   --font-display:'Playfair Display',serif;--font-body:'Sora',sans-serif;--font-mono:'DM Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:14px;-webkit-tap-highlight-color:transparent;}
-body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden;position:relative;}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-height:100vh;max-width:var(--app-width);margin:0 auto;overflow-x:hidden;position:relative;}
 
 /* TOPBAR */
 .topbar{position:sticky;top:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--border);height:var(--topbar-h);display:flex;align-items:center;padding:0 20px;gap:12px;}
@@ -49,7 +50,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .page.active{display:block;}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:var(--nav-h);background:var(--brown-deep);display:flex;align-items:stretch;z-index:200;border-top:1px solid rgba(255,255,255,0.08);}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--app-width);height:var(--nav-h);background:var(--brown-deep);display:flex;align-items:stretch;z-index:200;border-top:1px solid rgba(255,255,255,0.08);}
 .nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:rgba(255,255,255,0.35);transition:color 0.15s;position:relative;-webkit-tap-highlight-color:transparent;}
 .nav-tab.active{color:var(--gold2);}
 .nav-tab.active::before{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:var(--gold);border-radius:0 0 3px 3px;}
@@ -165,7 +166,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .of-chip.active{background:var(--brown);color:var(--cream);border-color:var(--brown);}
 
 /* CASH CONFIRMATION MODAL CARD */
-.cash-confirm-popup{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:300;background:var(--amber);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-xl);transition:transform 0.4s ease;transform:translateX(-50%) translateY(-100%);}
+.cash-confirm-popup{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--app-width);z-index:300;background:var(--amber);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-xl);transition:transform 0.4s ease;transform:translateX(-50%) translateY(-100%);}
 .cash-confirm-popup.show{transform:translateX(-50%) translateY(0);}
 .ccp-icon{font-size:28px;flex-shrink:0;}
 .ccp-text{flex:1;}
@@ -175,7 +176,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .ccp-dismiss{background:rgba(30,20,8,0.15);color:var(--brown-deep);border:none;border-radius:20px;padding:8px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);flex-shrink:0;}
 
 /* NEW ORDER POPUP */
-.new-order-popup{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(20px);width:calc(100% - 32px);max-width:448px;z-index:290;background:var(--brown-deep);border:1px solid rgba(45,106,79,0.4);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-xl);opacity:0;transition:all 0.35s ease;pointer-events:none;}
+.new-order-popup{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(20px);width:calc(100% - 32px);max-width:calc(var(--app-width) - 32px);z-index:290;background:var(--brown-deep);border:1px solid rgba(45,106,79,0.4);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-xl);opacity:0;transition:all 0.35s ease;pointer-events:none;}
 .new-order-popup.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all;}
 .new-order-popup::before{content:'';position:absolute;top:-1px;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green2),transparent 60%);border-radius:var(--r) var(--r) 0 0;}
 .nop-pulse{width:10px;height:10px;border-radius:50%;background:var(--green2);box-shadow:0 0 10px var(--green2);animation:live-pulse 1.2s infinite;flex-shrink:0;}
@@ -287,7 +288,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .comp-status{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-top:4px;}
 
 /* MODALS */
-.modal-overlay{display:none;position:fixed;inset:0;max-width:480px;margin:0 auto;background:rgba(30,20,8,0.6);backdrop-filter:blur(4px);z-index:500;align-items:flex-end;}
+.modal-overlay{display:none;position:fixed;inset:0;max-width:var(--app-width);margin:0 auto;background:rgba(30,20,8,0.6);backdrop-filter:blur(4px);z-index:500;align-items:flex-end;}
 .modal-overlay.open{display:flex;}
 .modal-sheet{background:var(--cream);border-radius:var(--r) var(--r) 0 0;width:100%;max-height:88vh;overflow-y:auto;animation:sheetUp 0.3s ease;}
 @keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
@@ -354,10 +355,21 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .page.active .card:nth-child(4){animation-delay:0.14s;}
 
 @media(min-width:480px){body{border-left:1px solid var(--border);border-right:1px solid var(--border);box-shadow:0 0 60px rgba(0,0,0,0.1);}
-.modal-overlay{left:50%;transform:translateX(-50%);right:auto;width:480px;}
-.cash-confirm-popup,.new-order-popup{width:480px;}
-.new-order-popup{width:calc(480px - 32px);}
+.modal-overlay{left:50%;transform:translateX(-50%);right:auto;width:var(--app-width);}
+.cash-confirm-popup,.new-order-popup{width:var(--app-width);}
+.new-order-popup{width:calc(var(--app-width) - 32px);}
 .bottom-nav{left:50%;}}
+
+/* TABLET — the primary counter device. Same single-column UI as phone, just
+   widened via one variable, capped at 720px so it stays a balanced column
+   (never stretched edge-to-edge on a large landscape tablet). The two
+   horizontal-scroll chip rows switch to wrapping here so every status/filter
+   stays on-screen without swiping — phone keeps its scroll behaviour untouched. */
+@media(min-width:768px){
+  :root{--app-width:720px;}
+  .status-strip{flex-wrap:wrap;overflow-x:visible;}
+  .order-filter-row{flex-wrap:wrap;overflow-x:visible;}
+}
 </style>
 </head>
 <body>

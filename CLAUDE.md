@@ -85,6 +85,17 @@ check it doesn't depend on something defined in a file loaded after it.
 `brewops-customer.html` and `brewops-franchisee-v2.html` remain single
 inline `<script>` files.
 
+**Responsive layout**: only `brewops-franchisee-v2.html` is responsive, on
+purpose — it's the tablet counter device with a phone as emergency fallback,
+so it needs the same UI at two sizes. It uses one `--app-width` CSS variable
+(480px phone default; 720px at a `min-width:768px` breakpoint) for every
+width cap, plus that breakpoint switching its two horizontal-scroll chip
+rows to wrap. It's the same single-column layout at both sizes, just
+widened — not a per-device redesign. The customer app is deliberately
+phone-only (customers order on phones) and the franchisor app deliberately
+a desktop console, so neither has this; don't add it without a real
+cross-device need.
+
 **Supabase connection**: URL + anon key are hardcoded near the top of each
 app's JS (search `SUPABASE_URL`) — inline in the customer/franchisee files,
 in `franchisor-init.js` for the franchisor app. All three point at the same
