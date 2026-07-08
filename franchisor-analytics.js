@@ -192,7 +192,7 @@ async function loadAiInsights() {
   const totalCups = (health||[]).reduce((s,h) => s+(h.cups_today||0), 0);
   const totalRevenue = (health||[]).reduce((s,h) => s+(h.revenue_today||0), 0);
   document.getElementById('ai-summary').textContent = risks.length
-    ? `${outletCount} outlet${outletCount===1?'':'s'} tracked. ${totalCups} cups sold today across the network (LKR ${Math.round(totalRevenue/100).toLocaleString()}). ${risks.length} issue${risks.length===1?'':'s'} need attention below.`
+    ? `${outletCount} outlet${outletCount===1?'':'s'} tracked. ${totalCups} cups sold today across the network (LKR ${Math.round(totalRevenue/100).toLocaleString()}). ${risks.length} issue${risks.length===1?'':'s'} need${risks.length===1?'s':''} attention below.`
     : `${outletCount} outlet${outletCount===1?'':'s'} tracked. ${totalCups} cups sold today (LKR ${Math.round(totalRevenue/100).toLocaleString()}). No active risks detected.`;
 
   // ── Revenue card (real, from outlet_health) ──
@@ -287,7 +287,7 @@ async function loadDashboardOverview() {
   score -= risks.filter(r=>r.cls==='warning').length*8;
   score = Math.max(0, Math.min(100, score));
   document.getElementById('dash-score-num').textContent = score;
-  document.getElementById('dash-summary').innerHTML = `Network health <strong style="color:var(--green-text)">${score}/100</strong>. ${totalCups} cups sold today (LKR ${Math.round(totalRevenue/100).toLocaleString()}) across ${(outlets||[]).length} outlet${(outlets||[]).length===1?'':'s'}. ${risks.length} item${risks.length===1?'':'s'} need attention.`;
+  document.getElementById('dash-summary').innerHTML = `Network health <strong style="color:var(--green-text)">${score}/100</strong>. ${totalCups} cups sold today (LKR ${Math.round(totalRevenue/100).toLocaleString()}) across ${(outlets||[]).length} outlet${(outlets||[]).length===1?'':'s'}. ${risks.length} item${risks.length===1?'':'s'} need${risks.length===1?'s':''} attention.`;
 
   document.getElementById('dash-alert-count').textContent = `${risks.length} active`;
   document.getElementById('dash-alerts').innerHTML = risks.length

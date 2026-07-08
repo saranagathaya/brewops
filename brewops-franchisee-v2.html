@@ -1835,7 +1835,7 @@ function renderOrders(filter){
   el.innerHTML=list.map(o=>`
     <div class="live-order-item${cardClasses[o.status]||''}">
       <div class="loi-head">
-        <div class="loi-num">${o.id}</div>
+        <div class="loi-num">${o.order_number || o.id}</div>
         <div class="loi-mode ${o.mode==='Pickup'?'lm-pickup':'lm-delivery'}">${o.mode}</div>
         <div class="loi-time">${o.time}</div>
         <div class="loi-status ${statusClasses[o.status]||'ls-done'}">${statusLabels[o.status]||o.status}</div>
@@ -1911,7 +1911,7 @@ function updateOrderCount(){
 
 // ── CASH CONFIRM POPUP ──
 function showCashPopup(order){
-  document.getElementById('ccp-title').textContent='Cash Payment — '+order.id;
+  document.getElementById('ccp-title').textContent='Cash Payment — '+(order.order_number || order.id);
   document.getElementById('ccp-sub').textContent=order.items[0].name+(order.items.length>1?` +${order.items.length-1} more`:'')+' · LKR '+order.total.toLocaleString()+' · Confirm received?';
   document.getElementById('cash-confirm-popup').classList.add('show');
 }

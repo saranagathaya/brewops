@@ -138,7 +138,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .section-more{margin-left:auto;font-size:12px;color:var(--text3);font-family:var(--font-mono);cursor:pointer;}
 
 /* FEATURED CARDS */
-.featured-scroll{display:flex;gap:13px;overflow-x:auto;padding:2px 16px 4px;-ms-overflow-style:none;scrollbar-width:none;}
+.featured-scroll{display:flex;gap:13px;overflow-x:auto;padding:2px 16px 4px;-ms-overflow-style:none;scrollbar-width:none;flex-shrink:0;align-items:flex-start;}
 .featured-scroll::-webkit-scrollbar{display:none;}
 .fcard{width:160px;flex-shrink:0;background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-card);cursor:pointer;transition:transform 0.15s;}
 .fcard:active{transform:scale(0.97);}

@@ -290,7 +290,7 @@ async function loadOutlets() {
   document.getElementById('kpi-lowest').textContent = worst.name;
   document.getElementById('kpi-lowest-sub').textContent = `▼ ${worst.cups_today} cups`;
   document.getElementById('kpi-healthy').textContent = `${healthyCount} / ${health.length}`;
-  document.getElementById('kpi-healthy-sub').textContent = `${health.length - healthyCount} need attention`;
+  document.getElementById('kpi-healthy-sub').textContent = `${health.length - healthyCount} need${(health.length - healthyCount)===1?'s':''} attention`;
 
   // ── Table ──
   wrap.innerHTML = `<table class="data-table">
