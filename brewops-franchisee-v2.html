@@ -275,6 +275,16 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .sum-val.amber{color:var(--amber);}
 .sum-val.blue{color:var(--blue);}
 
+/* Mini bar — same visual language as the franchisor app's ranking/stock
+   bars (a track + colored fill sized by %), reused here so Finance/Stats
+   aren't purely numbers where the franchisor app already uses this. */
+.mini-bar{height:5px;border-radius:3px;background:var(--cream3);overflow:hidden;flex:1;}
+.mini-bar-fill{height:100%;border-radius:3px;transition:width 0.3s ease;}
+.mini-bar-split{height:7px;border-radius:4px;overflow:hidden;display:flex;background:var(--cream3);}
+.sum-row-bar{padding:9px 0;border-bottom:1px solid var(--border);}
+.sum-row-bar:last-child{border-bottom:none;}
+.sum-row-bar .sum-row-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+
 /* COMPLAINTS */
 .complaint-item{padding:12px 0;border-bottom:1px solid var(--border);}
 .complaint-item:last-child{border-bottom:none;}
@@ -682,6 +692,12 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
         <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
       </div>
     </div>
+    <div class="section-label">Vs. last month</div>
+    <div class="card">
+      <div class="card-body" style="padding:4px 16px" id="stats-month-trend">
+        <div style="padding:10px;color:var(--text3);font-size:13px">Loading...</div>
+      </div>
+    </div>
     <div class="section-label">Network ranking</div>
     <div class="card">
       <div class="card-body" style="padding:4px 16px" id="stats-network-ranking">
@@ -905,7 +921,27 @@ async function loadProfileAndEnterApp(userId) {
 
   document.getElementById('auth-gate').style.display = 'none';
   await loadFranchiseeData();
+  await loadNotificationSettings();
   subscribeToOrders();
+}
+
+// Franchisor-controlled notification toggles (App Settings — Notifications
+// card). Defaults to enabled when no row exists yet, matching this app's
+// original unconditional behavior, so nothing changes until a franchisor
+// actually turns one off.
+window.NOTIF_SETTINGS = { new_order: true, cash_confirm: true };
+async function loadNotificationSettings() {
+  if (!sb || !window.MY_PROFILE?.brand_id) return;
+  const { data } = await sb.from('app_settings')
+    .select('key,value')
+    .eq('brand_id', window.MY_PROFILE.brand_id)
+    .in('key', ['notif_new_order_enabled', 'notif_cash_confirm_enabled']);
+  const s = {};
+  (data || []).forEach(r => s[r.key] = r.value);
+  window.NOTIF_SETTINGS = {
+    new_order: s.notif_new_order_enabled !== 'false',
+    cash_confirm: s.notif_cash_confirm_enabled !== 'false',
+  };
 }
 
 function switchAuthTab(tab) {
@@ -1319,10 +1355,10 @@ function subscribeToOrders() {
       window.LIVE_ORDERS = [newOrder, ...(window.LIVE_ORDERS||[])];
       renderOrders('all');
       updateOrderCount();
-      // Show popup notification
-      showNewOrderPopup(newOrder);
-      // Show cash banner if cash payment
-      if (newOrder.isCash) showCashPopup(newOrder);
+      // Show popup notification (franchisor-controlled — App Settings)
+      if (window.NOTIF_SETTINGS?.new_order !== false) showNewOrderPopup(newOrder);
+      // Show cash banner if cash payment (franchisor-controlled — App Settings)
+      if (newOrder.isCash && window.NOTIF_SETTINGS?.cash_confirm !== false) showCashPopup(newOrder);
       // Update nav badge
       const badge = document.getElementById('orders-badge');
       if (badge) { badge.textContent = parseInt(badge.textContent||0)+1; }
@@ -1644,12 +1680,30 @@ async function loadFinancePage() {
   const franchiseFee = Math.round(grossRevenue * (feePct/100));
   const netToYou = grossRevenue - franchiseFee;
 
+  // Two composition bars — where revenue comes from, and how it splits
+  // between the franchisee and the franchise fee. Only rendered with real
+  // revenue to split; an empty 0/0 bar reads as broken, not "no data yet".
+  const appPct = grossRevenue > 0 ? Math.round((appRevenue/grossRevenue)*100) : 0;
+  const sourceBar = grossRevenue > 0 ? `
+    <div class="sum-row-bar">
+      <div class="sum-row-top"><span class="sum-label" style="font-size:11px;color:var(--text3)">App vs walk-in</span></div>
+      <div class="mini-bar-split"><div style="width:${appPct}%;background:var(--blue)"></div><div style="width:${100-appPct}%;background:var(--cream3)"></div></div>
+    </div>` : '';
+  const feePctOfGross = grossRevenue > 0 ? Math.round((franchiseFee/grossRevenue)*100) : 0;
+  const splitBar = grossRevenue > 0 ? `
+    <div class="sum-row-bar">
+      <div class="sum-row-top"><span class="sum-label" style="font-size:11px;color:var(--text3)">Franchise fee vs your share</span></div>
+      <div class="mini-bar-split"><div style="width:${feePctOfGross}%;background:var(--red)"></div><div style="width:${100-feePctOfGross}%;background:var(--green)"></div></div>
+    </div>` : '';
+
   document.getElementById('finance-revenue-card').innerHTML = `
     <div class="sum-row"><span class="sum-label">Gross revenue (this month)</span><span class="sum-val">LKR ${Math.round(grossRevenue/100).toLocaleString()}</span></div>
     <div class="sum-row"><span class="sum-label">App orders revenue</span><span class="sum-val blue">LKR ${Math.round(appRevenue/100).toLocaleString()}</span></div>
     <div class="sum-row"><span class="sum-label">Walk-in revenue</span><span class="sum-val">LKR ${Math.round(walkInRevenue/100).toLocaleString()}</span></div>
+    ${sourceBar}
     <div class="sum-row"><span class="sum-label">Franchise fee (${feePct}%)</span><span class="sum-val red">− LKR ${Math.round(franchiseFee/100).toLocaleString()}</span></div>
     <div class="sum-row"><span class="sum-label">Net to you (est.)</span><span class="sum-val green">LKR ${Math.round(netToYou/100).toLocaleString()}</span></div>
+    ${splitBar}
     ${inv ? `<div class="sum-row"><span class="sum-label">Latest invoice (${inv.invoice_number})</span><span class="pill ${inv.status==='paid'?'pill-green':inv.status==='overdue'?'pill-red':'pill-amber'}">${inv.status==='paid'?'Paid ✓':inv.status==='overdue'?'Overdue':'Pending'}</span></div>` : `<div class="sum-row"><span class="sum-label">Invoices</span><span class="sum-val" style="color:var(--text3)">None issued yet</span></div>`}`;
 
   // ── Payment methods today (separate fetch — the orders query above
@@ -1663,8 +1717,12 @@ async function loadFinancePage() {
     return { method: m, sum, count: matching.length, pct: Math.round((sum/todayTotal)*100) };
   });
   const methodLabels = { card: '💳 Card payments', cash: '💵 Cash', qr: '📱 QR / Transfer', voucher: '🎟️ Voucher' };
+  const methodBarColor = { card: 'var(--blue)', cash: 'var(--green)', qr: 'var(--gold)', voucher: 'var(--red)' };
   document.getElementById('finance-payment-methods').innerHTML = todays.length
-    ? methodGroups.map(g => `<div class="sum-row"><span class="sum-label">${methodLabels[g.method]}</span><div style="text-align:right"><div class="sum-val">LKR ${Math.round(g.sum/100).toLocaleString()}</div><div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${g.pct}% · ${g.count} txns</div></div></div>`).join('')
+    ? methodGroups.map(g => `<div class="sum-row-bar">
+        <div class="sum-row-top"><span class="sum-label">${methodLabels[g.method]}</span><div style="text-align:right"><div class="sum-val">LKR ${Math.round(g.sum/100).toLocaleString()}</div><div style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${g.pct}% · ${g.count} txns</div></div></div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:${g.pct}%;background:${methodBarColor[g.method]}"></div></div>
+      </div>`).join('')
     : `<div style="padding:10px;color:var(--text3);font-size:13px">No completed sales today yet.</div>`;
 
   // ── Coupons used today ──
@@ -1749,15 +1807,19 @@ function timeAgoLabel(isoString) {
 // ══ STATS — real monthly performance + privacy-safe network ranking ══
 async function loadStatsPage() {
   if (!sb || !OUTLET_ID) return;
-  const startOfMonth = new Date().toISOString().slice(0,7) + '-01';
-  const daysSoFar = new Date().getDate();
+  const now = new Date();
+  const startOfMonth = now.toISOString().slice(0,7) + '-01';
+  const daysSoFar = now.getDate();
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const startOfLastMonth = lastMonthDate.toISOString().slice(0,10);
 
-  const [opsRes, appOrdersRes, redemptionsRes, machineLogsRes, rankRes] = await Promise.all([
+  const [opsRes, appOrdersRes, redemptionsRes, machineLogsRes, rankRes, lastMonthOpsRes] = await Promise.all([
     sb.from('daily_ops').select('total_cups, total_revenue, machine_cleans, machine_flushes, date').eq('outlet_id', OUTLET_ID).gte('date', startOfMonth),
     sb.from('orders').select('id', { count: 'exact', head: true }).eq('outlet_id', OUTLET_ID).not('customer_id','is',null).eq('status','completed').gte('created_at', startOfMonth),
     sb.from('coupon_redemptions').select('id', { count: 'exact', head: true }).eq('outlet_id', OUTLET_ID).gte('redeemed_at', startOfMonth),
     sb.from('machine_logs').select('logged_at').eq('outlet_id', OUTLET_ID).gte('logged_at', startOfMonth),
-    sb.rpc('get_my_outlet_ranking')
+    sb.rpc('get_my_outlet_ranking'),
+    sb.from('daily_ops').select('total_cups, total_revenue').eq('outlet_id', OUTLET_ID).gte('date', startOfLastMonth).lt('date', startOfMonth)
   ]);
 
   const ops = opsRes.data || [];
@@ -1780,6 +1842,40 @@ async function loadStatsPage() {
     <div class="sum-row"><span class="sum-label">Machine-logged days</span><span class="sum-val ${complianceDays>=daysSoFar?'green':'amber'}">${complianceDays} / ${daysSoFar}</span></div>
     <div class="sum-row"><span class="sum-label">Coupons redeemed</span><span class="sum-val">${couponsRedeemed} uses</span></div>`;
 
+  // Month-over-month trend — compares DAILY AVERAGES, not raw totals.
+  // Comparing this month's running total against a full completed prior
+  // month would always look like a decline early in the month regardless
+  // of actual performance (3 days of sales vs 30), so the fair comparison
+  // is rate-based: this month's average-so-far vs last month's actual
+  // average. Falls back to an honest "not enough history" message rather
+  // than fabricating a trend from a month that never happened.
+  const daysInLastMonth = new Date(lastMonthDate.getFullYear(), lastMonthDate.getMonth() + 1, 0).getDate();
+  const lastMonthOps = lastMonthOpsRes.data || [];
+  const trendEl = document.getElementById('stats-month-trend');
+  if (!lastMonthOps.length) {
+    trendEl.innerHTML = `<div style="padding:10px;color:var(--text3);font-size:13px">Not enough history yet — trends appear once a prior month of data exists.</div>`;
+  } else {
+    const lastMonthCups = lastMonthOps.reduce((s,o)=>s+(o.total_cups||0), 0);
+    const lastMonthRevenue = lastMonthOps.reduce((s,o)=>s+(o.total_revenue||0), 0);
+    const lastAvgCups = lastMonthCups / daysInLastMonth;
+    const lastAvgRevenue = lastMonthRevenue / daysInLastMonth;
+    const thisAvgRevenue = daysSoFar > 0 ? totalRevenue / daysSoFar : 0;
+
+    const trendRow = (label, thisAvg, lastAvg, fmt) => {
+      const pct = lastAvg > 0 ? Math.round(((thisAvg - lastAvg) / lastAvg) * 100) : (thisAvg > 0 ? 100 : 0);
+      const up = pct >= 0;
+      const barPct = Math.min(100, Math.round((thisAvg / Math.max(thisAvg, lastAvg, 1)) * 100));
+      return `<div class="sum-row-bar">
+        <div class="sum-row-top"><span class="sum-label">${label} (daily avg)</span><span class="sum-val ${up?'green':'red'}">${up?'▲':'▼'} ${Math.abs(pct)}% vs last month</span></div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:${barPct}%;background:${up?'var(--green)':'var(--red)'}"></div></div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:4px">${fmt(thisAvg)} this month vs ${fmt(lastAvg)} last month</div>
+      </div>`;
+    };
+    trendEl.innerHTML =
+      trendRow('Cups sold', avgDailyCups, lastAvgCups, v => Math.round(v).toLocaleString()) +
+      trendRow('Revenue', thisAvgRevenue, lastAvgRevenue, v => 'LKR ' + Math.round(v/100).toLocaleString());
+  }
+
   // Network ranking — privacy-safe, via SECURITY DEFINER function
   // (returns only this outlet's own rank, never other outlets' data)
   const rankEl = document.getElementById('stats-network-ranking');
@@ -1788,11 +1884,19 @@ async function loadStatsPage() {
     rankEl.innerHTML = `<div style="padding:10px;color:var(--text3);font-size:13px">Ranking unavailable — ask your franchisor to run the ranking setup SQL if this persists.</div>`;
   } else {
     const medalFor = (rank) => rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
-    rankEl.innerHTML = `
-      <div class="sum-row"><span class="sum-label">Revenue rank</span><span class="sum-val" style="color:var(--gold)">${medalFor(rankData.revenue_rank)} #${rankData.revenue_rank} of ${rankData.total_outlets}</span></div>
-      <div class="sum-row"><span class="sum-label">App orders rank</span><span class="sum-val" style="color:var(--gold)">${medalFor(rankData.app_order_rank)} #${rankData.app_order_rank} of ${rankData.total_outlets}</span></div>
-      <div class="sum-row"><span class="sum-label">Machine compliance rank</span><span class="sum-val" style="color:var(--gold)">${medalFor(rankData.machine_compliance_rank)} #${rankData.machine_compliance_rank} of ${rankData.total_outlets}</span></div>
-      <div style="padding:10px 0 4px;font-size:12px;color:var(--text3);font-family:var(--font-mono);border-top:1px solid var(--border);margin-top:4px">Rankings are anonymous — you only see your own position</div>`;
+    // Rank is relative position, not a magnitude — visualized as how far up
+    // the field this outlet sits (1st place = full bar), not a raw number.
+    const posPct = (rank, total) => total > 1 ? Math.round(((total - rank) / (total - 1)) * 100) : 100;
+    const rankRow = (label, rank, total) => `
+      <div class="sum-row-bar">
+        <div class="sum-row-top"><span class="sum-label">${label}</span><span class="sum-val" style="color:var(--gold)">${medalFor(rank)} #${rank} of ${total}</span></div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:${posPct(rank,total)}%;background:var(--gold)"></div></div>
+      </div>`;
+    rankEl.innerHTML =
+      rankRow('Revenue rank', rankData.revenue_rank, rankData.total_outlets) +
+      rankRow('App orders rank', rankData.app_order_rank, rankData.total_outlets) +
+      rankRow('Machine compliance rank', rankData.machine_compliance_rank, rankData.total_outlets) +
+      `<div style="padding:10px 0 4px;font-size:12px;color:var(--text3);font-family:var(--font-mono);border-top:1px solid var(--border);margin-top:4px">Rankings are anonymous — you only see your own position</div>`;
   }
 }
 

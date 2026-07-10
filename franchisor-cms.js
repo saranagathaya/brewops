@@ -55,6 +55,87 @@ async function saveBrandSettings() {
   loadBrandSettings();
 }
 
+// ══ PAYMENT SETTINGS (which checkout methods the customer app offers) ══
+// Stored in app_settings as plain 'true'/'false' strings, matching the
+// generic key/value pattern saveAppSettingDB already provides. Card/Cash/QR
+// default enabled and Voucher defaults disabled when no row exists yet —
+// this matches the checkboxes' original hardcoded HTML state, so a brand
+// that's never touched this card sees no behavior change until they save.
+async function loadPaymentSettings() {
+  if (!sb || !window.MY_PROFILE?.brand_id) return;
+  const { data } = await sb.from('app_settings')
+    .select('key,value')
+    .eq('brand_id', window.MY_PROFILE.brand_id)
+    .in('key', ['payment_card_enabled', 'payment_cash_enabled', 'payment_qr_enabled', 'payment_voucher_enabled']);
+
+  const s = {};
+  (data || []).forEach(r => s[r.key] = r.value);
+  document.getElementById('pay-card-enabled').checked = s.payment_card_enabled !== 'false';
+  document.getElementById('pay-cash-enabled').checked = s.payment_cash_enabled !== 'false';
+  document.getElementById('pay-qr-enabled').checked = s.payment_qr_enabled !== 'false';
+  document.getElementById('pay-voucher-enabled').checked = s.payment_voucher_enabled === 'true';
+}
+
+async function savePaymentSettings() {
+  if (!sb || !window.MY_PROFILE?.brand_id) { showToast('No brand on this account', '⚠️'); return; }
+  const btn = document.getElementById('payment-settings-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  try {
+    await Promise.all([
+      saveAppSettingDB('payment_card_enabled', String(document.getElementById('pay-card-enabled').checked)),
+      saveAppSettingDB('payment_cash_enabled', String(document.getElementById('pay-cash-enabled').checked)),
+      saveAppSettingDB('payment_qr_enabled', String(document.getElementById('pay-qr-enabled').checked)),
+      saveAppSettingDB('payment_voucher_enabled', String(document.getElementById('pay-voucher-enabled').checked)),
+    ]);
+    showToast('Payment settings saved ✓', '💳');
+  } catch (error) {
+    showToast('Failed: ' + error.message, '⚠️');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Settings';
+  }
+}
+
+// ══ NOTIFICATION SETTINGS ══
+// Only "New order alerts" and "Cash payment confirmation popup" are wired
+// here — both gate real, already-existing behavior in the franchisee app
+// (showNewOrderPopup / showCashPopup, previously fired unconditionally on
+// every realtime order). "Order ready notification to customer" and
+// "Weekly summary to franchisor" have no delivery mechanism at all yet
+// (no push/Telegram/email system exists) — the HTML disables those two
+// checkboxes with a "(coming soon)" label instead of pretending Save
+// controls something that doesn't exist.
+async function loadNotificationSettings() {
+  if (!sb || !window.MY_PROFILE?.brand_id) return;
+  const { data } = await sb.from('app_settings')
+    .select('key,value')
+    .eq('brand_id', window.MY_PROFILE.brand_id)
+    .in('key', ['notif_new_order_enabled', 'notif_cash_confirm_enabled']);
+
+  const s = {};
+  (data || []).forEach(r => s[r.key] = r.value);
+  document.getElementById('notif-new-order-enabled').checked = s.notif_new_order_enabled !== 'false';
+  document.getElementById('notif-cash-confirm-enabled').checked = s.notif_cash_confirm_enabled !== 'false';
+}
+
+async function saveNotificationSettings() {
+  if (!sb || !window.MY_PROFILE?.brand_id) { showToast('No brand on this account', '⚠️'); return; }
+  const btn = document.getElementById('notification-settings-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  try {
+    await Promise.all([
+      saveAppSettingDB('notif_new_order_enabled', String(document.getElementById('notif-new-order-enabled').checked)),
+      saveAppSettingDB('notif_cash_confirm_enabled', String(document.getElementById('notif-cash-confirm-enabled').checked)),
+    ]);
+    showToast('Notification settings saved ✓', '🔔');
+  } catch (error) {
+    showToast('Failed: ' + error.message, '⚠️');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Settings';
+  }
+}
+
 function resetNetworkKpis() {
   ['kpi-best-revenue','kpi-most-cups','kpi-lowest','kpi-healthy'].forEach(id => document.getElementById(id).textContent = '—');
   ['kpi-best-revenue-sub','kpi-most-cups-sub','kpi-lowest-sub','kpi-healthy-sub'].forEach(id => document.getElementById(id).textContent = '—');

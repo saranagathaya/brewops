@@ -112,10 +112,15 @@ async function savePromoSlideToDB(id, data) {
 // CMS: Toggle coupon active
 
 // CMS: Save app settings
+// Was silently swallowing failures (never checked .error) — the mismatched
+// onConflict target below went unnoticed for exactly that reason. Now
+// throws so a caller's try/catch (or an unhandled rejection, visibly in
+// the console) surfaces a real failure instead of pretending it saved.
 async function saveAppSettingDB(key, value) {
   if (!sb || !window.MY_PROFILE?.brand_id) return;
-  await sb.from('app_settings')
-    .upsert({ key, value, brand_id: window.MY_PROFILE.brand_id, updated_at: new Date().toISOString() }, { onConflict: 'key,brand_id' });
+  const { error } = await sb.from('app_settings')
+    .upsert({ key, value, brand_id: window.MY_PROFILE.brand_id, updated_at: new Date().toISOString() }, { onConflict: 'brand_id,key' });
+  if (error) throw error;
 }
 
 // ══ INVOICES ══
@@ -232,7 +237,7 @@ function navigate(id,navEl){
   if(id === 'cms-merch') loadMerchManager();
   if(id === 'cms-promo') loadPromoAndBanner();
   if(id === 'cms-coupons') loadCoupons();
-  if(id === 'cms-settings') loadBrandSettings();
+  if(id === 'cms-settings') { loadBrandSettings(); loadPaymentSettings(); loadNotificationSettings(); }
   if(id === 'machines') loadMachines();
   if(id === 'rent') loadRentSchedules();
   if(id === 'stock') loadStock();

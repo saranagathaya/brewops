@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --brand: #8B1A1A; --brand2: #A52020; --brand3: #B43030; --brand-light: #fdf0f0; --brand-dim: rgba(139,26,26,0.10);
+  --brand: #8B1A1A; --brand2: #A52020; --brand3: #B43030; --brand-light: #fdf0f0; --brand-dim: rgba(139,26,26,0.10); --brand-dark: #5e0f0f; --brand-shadow: rgba(139,26,26,0.3);
   --gold: #C8922A; --gold2: #E8B04A; --gold-dim: rgba(200,146,42,0.12);
   --green: #2d6a4f; --green-dim: rgba(45,106,79,0.12);
   --cream: #FBF8F3; --cream2: #F3EFE7; --cream3: #E9E3D8; --white: #ffffff;
@@ -120,7 +120,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .ql-tag{position:absolute;top:-6px;right:-4px;background:var(--brand);color:#fff;font-size:8px;font-family:var(--font-mono);padding:2px 6px;border-radius:8px;font-weight:600;white-space:nowrap;box-shadow:0 3px 8px rgba(139,26,26,0.35);}
 
 /* REWARD CARD */
-.reward{margin:16px 16px 4px;border-radius:var(--r);overflow:hidden;position:relative;background:linear-gradient(120deg,#8B1A1A,#B43030 60%,#8B1A1A);padding:18px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;box-shadow:0 10px 26px rgba(139,26,26,0.3);}
+.reward{margin:16px 16px 4px;border-radius:var(--r);overflow:hidden;position:relative;background:linear-gradient(120deg,var(--brand),var(--brand3) 60%,var(--brand));padding:18px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;box-shadow:0 10px 26px var(--brand-shadow);}
 .reward::after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.06);}
 .reward-num{position:relative;z-index:1;text-align:center;flex-shrink:0;}
 .reward-num .big{font-family:var(--font-mono);font-size:38px;font-weight:700;color:var(--gold2);line-height:0.9;}
@@ -231,7 +231,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .empty-btn{background:var(--brand);color:#fff;border:none;border-radius:26px;padding:12px 28px;font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;margin-top:4px;}
 
 /* PROFILE */
-.profile-hero{background:linear-gradient(135deg,#5e0f0f,#8B1A1A 55%,#B43030);padding:calc(var(--inset-t) + 22px) 18px 26px;position:relative;overflow:hidden;}
+.profile-hero{background:linear-gradient(135deg,var(--brand-dark),var(--brand) 55%,var(--brand3));padding:calc(var(--inset-t) + 22px) 18px 26px;position:relative;overflow:hidden;}
 .profile-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.05);}
 .profile-tagline{font-family:var(--font-display);font-style:italic;font-size:22px;font-weight:600;color:rgba(255,255,255,0.92);margin-bottom:18px;position:relative;z-index:1;line-height:1.05;}
 .profile-card{position:relative;z-index:1;display:flex;align-items:center;gap:14px;}
@@ -403,7 +403,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <div class="app-topbar">
         <div class="topbar-row1">
           <div id="oc-cust-2" class="store-chip">
-            <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="#8B1A1A" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="#8B1A1A"/></svg></div>
+            <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="var(--brand)" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="var(--brand)"/></svg></div>
             <div class="store-meta">
               <div class="store-name"><span id="selected-store-name">Select your outlet</span><span class="chev">›</span></div>
               <div class="store-dist" id="selected-store-dist">Tap to choose your nearest café</div>
@@ -453,7 +453,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
             <div id="oc-cust-8" class="mode-btn" style="opacity:0.4;cursor:not-allowed;">Delivery</div>
           </div>
           <div id="oc-cust-9" class="store-chip" style="flex:1;margin-left:6px;">
-            <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="#8B1A1A" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="#8B1A1A"/></svg></div>
+            <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="var(--brand)" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="var(--brand)"/></svg></div>
             <div class="store-meta"><div class="store-name"><span id="menu-store-name">Select outlet</span><span class="chev">›</span></div></div>
           </div>
         </div>
@@ -695,10 +695,10 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
       <div class="co-card">
         <div class="cs-title">Payment Method</div>
         <div class="payment-method-grid">
-          <div id="oc-cust-51" class="pm-opt selected"><div class="pm-opt-label">Card</div></div>
-          <div id="oc-cust-52" class="pm-opt"><div class="pm-opt-label">Cash at Counter</div></div>
-          <div id="oc-cust-53" class="pm-opt"><div class="pm-opt-label">QR / Transfer</div></div>
-          <div id="oc-cust-54" class="pm-opt"><div class="pm-opt-label">Voucher</div></div>
+          <div id="oc-cust-51" class="pm-opt selected" data-method="card"><div class="pm-opt-label">Card</div></div>
+          <div id="oc-cust-52" class="pm-opt" data-method="cash"><div class="pm-opt-label">Cash at Counter</div></div>
+          <div id="oc-cust-53" class="pm-opt" data-method="qr"><div class="pm-opt-label">QR / Transfer</div></div>
+          <div id="oc-cust-54" class="pm-opt" data-method="voucher"><div class="pm-opt-label">Voucher</div></div>
         </div>
       </div>
       <div class="co-card">
@@ -794,14 +794,56 @@ async function resolveBrand() {
   return true;
 }
 
+// ── Color derivation helpers ──
+// The stylesheet's :root also defines --brand3, --brand-light, --brand-dim,
+// --gold2, --gold-dim — shades derived from --brand/--gold but, until now,
+// hardcoded to Lietard's specific values regardless of brand. Asking every
+// franchisor to hand-pick 5 more harmonious colors (on top of the 3 they
+// already choose) doesn't scale for non-designers, so these are computed
+// from the same primary/secondary/accent colors instead — every brand gets
+// a full, coherent palette from the 3 pickers it already has.
+function hexToRgbParts(hex) {
+  hex = (hex || '').replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const num = parseInt(hex, 16);
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+}
+function lightenHex(hex, amount) { // amount 0-1, mixes toward white
+  const { r, g, b } = hexToRgbParts(hex);
+  const mix = v => Math.round(v + (255 - v) * amount);
+  return '#' + [mix(r), mix(g), mix(b)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+function darkenHex(hex, amount) { // amount 0-1, mixes toward black
+  const { r, g, b } = hexToRgbParts(hex);
+  const mix = v => Math.round(v * (1 - amount));
+  return '#' + [mix(r), mix(g), mix(b)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+function hexToRgbaStr(hex, alpha) {
+  const { r, g, b } = hexToRgbParts(hex);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 // Applies the brand's colors as CSS custom properties, overriding the
 // hardcoded defaults baked into the stylesheet. Logo/name get applied
 // wherever the app already shows brand identity (see applyBrandIdentityToDOM).
 function applyBrandTheme(brand) {
   const root = document.documentElement;
-  if (brand.primary_color) root.style.setProperty('--brand', brand.primary_color);
-  if (brand.secondary_color) root.style.setProperty('--brand2', brand.secondary_color);
-  if (brand.accent_color) root.style.setProperty('--gold', brand.accent_color);
+  if (brand.primary_color) {
+    root.style.setProperty('--brand', brand.primary_color);
+    root.style.setProperty('--brand-light', lightenHex(brand.primary_color, 0.94));
+    root.style.setProperty('--brand-dim', hexToRgbaStr(brand.primary_color, 0.10));
+    root.style.setProperty('--brand-dark', darkenHex(brand.primary_color, 0.33));
+    root.style.setProperty('--brand-shadow', hexToRgbaStr(brand.primary_color, 0.3));
+  }
+  if (brand.secondary_color) {
+    root.style.setProperty('--brand2', brand.secondary_color);
+    root.style.setProperty('--brand3', lightenHex(brand.secondary_color, 0.12));
+  }
+  if (brand.accent_color) {
+    root.style.setProperty('--gold', brand.accent_color);
+    root.style.setProperty('--gold2', lightenHex(brand.accent_color, 0.25));
+    root.style.setProperty('--gold-dim', hexToRgbaStr(brand.accent_color, 0.12));
+  }
   document.title = brand.name || 'BrewOps';
 }
 
@@ -1795,8 +1837,38 @@ function selectStore(id){
 function openStoreSelector(){ openModal('modal-store'); }
 
 // ══ CHECKOUT ══
+// Hides payment methods the franchisor has disabled (Payment Settings
+// card in the franchisor app, backed by app_settings). Defaults to
+// card/cash/qr enabled and voucher disabled when a brand has never
+// touched that card, matching the checkout markup's original hardcoded
+// state — so this is a no-op until a franchisor actually saves a change.
+function applyPaymentMethodAvailability(){
+  const s = window.APP_SETTINGS || {};
+  const enabled = {
+    card: s.payment_card_enabled !== 'false',
+    cash: s.payment_cash_enabled !== 'false',
+    qr: s.payment_qr_enabled !== 'false',
+    voucher: s.payment_voucher_enabled === 'true',
+  };
+  const opts = document.querySelectorAll('.payment-method-grid .pm-opt');
+  opts.forEach(el => {
+    const on = enabled[el.dataset.method] !== false;
+    el.style.display = on ? '' : 'none';
+    if (!on) el.classList.remove('selected');
+  });
+  // If the currently-selected method just got disabled (or nothing was
+  // selected yet), fall back to the first still-visible option so
+  // checkout never ends up with no payment method chosen.
+  const grid = document.querySelector('.payment-method-grid');
+  if (grid && !grid.querySelector('.pm-opt.selected')) {
+    const firstVisible = Array.from(opts).find(el => el.style.display !== 'none');
+    if (firstVisible) firstVisible.classList.add('selected');
+  }
+}
+
 function openCheckout(){
   if(cart.length===0){ showToast('Add items to your cart first','🛒'); return; }
+  applyPaymentMethodAvailability();
   const grouped = groupCartItems(cart);
   document.getElementById('checkout-items').innerHTML = grouped.map(i=>{
     const optLabel = (i.selectedOptions||[]).length ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">${i.selectedOptions.join(' / ')}</div>` : '';

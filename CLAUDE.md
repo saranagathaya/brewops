@@ -134,6 +134,14 @@ they are not independent, especially 08 through 13 (the multi-brand steps),
 which must run in that exact sequence. Each is idempotent where practical
 (`if not exists` / `drop ... if exists` before `create`).
 
+`app_settings` is keyed by `PRIMARY KEY (brand_id, key)` as of
+`18-app-settings-composite-key.sql` — it was originally `PRIMARY KEY (key)`
+alone despite being a brand-owned table, a real bug (two brands could never
+both have a row for the same setting name) caught when `saveAppSettingDB()`
+(`franchisor-live-ops.js`) was first actually exercised end-to-end wiring
+the Payment Settings card. Always upsert against `onConflict: 'brand_id,key'`,
+never `'key'` alone.
+
 `00-base-schema.sql` covers the original base schema (`profiles`, `outlets`,
 `orders`, `menu_items`, etc.) that predates this repo's numbered migration
 history. It was reconstructed from the live project via `pg_catalog`
@@ -219,7 +227,37 @@ tradeoff, not an open bug.
 - Telegram Bot notifications (replacing an earlier WhatsApp plan) are
   planned but not yet built — franchisor/franchisee-facing ops alerts only,
   customer-facing channel undecided.
-- Per-brand theming currently applies only 3 base colors; derived shades
-  are fixed across all brands.
-- Three App Settings cards (Outlet Config, Payment Settings, Notifications)
-  in the franchisor app are UI-only, not wired to any backend.
+- Per-brand theming: the franchisor still only picks 3 colors
+  (primary/secondary/accent), but `applyBrandTheme()` (`brewops-customer.html`)
+  now derives the other 6 root CSS vars (`--brand3`, `--brand-light`,
+  `--brand-dim`, `--brand-dark`, `--brand-shadow`, `--gold2`, `--gold-dim`)
+  from those 3 via `lightenHex`/`darkenHex`/`hexToRgbaStr`, instead of
+  those shades being Lietard's specific hardcoded values regardless of
+  brand. Also fixed a few elements that bypassed CSS vars entirely with
+  literal hex (`.profile-hero`, the two store-chip location-pin SVGs) —
+  those never responded to *any* brand color, not just the derived ones.
+  `#splash`'s gradient is deliberately left hardcoded: it renders before
+  brand resolution completes, so there's nothing to theme it with yet.
+- App Settings: Payment Settings (which checkout methods the customer app
+  offers) and 2 of 4 Notifications toggles (new-order alert, cash-confirm
+  popup — both gate real franchisee-app behavior) are wired to
+  `app_settings` and take effect immediately, as the page banner claims.
+  "Order ready notification to customer" and "Weekly summary to franchisor"
+  are intentionally left disabled with a "(coming soon)" label — no
+  delivery mechanism (push/Telegram/email) exists yet for either, so
+  making them look interactive without one would just move the same
+  deception the original UI-only cards had. Outlet Configuration (default
+  order mode, location detection, delivery radius) is entirely disabled
+  with the same "(coming soon)" treatment, for the same reason — all three
+  settings would control delivery-mode/geolocation features that don't
+  exist yet either (see the delivery-service gap above).
+- Franchisee Finance/Stats gained the franchisor app's `.mini-bar`/
+  `.mini-bar-fill` and two-segment `.mini-bar-split` visual pattern
+  (`brewops-franchisee-v2.html`) — payment-method proportions, revenue
+  composition (app vs walk-in, fee vs net), and network-ranking position
+  are now bars, not just numbers. A month-over-month trend section
+  compares **daily averages**, not raw totals (comparing a partial current
+  month against a full prior month would always look like a decline early
+  in the month) — falls back to an honest "not enough history" message
+  when there's no prior month of `daily_ops` data, rather than fabricating
+  a trend from a month that never happened.

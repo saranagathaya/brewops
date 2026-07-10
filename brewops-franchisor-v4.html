@@ -1121,29 +1121,29 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <div class="section-head"><div><div class="section-title">App Settings</div><div class="section-subtitle" id="cms-settings-subtitle">Customer app configuration</div></div></div>
     <div class="cms-panel"><div class="cms-badge"><div class="cms-live-dot"></div>Customer App — Live Configuration</div><div style="font-size:13px;color:var(--text2);line-height:1.6">These settings control the customer-facing app behaviour. Changes apply immediately.</div></div>
     <div class="three-col">
-      <div class="card"><div class="card-head"><span>🏪</span><span class="card-title">Outlet Configuration</span></div><div class="card-body">
-        <div class="form-group"><label class="form-label">Default Order Mode</label><select class="form-select"><option>Pick Up (default)</option><option>Delivery (default)</option></select></div>
-        <div class="form-group"><label class="form-label">Location Detection</label><select class="form-select"><option>Auto-detect + manual fallback</option><option>Manual only</option></select></div>
-        <div class="form-group"><label class="form-label">Max delivery radius (km)</label><input class="form-input" value="5" type="number"></div>
-        <button id="oc-for-103" class="btn btn-primary" style="width:100%">Save Settings</button>
+      <div class="card" title="These control delivery mode and location features that don't exist in the customer app yet — delivery ordering is disabled and there's no geolocation. Nothing to wire this to until those are built."><div class="card-head"><span>🏪</span><span class="card-title">Outlet Configuration</span><span style="font-size:10px;color:var(--text3);margin-left:6px;">(coming soon)</span></div><div class="card-body" style="opacity:0.55">
+        <div class="form-group"><label class="form-label">Default Order Mode</label><select class="form-select" disabled><option>Pick Up (default)</option><option>Delivery (default)</option></select></div>
+        <div class="form-group"><label class="form-label">Location Detection</label><select class="form-select" disabled><option>Auto-detect + manual fallback</option><option>Manual only</option></select></div>
+        <div class="form-group"><label class="form-label">Max delivery radius (km)</label><input class="form-input" value="5" type="number" disabled></div>
+        <button class="btn btn-primary" style="width:100%" disabled>Save Settings</button>
       </div></div>
       <div class="card"><div class="card-head"><span>💳</span><span class="card-title">Payment Settings</span></div><div class="card-body">
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" checked style="accent-color:var(--accent)"> Card payments enabled</label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" checked style="accent-color:var(--accent)"> Cash at counter enabled</label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" checked style="accent-color:var(--accent)"> QR / Bank Transfer enabled</label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" style="accent-color:var(--accent)"> Voucher payments enabled</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" id="pay-card-enabled" checked style="accent-color:var(--accent)"> Card payments enabled</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" id="pay-cash-enabled" checked style="accent-color:var(--accent)"> Cash at counter enabled</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" id="pay-qr-enabled" checked style="accent-color:var(--accent)"> QR / Bank Transfer enabled</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" id="pay-voucher-enabled" style="accent-color:var(--accent)"> Voucher payments enabled</label>
         </div>
-        <button id="oc-for-104" class="btn btn-primary" style="width:100%">Save Settings</button>
+        <button id="payment-settings-save-btn" class="btn btn-primary" style="width:100%">Save Settings</button>
       </div></div>
       <div class="card"><div class="card-head"><span>🔔</span><span class="card-title">Notifications</span></div><div class="card-body">
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" checked style="accent-color:var(--accent)"> New order alerts to franchisee</label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" checked style="accent-color:var(--accent)"> Cash payment confirmation popup</label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" checked style="accent-color:var(--accent)"> Order ready notification to customer</label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" checked style="accent-color:var(--accent)"> Weekly summary to franchisor</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" id="notif-new-order-enabled" checked style="accent-color:var(--accent)"> New order alerts to franchisee</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><input type="checkbox" id="notif-cash-confirm-enabled" checked style="accent-color:var(--accent)"> Cash payment confirmation popup</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3);opacity:0.55" title="No delivery mechanism exists yet to send this — the toggle can't do anything until one is built (Telegram bot or similar)."><input type="checkbox" checked disabled style="accent-color:var(--accent)"> Order ready notification to customer <span style="font-size:10px">(coming soon)</span></label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3);opacity:0.55" title="No reporting/email mechanism exists yet to send this — the toggle can't do anything until one is built."><input type="checkbox" checked disabled style="accent-color:var(--accent)"> Weekly summary to franchisor <span style="font-size:10px">(coming soon)</span></label>
         </div>
-        <button id="oc-for-105" class="btn btn-primary" style="width:100%">Save Settings</button>
+        <button id="notification-settings-save-btn" class="btn btn-primary" style="width:100%">Save Settings</button>
       </div></div>
     </div>
     <div class="card full-row" id="brand-settings-card"><div class="card-head"><span>☕</span><span class="card-title">Brand Settings</span><span class="card-sub" id="brand-settings-status"></span></div><div class="card-body">

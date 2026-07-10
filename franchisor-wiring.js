@@ -112,9 +112,8 @@ document.getElementById('oc-for-99').addEventListener('click', function(event){ 
 document.getElementById('oc-for-100').addEventListener('click', function(event){ closeModal('modal-add-coupon') });
 document.getElementById('oc-for-101').addEventListener('click', function(event){ closeModal('modal-add-coupon') });
 document.getElementById('coupon-save-btn').addEventListener('click', function(event){ saveCoupon() });
-document.getElementById('oc-for-103').addEventListener('click', function(event){ showToast('Outlet settings saved ✓','🏪') });
-document.getElementById('oc-for-104').addEventListener('click', function(event){ showToast('Payment settings saved ✓','💳') });
-document.getElementById('oc-for-105').addEventListener('click', function(event){ showToast('Notification settings saved ✓','🔔') });
+document.getElementById('payment-settings-save-btn').addEventListener('click', function(event){ savePaymentSettings() });
+document.getElementById('notification-settings-save-btn').addEventListener('click', function(event){ saveNotificationSettings() });
 document.getElementById('oc-for-106').addEventListener('click', function(event){ document.getElementById('brand-settings-logo-file').click() });
 document.getElementById('brand-settings-logo-remove-btn').addEventListener('click', function(event){ removeSelectedImage('brand-settings-logo-file','brand-settings-logo-preview','brand-settings-logo-url') });
 document.getElementById('oc-for-108').addEventListener('click', function(event){ loadBrandSettings() });
