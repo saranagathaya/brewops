@@ -1,0 +1,8 @@
+{
+  "name": "brewops-staging-tools",
+  "private": true,
+  "description": "Scripts for building the local Docker-based Supabase staging environment. See README.md.",
+  "dependencies": {
+    "pg": "^8.11.0"
+  }
+}

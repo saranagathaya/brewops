@@ -54,13 +54,17 @@ const KNOWN_PUBLIC_CATALOG_TABLES = new Set([
 ]);
 
 async function main() {
+  // Cloud Supabase (session pooler) requires SSL; a local Supabase CLI
+  // stack (127.0.0.1) doesn't speak SSL at all. Set PGSSL=false when
+  // pointing this at a local `supabase start` instance for staging.
+  const useSsl = process.env.PGSSL !== 'false';
   const client = new Client({
     host: process.env.PGHOST,
     port: +(process.env.PGPORT || 5432),
     user: process.env.PGUSER,
     password: process.env.PGPASSWORD,
     database: process.env.PGDATABASE || 'postgres',
-    ssl: { rejectUnauthorized: false },
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
   });
   await client.connect();
 

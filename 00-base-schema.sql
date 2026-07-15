@@ -7,12 +7,19 @@
 --
 -- Generated via pg_catalog/information_schema introspection rather
 -- than pg_dump (pg_dump wasn't available in the environment this was
--- produced in), then validated by parsing the whole file with
--- Postgres's own SQL parser (libpg-query) before being committed —
--- it was NOT executed against the source database. Treat it as a
--- point-in-time snapshot, not a hand-maintained migration: if you add
--- new base tables/functions/policies going forward, add them as a new
--- numbered migration file rather than editing this one.
+-- produced in), originally validated only by parsing the whole file
+-- with Postgres's own SQL parser (libpg-query). Since 2026-07-15 it is
+-- also EXECUTION-validated: the full 00→18 sequence runs cleanly from
+-- an empty database (the local staging stack — see tools/staging/).
+-- That first real execution caught and fixed two bugs the parser
+-- couldn't see: FK constraints ordered before the PK/UNIQUE
+-- constraints they reference, and the missing default GRANTs added
+-- below. Still treat it as a point-in-time snapshot, not a
+-- hand-maintained migration: if you add new base
+-- tables/functions/policies going forward, add them as a new numbered
+-- migration file rather than editing this one — edit this file only
+-- to fix errors in the snapshot itself, and re-verify any such edit
+-- with a from-scratch rebuild on staging.
 --
 -- Order: extensions, enums, tables+columns, constraints, indexes,
 -- views, functions, triggers, RLS enable + policies. Run this before
@@ -38,6 +45,26 @@ create extension if not exists "pg_stat_statements";
 create extension if not exists "pgcrypto";
 create extension if not exists "supabase_vault";
 create extension if not exists "uuid-ossp";
+
+-- On hosted Supabase, anon/authenticated/service_role automatically get
+-- SELECT/INSERT/UPDATE/DELETE on every public-schema table as platform
+-- bootstrapping outside any SQL migration -- invisible until you rebuild
+-- from scratch by connecting directly as `postgres` (e.g. via psql, not
+-- the dashboard SQL editor), which uses `postgres`'s own DEFAULT
+-- PRIVILEGES instead of `supabase_admin`'s -- and that default is missing
+-- exactly SELECT/INSERT/UPDATE/DELETE (confirmed against a local
+-- `supabase start` stack: every query failed "permission denied for
+-- table X" regardless of RLS policy content, since Postgres checks
+-- GRANTs before RLS). Restated explicitly here so a from-scratch rebuild
+-- run outside the dashboard doesn't hit that wall; harmless / already
+-- true if run against a real Supabase project via the dashboard.
+grant usage on schema public to anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  grant select, insert, update, delete on tables to anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  grant usage, select on sequences to anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  grant execute on functions to anon, authenticated, service_role;
 
 -- Tables
 create table if not exists "app_settings" (
@@ -429,75 +456,90 @@ create table if not exists "waste_logs" (
 );
 
 -- Constraints
-alter table "app_settings" add constraint "app_settings_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "app_settings" add constraint "app_settings_pkey" PRIMARY KEY (key);
 alter table "brands" add constraint "brands_pkey" PRIMARY KEY (id);
 alter table "brands" add constraint "brands_slug_key" UNIQUE (slug);
+alter table "coupon_redemptions" add constraint "coupon_redemptions_pkey" PRIMARY KEY (id);
+alter table "coupons" add constraint "coupons_pkey" PRIMARY KEY (id);
+alter table "coupons" add constraint "coupons_brand_code_key" UNIQUE (brand_id, code);
+alter table "customer_addresses" add constraint "customer_addresses_pkey" PRIMARY KEY (id);
+alter table "customer_favourites" add constraint "customer_favourites_pkey" PRIMARY KEY (id);
+alter table "daily_ops" add constraint "daily_ops_pkey" PRIMARY KEY (id);
+alter table "daily_ops" add constraint "daily_ops_outlet_id_date_key" UNIQUE (outlet_id, date);
+alter table "home_banner" add constraint "home_banner_pkey" PRIMARY KEY (id);
+alter table "invite_codes" add constraint "invite_codes_pkey" PRIMARY KEY (id);
+alter table "invite_codes" add constraint "invite_codes_code_key" UNIQUE (code);
+alter table "invoices" add constraint "invoices_pkey" PRIMARY KEY (id);
+alter table "invoices" add constraint "invoices_invoice_number_key" UNIQUE (invoice_number);
+alter table "issues" add constraint "issues_pkey" PRIMARY KEY (id);
+alter table "machine_logs" add constraint "machine_logs_pkey" PRIMARY KEY (id);
+alter table "machines" add constraint "machines_pkey" PRIMARY KEY (id);
+alter table "machines" add constraint "machines_outlet_id_key" UNIQUE (outlet_id);
+alter table "menu_categories" add constraint "menu_categories_pkey" PRIMARY KEY (id);
+alter table "menu_items" add constraint "menu_items_pkey" PRIMARY KEY (id);
+alter table "merch_categories" add constraint "merch_categories_pkey" PRIMARY KEY (id);
+alter table "merch_items" add constraint "merch_items_pkey" PRIMARY KEY (id);
+alter table "order_items" add constraint "order_items_pkey" PRIMARY KEY (id);
+alter table "orders" add constraint "orders_pkey" PRIMARY KEY (id);
+alter table "orders" add constraint "orders_order_number_key" UNIQUE (order_number);
+alter table "outlets" add constraint "outlets_pkey" PRIMARY KEY (id);
+alter table "profiles" add constraint "profiles_pkey" PRIMARY KEY (id);
+alter table "promo_slides" add constraint "promo_slides_pkey" PRIMARY KEY (id);
+alter table "rent_schedules" add constraint "rent_schedules_pkey" PRIMARY KEY (id);
+alter table "rent_schedules" add constraint "rent_schedules_outlet_id_key" UNIQUE (outlet_id);
+alter table "stock" add constraint "stock_pkey" PRIMARY KEY (id);
+alter table "stock" add constraint "stock_outlet_id_item_name_key" UNIQUE (outlet_id, item_name);
+alter table "stock_requests" add constraint "stock_requests_pkey" PRIMARY KEY (id);
+alter table "supplier_payments" add constraint "supplier_payments_pkey" PRIMARY KEY (id);
+alter table "suppliers" add constraint "suppliers_pkey" PRIMARY KEY (id);
+alter table "waste_logs" add constraint "waste_logs_pkey" PRIMARY KEY (id);
+
+-- (foreign keys + check constraints, after all primary/unique keys above)
+alter table "app_settings" add constraint "app_settings_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "coupon_redemptions" add constraint "coupon_redemptions_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "coupon_redemptions" add constraint "coupon_redemptions_coupon_id_fkey" FOREIGN KEY (coupon_id) REFERENCES coupons(id);
 alter table "coupon_redemptions" add constraint "coupon_redemptions_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES profiles(id);
 alter table "coupon_redemptions" add constraint "coupon_redemptions_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "coupon_redemptions" add constraint "coupon_redemptions_pkey" PRIMARY KEY (id);
 alter table "coupons" add constraint "coupons_discount_type_check" CHECK ((discount_type = ANY (ARRAY['percent'::text, 'fixed'::text, 'free'::text])));
 alter table "coupons" add constraint "coupons_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
-alter table "coupons" add constraint "coupons_pkey" PRIMARY KEY (id);
-alter table "coupons" add constraint "coupons_brand_code_key" UNIQUE (brand_id, code);
 alter table "customer_addresses" add constraint "customer_addresses_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-alter table "customer_addresses" add constraint "customer_addresses_pkey" PRIMARY KEY (id);
 alter table "customer_favourites" add constraint "customer_favourites_one_product_type_chk" CHECK ((((menu_item_id IS NOT NULL) AND (merch_item_id IS NULL)) OR ((menu_item_id IS NULL) AND (merch_item_id IS NOT NULL))));
 alter table "customer_favourites" add constraint "customer_favourites_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 alter table "customer_favourites" add constraint "customer_favourites_menu_item_id_fkey" FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE;
 alter table "customer_favourites" add constraint "customer_favourites_merch_item_id_fkey" FOREIGN KEY (merch_item_id) REFERENCES merch_items(id) ON DELETE CASCADE;
-alter table "customer_favourites" add constraint "customer_favourites_pkey" PRIMARY KEY (id);
 alter table "daily_ops" add constraint "daily_ops_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "daily_ops" add constraint "daily_ops_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "daily_ops" add constraint "daily_ops_pkey" PRIMARY KEY (id);
-alter table "daily_ops" add constraint "daily_ops_outlet_id_date_key" UNIQUE (outlet_id, date);
 alter table "home_banner" add constraint "home_banner_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
-alter table "home_banner" add constraint "home_banner_pkey" PRIMARY KEY (id);
 alter table "invite_codes" add constraint "invite_codes_role_check" CHECK ((role = ANY (ARRAY['franchisee'::text, 'franchisor'::text])));
 alter table "invite_codes" add constraint "invite_codes_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "invite_codes" add constraint "invite_codes_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
 alter table "invite_codes" add constraint "invite_codes_used_by_fkey" FOREIGN KEY (used_by) REFERENCES auth.users(id);
-alter table "invite_codes" add constraint "invite_codes_pkey" PRIMARY KEY (id);
-alter table "invite_codes" add constraint "invite_codes_code_key" UNIQUE (code);
 alter table "invoices" add constraint "invoices_status_check" CHECK ((status = ANY (ARRAY['draft'::text, 'sent'::text, 'paid'::text, 'overdue'::text])));
 alter table "invoices" add constraint "invoices_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "invoices" add constraint "invoices_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "invoices" add constraint "invoices_pkey" PRIMARY KEY (id);
-alter table "invoices" add constraint "invoices_invoice_number_key" UNIQUE (invoice_number);
 alter table "issues" add constraint "issues_severity_check" CHECK ((severity = ANY (ARRAY['high'::text, 'medium'::text, 'low'::text])));
 alter table "issues" add constraint "issues_status_check" CHECK ((status = ANY (ARRAY['open'::text, 'in_progress'::text, 'resolved'::text, 'closed'::text])));
 alter table "issues" add constraint "issues_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "issues" add constraint "issues_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
 alter table "issues" add constraint "issues_reported_by_fkey" FOREIGN KEY (reported_by) REFERENCES profiles(id);
-alter table "issues" add constraint "issues_pkey" PRIMARY KEY (id);
 alter table "machine_logs" add constraint "machine_logs_event_type_check" CHECK ((event_type = ANY (ARRAY['clean'::text, 'flush'::text, 'routine_service'::text, 'emergency_service'::text, 'issue_noticed'::text, 'part_replaced'::text])));
 alter table "machine_logs" add constraint "machine_logs_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "machine_logs" add constraint "machine_logs_logged_by_fkey" FOREIGN KEY (logged_by) REFERENCES profiles(id);
 alter table "machine_logs" add constraint "machine_logs_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "machine_logs" add constraint "machine_logs_pkey" PRIMARY KEY (id);
 alter table "machines" add constraint "machines_status_check" CHECK ((status = ANY (ARRAY['ok'::text, 'due_soon'::text, 'overdue'::text, 'emergency'::text])));
 alter table "machines" add constraint "machines_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "machines" add constraint "machines_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "machines" add constraint "machines_pkey" PRIMARY KEY (id);
-alter table "machines" add constraint "machines_outlet_id_key" UNIQUE (outlet_id);
 alter table "menu_categories" add constraint "menu_categories_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
-alter table "menu_categories" add constraint "menu_categories_pkey" PRIMARY KEY (id);
 alter table "menu_items" add constraint "menu_items_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "menu_items" add constraint "menu_items_category_id_fkey" FOREIGN KEY (category_id) REFERENCES menu_categories(id) ON DELETE SET NULL;
-alter table "menu_items" add constraint "menu_items_pkey" PRIMARY KEY (id);
 alter table "merch_categories" add constraint "merch_categories_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
-alter table "merch_categories" add constraint "merch_categories_pkey" PRIMARY KEY (id);
 alter table "merch_items" add constraint "merch_items_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "merch_items" add constraint "merch_items_category_id_fkey" FOREIGN KEY (category_id) REFERENCES merch_categories(id) ON DELETE SET NULL;
-alter table "merch_items" add constraint "merch_items_pkey" PRIMARY KEY (id);
 alter table "order_items" add constraint "order_items_one_product_type_chk" CHECK ((((menu_item_id IS NOT NULL) AND (merch_item_id IS NULL)) OR ((menu_item_id IS NULL) AND (merch_item_id IS NOT NULL))));
 alter table "order_items" add constraint "order_items_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "order_items" add constraint "order_items_menu_item_id_fkey" FOREIGN KEY (menu_item_id) REFERENCES menu_items(id);
 alter table "order_items" add constraint "order_items_merch_item_id_fkey" FOREIGN KEY (merch_item_id) REFERENCES merch_items(id);
 alter table "order_items" add constraint "order_items_order_id_fkey" FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
-alter table "order_items" add constraint "order_items_pkey" PRIMARY KEY (id);
 alter table "orders" add constraint "orders_order_type_check" CHECK ((order_type = ANY (ARRAY['pickup'::text, 'delivery'::text])));
 alter table "orders" add constraint "orders_payment_method_check" CHECK ((payment_method = ANY (ARRAY['card'::text, 'cash'::text, 'qr'::text, 'voucher'::text])));
 alter table "orders" add constraint "orders_payment_status_check" CHECK ((payment_status = ANY (ARRAY['pending'::text, 'paid'::text, 'cash_confirmed'::text, 'failed'::text, 'refunded'::text])));
@@ -506,43 +548,30 @@ alter table "orders" add constraint "orders_brand_id_fkey" FOREIGN KEY (brand_id
 alter table "orders" add constraint "orders_coupon_id_fkey" FOREIGN KEY (coupon_id) REFERENCES coupons(id);
 alter table "orders" add constraint "orders_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES profiles(id);
 alter table "orders" add constraint "orders_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "orders" add constraint "orders_pkey" PRIMARY KEY (id);
-alter table "orders" add constraint "orders_order_number_key" UNIQUE (order_number);
 alter table "outlets" add constraint "outlets_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
-alter table "outlets" add constraint "outlets_pkey" PRIMARY KEY (id);
 alter table "profiles" add constraint "profiles_role_check" CHECK ((role = ANY (ARRAY['franchisor'::text, 'franchisee'::text, 'customer'::text, 'platform_admin'::text])));
 alter table "profiles" add constraint "profiles_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "profiles" add constraint "profiles_id_fkey" FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
 alter table "profiles" add constraint "profiles_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "profiles" add constraint "profiles_pkey" PRIMARY KEY (id);
 alter table "promo_slides" add constraint "promo_slides_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
-alter table "promo_slides" add constraint "promo_slides_pkey" PRIMARY KEY (id);
 alter table "rent_schedules" add constraint "rent_schedules_status_check" CHECK ((status = ANY (ARRAY['current'::text, 'due_soon'::text, 'overdue'::text])));
 alter table "rent_schedules" add constraint "rent_schedules_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "rent_schedules" add constraint "rent_schedules_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "rent_schedules" add constraint "rent_schedules_pkey" PRIMARY KEY (id);
-alter table "rent_schedules" add constraint "rent_schedules_outlet_id_key" UNIQUE (outlet_id);
 alter table "stock" add constraint "stock_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "stock" add constraint "stock_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "stock" add constraint "stock_pkey" PRIMARY KEY (id);
-alter table "stock" add constraint "stock_outlet_id_item_name_key" UNIQUE (outlet_id, item_name);
 alter table "stock_requests" add constraint "stock_requests_status_check" CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'dispatched'::text, 'delivered'::text, 'fulfilled'::text])));
 alter table "stock_requests" add constraint "stock_requests_urgency_check" CHECK ((urgency = ANY (ARRAY['critical'::text, 'urgent'::text, 'normal'::text])));
 alter table "stock_requests" add constraint "stock_requests_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "stock_requests" add constraint "stock_requests_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
 alter table "stock_requests" add constraint "stock_requests_requested_by_fkey" FOREIGN KEY (requested_by) REFERENCES profiles(id);
-alter table "stock_requests" add constraint "stock_requests_pkey" PRIMARY KEY (id);
 alter table "supplier_payments" add constraint "supplier_payments_status_check" CHECK ((status = ANY (ARRAY['pending'::text, 'paid'::text, 'overdue'::text])));
 alter table "supplier_payments" add constraint "supplier_payments_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "supplier_payments" add constraint "supplier_payments_supplier_id_fkey" FOREIGN KEY (supplier_id) REFERENCES suppliers(id);
-alter table "supplier_payments" add constraint "supplier_payments_pkey" PRIMARY KEY (id);
 alter table "suppliers" add constraint "suppliers_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
-alter table "suppliers" add constraint "suppliers_pkey" PRIMARY KEY (id);
 alter table "waste_logs" add constraint "waste_logs_reason_check" CHECK ((reason = ANY (ARRAY['spilled'::text, 'disposed'::text, 'expired'::text, 'quality_issue'::text, 'other'::text])));
 alter table "waste_logs" add constraint "waste_logs_brand_id_fkey" FOREIGN KEY (brand_id) REFERENCES brands(id);
 alter table "waste_logs" add constraint "waste_logs_logged_by_fkey" FOREIGN KEY (logged_by) REFERENCES profiles(id);
 alter table "waste_logs" add constraint "waste_logs_outlet_id_fkey" FOREIGN KEY (outlet_id) REFERENCES outlets(id);
-alter table "waste_logs" add constraint "waste_logs_pkey" PRIMARY KEY (id);
 
 -- Indexes
 CREATE INDEX idx_customer_addresses_customer ON public.customer_addresses USING btree (customer_id);

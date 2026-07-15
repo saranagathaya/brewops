@@ -145,10 +145,23 @@ never `'key'` alone.
 `00-base-schema.sql` covers the original base schema (`profiles`, `outlets`,
 `orders`, `menu_items`, etc.) that predates this repo's numbered migration
 history. It was reconstructed from the live project via `pg_catalog`
-introspection (not `pg_dump`) and validated by parsing it with Postgres's
-own SQL parser before being committed, so treat it as a point-in-time
-snapshot rather than a hand-maintained migration — add new base-level
-tables/functions/policies as a new numbered file, not by editing this one.
+introspection (not `pg_dump`), originally validated only by parsing it
+with Postgres's own SQL parser — but as of 2026-07-15 the full 00→18
+sequence is also execution-validated against a from-scratch local staging
+database (see "Local staging environment" below). That first real
+execution caught two bugs parser-validation couldn't: FK constraints
+ordered before the PK/UNIQUE constraints they referenced, and missing
+`SELECT/INSERT/UPDATE/DELETE` default grants for
+`anon`/`authenticated`/`service_role` (hosted Supabase creates those as
+invisible platform bootstrapping via `supabase_admin`'s default
+privileges, so they never appear in any migration — until you rebuild by
+connecting directly as `postgres`, whose default ACLs don't include them,
+and every query fails "permission denied" regardless of RLS). Both are
+fixed in the file. Still treat it as a point-in-time snapshot rather than
+a hand-maintained migration — add new base-level tables/functions/policies
+as a new numbered file, not by editing this one; edit it only to fix
+snapshot errors, and re-verify such edits with a from-scratch staging
+rebuild.
 Its header flags (and `16-notification-triggers-drop-service-role.sql`
 fixes) a security issue: three `*-alert` triggers called an edge function
 with a `service_role` key hardcoded in the trigger DDL (readable by anyone
@@ -185,7 +198,9 @@ every `brand_id`-bearing table/view. Entirely read-only. Run it after any
 RLS change: `cd tools/rls-check && npm install && PGHOST=... PGPORT=...
 PGUSER=... PGPASSWORD=... PGDATABASE=... node check.js` (use the Supabase
 session-pooler connection details — the direct `db.<ref>.supabase.co`
-host is IPv6-only). It found and `15-rls-orders-and-view-security-fixes.sql`
+host is IPv6-only). Add `PGSSL=false` when pointing it at the local
+staging stack, which doesn't speak SSL (the cloud pooler requires it, so
+SSL stays the default). It found and `15-rls-orders-and-view-security-fixes.sql`
 fixed two real bugs: `orders` had two policies that granted ANY
 franchisor/franchisee account (any brand) full read/insert access with no
 brand or outlet check, defeating the correctly-scoped policies that
@@ -217,6 +232,29 @@ brands' outlet *names* to a franchisor who queries the view without a
 brand filter, but no longer their revenue (that came from `daily_ops`).
 That residual name/location visibility is the accepted public-catalog
 tradeoff, not an open bug.
+
+## Local staging environment
+
+`tools/staging/` (see its README for the full walkthrough) builds a
+complete local Supabase stack in Docker — Postgres + Auth + Storage +
+Realtime + Studio via `npx supabase start` (config in `supabase/`), then
+`run-migrations.js` applies 00→18 in order and `seed-staging.js` creates
+both test brands with an outlet and franchisor/franchisee logins each.
+Use it to trial schema/RLS changes before running them on production —
+it's the only place the full migration sequence actually executes end to
+end (production's schema was built incrementally, so it never re-runs
+these files). Two staging-specific facts to not trip over:
+
+- The three `*-alert` notification triggers are dropped on staging
+  (`tools/staging/staging-only-drop-notification-triggers.sql`, run
+  automatically by `run-migrations.js`): migrations 00/16 hardcode
+  PRODUCTION's edge-function URL into them, so left alive on staging
+  they'd silently POST to production. **Never run that drop file against
+  production.**
+- To point one of the HTML apps at staging, make a scratch copy with
+  `SUPABASE_URL`/`SUPABASE_KEY` swapped to the local values and never
+  commit it — the production values hardcoded in the real files are the
+  deployed configuration.
 
 ## Known gaps / open items
 
