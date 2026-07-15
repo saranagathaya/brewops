@@ -53,7 +53,37 @@ const KNOWN_PUBLIC_CATALOG_TABLES = new Set([
   'app_settings',
 ]);
 
+// Views with a documented, human-accepted residual exposure — reported
+// loudly on every run but not a failure. Currently only outlet_health:
+// after 15/17 fixed the real leaks (revenue via daily_ops), what remains
+// is other brands' outlet NAMES/locations, which are public information
+// anyway (the outlets table itself is intentionally public-read for the
+// anonymous customer app). See CLAUDE.md "Database / migrations". If a
+// future change makes these views expose anything beyond that, move the
+// view OUT of this set so it fails the build again.
+const KNOWN_ACCEPTED_VIEW_GAPS = new Set([
+  'outlet_health',
+]);
+
 async function main() {
+  // The session pooler occasionally drops a connection mid-run. Every
+  // check is read-only and rolled back, so simply retrying the whole run
+  // on a fresh connection is safe — and beats a red nightly CI run over
+  // a network blip. Real failures (bad credentials, missing brands,
+  // actual leaks) don't throw here, so they are not retried.
+  const ATTEMPTS = 3;
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+    try {
+      return await runOnce();
+    } catch (e) {
+      console.error(`attempt ${attempt}/${ATTEMPTS} failed: ${e.message}`);
+      if (attempt === ATTEMPTS) throw e;
+      await new Promise(r => setTimeout(r, 10000));
+    }
+  }
+}
+
+async function runOnce() {
   // Cloud Supabase (session pooler) requires SSL; a local Supabase CLI
   // stack (127.0.0.1) doesn't speak SSL at all. Set PGSSL=false when
   // pointing this at a local `supabase start` instance for staging.
@@ -65,7 +95,14 @@ async function main() {
     password: process.env.PGPASSWORD,
     database: process.env.PGDATABASE || 'postgres',
     ssl: useSsl ? { rejectUnauthorized: false } : false,
+    // Fail fast instead of hanging a CI job when the pooler stalls
+    connectionTimeoutMillis: 30000,
+    statement_timeout: 60000,
   });
+  // Without a handler, a dropped socket becomes an unhandled 'error'
+  // event that crashes the process with a bare stack trace instead of
+  // reaching the retry loop above.
+  client.on('error', e => { console.error(`connection error: ${e.message}`); });
   await client.connect();
 
   const brands = (await client.query(
@@ -152,7 +189,8 @@ async function main() {
 
 function report(results) {
   const errors = results.filter(r => r.error);
-  const leaks = results.filter(r => r.foreignVisible > 0 && !r.knownPublic);
+  const leaks = results.filter(r => r.foreignVisible > 0 && !r.knownPublic && !KNOWN_ACCEPTED_VIEW_GAPS.has(r.table));
+  const acceptedGaps = results.filter(r => r.foreignVisible > 0 && KNOWN_ACCEPTED_VIEW_GAPS.has(r.table));
   const acknowledged = results.filter(r => r.foreignVisible > 0 && r.knownPublic);
   const clean = results.filter(r => !r.error && r.foreignVisible === 0);
   // Positive check: a policy that's accidentally too strict would pass
@@ -171,9 +209,26 @@ function report(results) {
     console.log(`\n${acknowledged.length} check(s) saw cross-brand rows on tables in the reviewed KNOWN_PUBLIC_CATALOG_TABLES allowlist: ${tables.join(', ')}`);
   }
 
+  if (acceptedGaps.length) {
+    console.log(`\nACCEPTED GAPS (documented residual exposure, not a failure — see KNOWN_ACCEPTED_VIEW_GAPS):`);
+    for (const g of acceptedGaps) {
+      console.log(`  "${g.table}" — ${g.brand}/${g.role} saw ${g.foreignVisible} foreign row(s) (outlet names/locations only)`);
+    }
+  }
+
   if (zeroOwnVisibility.length) {
+    // Compact per-table summary — one line per table, not per actor, so
+    // this soft signal doesn't bury the hard ones in CI logs.
+    const byTable = new Map();
+    for (const z of zeroOwnVisibility) {
+      if (!byTable.has(z.table)) byTable.set(z.table, []);
+      byTable.get(z.table).push(`${z.brand}/${z.role}`);
+    }
+    const totalActors = new Set(results.map(r => `${r.brand}/${r.role}`)).size;
     console.log(`\n${zeroOwnVisibility.length} check(s) saw ZERO own-brand rows — could just mean no data exists yet, but worth a glance in case a policy is over-restrictive:`);
-    for (const z of zeroOwnVisibility) console.log(`  "${z.table}" — ${z.brand}/${z.role} sees none of their own brand's rows`);
+    for (const [table, actors] of byTable) {
+      console.log(`  "${table}" — ${actors.length === totalActors ? 'all actors' : actors.join(', ')}`);
+    }
   }
 
   if (errors.length) {

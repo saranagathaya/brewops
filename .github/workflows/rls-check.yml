@@ -1,0 +1,78 @@
+# ══ RLS cross-brand isolation gate ══
+#
+# Two jobs, two purposes:
+#
+#  staging-rls  — hermetic: builds the entire database from this repo's
+#                 migration files (00→19) inside the runner via the
+#                 Supabase CLI, seeds both test brands + probe rows, and
+#                 runs tools/rls-check against it. No secrets, no network
+#                 dependence on production. Catches RLS bugs in the
+#                 migration files BEFORE anyone applies them to
+#                 production. Runs on any push/PR that touches SQL or
+#                 the tooling.
+#
+#  production-rls — drift check: runs the same check against the LIVE
+#                 production database (read-only; every probe runs in a
+#                 rolled-back transaction). Catches policy changes made
+#                 directly in the Supabase dashboard that never went
+#                 through git. Runs nightly + on demand. Needs four repo
+#                 secrets (Settings → Secrets and variables → Actions):
+#                   PROD_PGHOST     e.g. aws-1-ap-southeast-1.pooler.supabase.com
+#                   PROD_PGPORT     5432
+#                   PROD_PGUSER     postgres.<project-ref>
+#                   PROD_PGPASSWORD the database password
+#                 (Session pooler values — the direct db.<ref> host is
+#                 IPv6-only and unreachable from GitHub runners too.)
+
+name: rls-check
+
+on:
+  push:
+    branches: [main]
+    paths: ['*.sql', 'tools/**', 'supabase/**', '.github/workflows/rls-check.yml']
+  pull_request:
+    paths: ['*.sql', 'tools/**', 'supabase/**', '.github/workflows/rls-check.yml']
+  schedule:
+    - cron: '30 22 * * *'   # 04:00 Asia/Colombo, daily
+  workflow_dispatch:
+
+jobs:
+  staging-rls:
+    # Hermetic migration + isolation test; skip for the nightly schedule
+    # (the schedule exists for production drift, not to rebuild staging).
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase stack
+        # Only db + auth matter for the RLS check; skip the heavy extras
+        run: supabase start -x studio,imgproxy,inbucket,edge-runtime,analytics,vector,realtime,storage
+      - name: Run migrations 00-19
+        run: cd tools/staging && npm ci && node run-migrations.js
+      - name: Seed test brands + isolation probe rows
+        run: cd tools/staging && node seed-staging.js
+      - name: rls-check against fresh staging
+        run: |
+          cd tools/rls-check && npm ci
+          PGSSL=false PGHOST=127.0.0.1 PGPORT=54322 PGUSER=postgres \
+          PGPASSWORD=postgres PGDATABASE=postgres node check.js
+
+  production-rls:
+    # Read-only drift check against live production
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: rls-check against production
+        env:
+          PGHOST: ${{ secrets.PROD_PGHOST }}
+          PGPORT: ${{ secrets.PROD_PGPORT }}
+          PGUSER: ${{ secrets.PROD_PGUSER }}
+          PGPASSWORD: ${{ secrets.PROD_PGPASSWORD }}
+          PGDATABASE: postgres
+        run: cd tools/rls-check && npm ci && node check.js

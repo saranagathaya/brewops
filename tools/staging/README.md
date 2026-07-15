@@ -50,8 +50,16 @@ node run-migrations.js      # runs 00→19 in order (19 drops the 3
                             # production's edge-function URL)
 node seed-staging.js        # both test brands + outlet + franchisor/
                             # franchisee login per brand (see its header
-                            # for the emails; password "staging-password")
+                            # for the emails; password "staging-password"),
+                            # plus one isolation "probe row" per brand in
+                            # each sensitive table so tools/rls-check has
+                            # data that COULD leak (without them a fresh
+                            # DB passes vacuously)
 ```
+
+The same sequence runs automatically in CI on every SQL-touching push/PR
+(`.github/workflows/rls-check.yml`), which also has a nightly read-only
+drift check against production.
 
 Finally create the `brewops-images` storage bucket (public) via Studio →
 Storage, matching production.

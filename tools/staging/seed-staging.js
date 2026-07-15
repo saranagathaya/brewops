@@ -86,6 +86,40 @@ async function main() {
       if (up.rowCount !== 1) throw new Error(`trigger did not create profile for ${email}`);
       console.log(`${brand.slug} / ${role}: user ${userId}, email ${email}`);
     }
+
+    // ── Isolation probe rows ──
+    // One row per brand in each historically-sensitive table. Without
+    // these, a fresh staging DB has nothing that COULD leak, so
+    // tools/rls-check passes vacuously — the two real leaks it ever
+    // found (orders, daily_ops-backed views) both needed actual rows to
+    // be visible. Values are obviously synthetic.
+    const tag = brand.slug === 'lietard' ? 'LI' : 'TB';
+    await c.query(
+      `insert into orders (order_number, outlet_id, order_type, payment_method, subtotal, total, brand_id)
+       values ($1, $2, 'pickup', 'cash', 1000, 1000, $3)`,
+      [`PROBE-${tag}-0001`, outletId, brand.id]
+    );
+    await c.query(
+      `insert into invoices (invoice_number, outlet_id, period_start, period_end, revenue_amount, franchise_fee, total_due, brand_id)
+       values ($1, $2, current_date - 30, current_date, 100000, 12000, 12000, $3)`,
+      [`PROBE-INV-${tag}-0001`, outletId, brand.id]
+    );
+    await c.query(
+      `insert into machines (outlet_id, model, serial_number, brand_id)
+       values ($1, 'Probe Machine 9000', $2, $3)`,
+      [outletId, `PROBE-SN-${tag}`, brand.id]
+    );
+    await c.query(
+      `insert into stock_requests (outlet_id, items, brand_id)
+       values ($1, '[{"item":"probe beans","qty":1}]'::jsonb, $2)`,
+      [outletId, brand.id]
+    );
+    await c.query(
+      `insert into daily_ops (outlet_id, total_cups, total_revenue, brand_id)
+       values ($1, 42, 42000, $2)`,
+      [outletId, brand.id]
+    );
+    console.log(`${brand.slug}: probe rows in orders/invoices/machines/stock_requests/daily_ops`);
   }
 
   await c.end();

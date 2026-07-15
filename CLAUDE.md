@@ -213,7 +213,21 @@ PGUSER=... PGPASSWORD=... PGDATABASE=... node check.js` (use the Supabase
 session-pooler connection details — the direct `db.<ref>.supabase.co`
 host is IPv6-only). Add `PGSSL=false` when pointing it at the local
 staging stack, which doesn't speak SSL (the cloud pooler requires it, so
-SSL stays the default). It found and `15-rls-orders-and-view-security-fixes.sql`
+SSL stays the default). It also runs automatically in CI
+(`.github/workflows/rls-check.yml`): a hermetic job builds the whole
+database from the migration files inside the GitHub runner (via
+`supabase start` + `tools/staging/`) and checks it on every SQL-touching
+push/PR, and a nightly job runs the same check read-only against
+production to catch dashboard-made policy drift (needs the four
+`PROD_PG*` repo secrets described in the workflow header). The
+`outlet_health` name-only residual is encoded as
+`KNOWN_ACCEPTED_VIEW_GAPS` in `check.js` — reported on every run but not
+a failure, so CI is green unless something new leaks; if that view ever
+exposes more than outlet names/locations again, remove it from that set.
+The staging seed plants one "probe row" per brand in the sensitive
+tables (orders, invoices, machines, stock_requests, daily_ops)
+specifically so the hermetic CI check has data that COULD leak — without
+them a fresh database passes vacuously. It found and `15-rls-orders-and-view-security-fixes.sql`
 fixed two real bugs: `orders` had two policies that granted ANY
 franchisor/franchisee account (any brand) full read/insert access with no
 brand or outlet check, defeating the correctly-scoped policies that
