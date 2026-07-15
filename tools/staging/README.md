@@ -44,10 +44,10 @@ Then build the schema and seed test data:
 ```
 cd tools/staging
 npm install
-node run-migrations.js      # runs 00→18 in order, then drops the 3
-                            # notification triggers (they hardcode
-                            # PRODUCTION's edge-function URL — see
-                            # staging-only-drop-notification-triggers.sql)
+node run-migrations.js      # runs 00→19 in order (19 drops the 3
+                            # notification triggers everywhere — they
+                            # carried a legacy key and hardcoded
+                            # production's edge-function URL)
 node seed-staging.js        # both test brands + outlet + franchisor/
                             # franchisee login per brand (see its header
                             # for the emails; password "staging-password")
@@ -84,7 +84,6 @@ values in the real files are the deployed configuration.
 
 ## What staging deliberately lacks
 
-- The 3 notification webhook triggers (dropped — they'd POST to
-  production's edge function; harmless today since no Telegram bot exists)
-- The `send-notification` edge function itself
+- The `send-notification` edge function (dormant on production anyway —
+  migration 19 dropped the triggers that called it, everywhere)
 - Production data — only the seed script's minimal rows

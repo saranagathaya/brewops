@@ -96,11 +96,16 @@ phone-only (customers order on phones) and the franchisor app deliberately
 a desktop console, so neither has this; don't add it without a real
 cross-device need.
 
-**Supabase connection**: URL + anon key are hardcoded near the top of each
-app's JS (search `SUPABASE_URL`) — inline in the customer/franchisee files,
-in `franchisor-init.js` for the franchisor app. All three point at the same
+**Supabase connection**: URL + publishable key (`sb_publishable_...` —
+public by design, safe in git) are hardcoded near the top of each app's JS
+(search `SUPABASE_URL`) — inline in the customer/franchisee files, in
+`franchisor-init.js` for the franchisor app. All three point at the same
 project. The client is lazy-loaded from the `@supabase/supabase-js` ESM
-CDN inside `initSupabase()`, not bundled.
+CDN inside `initSupabase()`, not bundled. The legacy JWT-format API keys
+(anon + service_role) were disabled in the dashboard on 2026-07-15 —
+production rejects them with 401 "Legacy API keys are disabled", so any
+old copy of them (including the once-exposed service_role string) is dead.
+Don't re-enable them.
 
 **Auth differs per app**:
 - `brewops-customer.html` — browsing is anonymous; login/signup only appears
@@ -171,11 +176,15 @@ satisfies it — so migration 16 swapped all three triggers to the public
 anon key, removing the RLS-bypassing key from the database. (Vault isn't an
 option here: a trigger's `EXECUTE FUNCTION` args must be literal constants,
 so the token can't be a dynamic Vault lookup; the anon key is public by
-design, so hardcoding it is fine.) Note this is only the in-database half —
-fully invalidating the previously-exposed `service_role` key *string* still
-requires migrating the apps off the legacy anon key onto the new
-publishable/secret keys and disabling the legacy keys in the dashboard,
-which hadn't been done as of migration 16.
+design, so hardcoding it is fine.) That was only the in-database half; the
+retirement completed 2026-07-15: the apps moved onto the new
+`sb_publishable_` key, migration 19 dropped the three triggers outright
+(the notification system is non-functional anyway — no Telegram bot — so
+nothing was re-pointed at dead plumbing; the dormant `send-notification`
+edge function stays deployed but uncalled), and the legacy keys were
+disabled in the dashboard, which finally invalidated the once-exposed
+`service_role` string. If/when the Telegram bot gets built, recreate the
+triggers against that day's key scheme.
 
 Three role-aware Postgres helper functions power essentially every RLS
 policy: `get_my_role()`, `get_my_brand_id()`, `get_my_outlet()`. `brand_id`
@@ -243,14 +252,8 @@ both test brands with an outlet and franchisor/franchisee logins each.
 Use it to trial schema/RLS changes before running them on production —
 it's the only place the full migration sequence actually executes end to
 end (production's schema was built incrementally, so it never re-runs
-these files). Two staging-specific facts to not trip over:
+these files). One staging-specific fact to not trip over:
 
-- The three `*-alert` notification triggers are dropped on staging
-  (`tools/staging/staging-only-drop-notification-triggers.sql`, run
-  automatically by `run-migrations.js`): migrations 00/16 hardcode
-  PRODUCTION's edge-function URL into them, so left alive on staging
-  they'd silently POST to production. **Never run that drop file against
-  production.**
 - To point one of the HTML apps at staging, make a scratch copy with
   `SUPABASE_URL`/`SUPABASE_KEY` swapped to the local values and never
   commit it — the production values hardcoded in the real files are the

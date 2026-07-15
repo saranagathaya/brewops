@@ -25,12 +25,7 @@ const files = [
   '11-multibrand-rls-retrofit.sql', '12-multibrand-rls-addendum.sql', '13-multibrand-views.sql',
   '14-brand-accounts-function.sql', '15-rls-orders-and-view-security-fixes.sql',
   '16-notification-triggers-drop-service-role.sql', '17-daily-ops-rls-tighten.sql',
-  '18-app-settings-composite-key.sql',
-  // Staging-only: 00 and 16 hardcode PRODUCTION's edge-function URL into
-  // three webhook triggers; left in place on staging, any invoice/machine/
-  // rent update would silently POST to production. Dropping them loses
-  // nothing (no Telegram bot exists yet — see CLAUDE.md known gaps).
-  'tools/staging/staging-only-drop-notification-triggers.sql',
+  '18-app-settings-composite-key.sql', '19-drop-notification-triggers.sql',
 ];
 
 async function main() {
