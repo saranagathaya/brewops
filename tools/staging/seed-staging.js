@@ -51,19 +51,39 @@ async function main() {
 
     for (const role of ['franchisor', 'franchisee']) {
       const email = `staging-${role}-${brand.slug}@example.com`;
+      // The empty-string token columns are load-bearing: GoTrue scans them
+      // as Go strings, and NULLs make every login for the user fail with
+      // 500 "Database error querying schema" (found the hard way against
+      // production). Same for the auth.identities row below — real signups
+      // create one, and logins without it break.
+      // raw_user_meta_data drives the on_auth_user_created trigger
+      // (00-base-schema), which creates the profiles row from it — same
+      // path a real signup takes. Franchisees get an outlet_id there;
+      // leaving it null makes every outlet-scoped RLS check a meaningless
+      // zero (see tools/rls-check).
+      const meta = {
+        role,
+        full_name: `Staging ${role} (${brand.slug})`,
+        ...(role === 'franchisee' ? { outlet_id: outletId } : {}),
+      };
       const userRes = await c.query(
-        `insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data)
-         values ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated', $1, crypt('staging-password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}')
+        `insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data,
+                                 confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
+         values ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated', $1, crypt('staging-password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', $2,
+                 '', '', '', '', '', '', '', '')
          returning id`,
-        [email]
+        [email, JSON.stringify(meta)]
       );
       const userId = userRes.rows[0].id;
-      // Franchisees are outlet-scoped; leaving outlet_id null makes every
-      // outlet-scoped RLS check a meaningless zero (see tools/rls-check).
       await c.query(
-        `insert into profiles (id, role, full_name, brand_id, outlet_id) values ($1, $2, $3, $4, $5)`,
-        [userId, role, `Staging ${role} (${brand.slug})`, brand.id, role === 'franchisee' ? outletId : null]
+        `insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+         values (gen_random_uuid(), $1::uuid, $2::text, jsonb_build_object('sub', $2::text, 'email', $3::text, 'email_verified', true), 'email', now(), now(), now())`,
+        [userId, userId, email]
       );
+      // The trigger doesn't know about brands (predates multibrand) —
+      // brand_id is set here, same as the apps' client-side upsert does.
+      const up = await c.query(`update profiles set brand_id = $1 where id = $2`, [brand.id, userId]);
+      if (up.rowCount !== 1) throw new Error(`trigger did not create profile for ${email}`);
       console.log(`${brand.slug} / ${role}: user ${userId}, email ${email}`);
     }
   }

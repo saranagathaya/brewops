@@ -902,6 +902,16 @@ CREATE TRIGGER trg_promo_slides_updated_at BEFORE UPDATE ON public.promo_slides 
 CREATE TRIGGER trg_stock_requests_updated_at BEFORE UPDATE ON public.stock_requests FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_stock_updated_at BEFORE UPDATE ON public.stock FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+-- On auth.users, not public — missed by the original public-schema-only
+-- introspection and discovered 2026-07-15 when a direct auth.users insert
+-- on production collided with the profile row this trigger had already
+-- created. It runs handle_new_user() (defined above) on every signup:
+-- creates the profiles row from raw_user_meta_data and marks the invite
+-- code used. (Supabase does allow user-defined triggers on auth.users;
+-- older notes claiming otherwise were wrong.)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- Row Level Security
 alter table "app_settings" enable row level security;
 alter table "brands" enable row level security;

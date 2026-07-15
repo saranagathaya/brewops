@@ -116,9 +116,13 @@ Don't re-enable them.
   (`#auth-gate`) blocks all content until `sb.auth.getSession()` resolves and
   the user's `profiles.role` is checked client-side (`loadProfileAndEnterApp()`).
   Signup requires a valid, unused, unexpired row in `invite_codes` scoped to
-  the target role; the profile row is created client-side via upsert after
-  `auth.signUp()` because a DB trigger can't run against Supabase-managed
-  `auth.users`.
+  the target role. The profiles row is created by the `on_auth_user_created`
+  trigger on `auth.users` (runs `handle_new_user()`, which reads the
+  role/full_name/outlet_id the apps pass as `auth.signUp()` metadata and
+  marks the invite code used) — Supabase does allow user-defined triggers
+  on `auth.users`; an older version of this doc claimed otherwise. The
+  client-side upsert after signup supplements the trigger (e.g. `brand_id`,
+  which the trigger predates), it doesn't replace it.
 - Franchisor has a third role, `platform_admin`, which never sees the normal
   franchisor dashboard — it's routed to a separate, much simpler
   `#platform-admin-app` view for creating/managing brands.
