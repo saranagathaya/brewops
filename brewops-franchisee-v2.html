@@ -550,7 +550,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 
     <div class="order-filter-row">
       <div id="oc-fee-16" class="of-chip active">All</div>
-      <div id="oc-fee-17" class="of-chip">💵 Cash Confirm</div>
+      <div id="oc-fee-17" class="of-chip">🧾 Confirm Payment</div>
       <div id="oc-fee-18" class="of-chip">New</div>
       <div id="oc-fee-19" class="of-chip">Preparing</div>
       <div id="oc-fee-20" class="of-chip">Ready</div>
@@ -1090,12 +1090,18 @@ async function loadFranchiseeData() {
         })),
         payment: o.payment_method,
         total: Math.round(o.total/100),
-        status: o.payment_method==='cash'&&(o.status==='pending'||o.payment_status==='pending') ? 'cash'
+        // Cash/QR/voucher all need the SAME thing before prep starts: a
+        // staff member confirms the money/voucher actually arrived (the
+        // customer is physically at the counter for all three, unlike
+        // card). Only card gets its own 'await' bucket, since that one
+        // resolves automatically via the payment gateway webhook, not a
+        // staff tap.
+        status: o.payment_method!=='card'&&o.payment_status==='pending' ? 'cash'
               : o.payment_method==='card'&&o.payment_status==='pending'&&(o.status==='pending'||o.status==='confirmed') ? 'await'
               : (o.status==='pending'||o.status==='confirmed') ? 'new' : o.status,
         time: new Date(o.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
         mode: o.order_type==='pickup' ? 'Pickup' : 'Delivery',
-        isCash: o.payment_method==='cash' && o.payment_status==='pending'
+        needsConfirm: o.payment_method!=='card' && o.payment_status==='pending'
       }));
       renderOrders('all');
       updateOrderCount();
@@ -1348,11 +1354,11 @@ function subscribeToOrders() {
         })),
         payment: order.payment_method,
         total: Math.round(order.total/100),
-        status: order.payment_method==='cash' ? 'cash'
+        status: order.payment_method!=='card'&&order.payment_status==='pending' ? 'cash'
               : order.payment_method==='card'&&order.payment_status==='pending' ? 'await' : 'new',
         time: new Date(order.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
         mode: order.order_type==='pickup' ? 'Pickup' : 'Delivery',
-        isCash: order.payment_method==='cash'
+        needsConfirm: order.payment_method!=='card' && order.payment_status==='pending'
       };
       // Add to top of orders list
       window.LIVE_ORDERS = [newOrder, ...(window.LIVE_ORDERS||[])];
@@ -1360,8 +1366,8 @@ function subscribeToOrders() {
       updateOrderCount();
       // Show popup notification (franchisor-controlled — App Settings)
       if (window.NOTIF_SETTINGS?.new_order !== false) showNewOrderPopup(newOrder);
-      // Show cash banner if cash payment (franchisor-controlled — App Settings)
-      if (newOrder.isCash && window.NOTIF_SETTINGS?.cash_confirm !== false) showCashPopup(newOrder);
+      // Show payment-confirm banner for cash/QR/voucher (franchisor-controlled — App Settings)
+      if (newOrder.needsConfirm && window.NOTIF_SETTINGS?.cash_confirm !== false) showCashPopup(newOrder);
       // Update nav badge
       const badge = document.getElementById('orders-badge');
       if (badge) { badge.textContent = parseInt(badge.textContent||0)+1; }
@@ -1374,12 +1380,13 @@ function subscribeToOrders() {
 }
 
 // Update order status in Supabase
-async function updateOrderStatusDB(orderId, newStatus) {
+async function updateOrderStatusDB(orderId, newStatus, paymentStatus) {
   if (!sb || !orderId || orderId.length < 10) return; // skip for static/demo IDs
   const updates = { status: newStatus };
   if (newStatus === 'preparing' || (newStatus === 'confirmed')) updates.status = 'preparing';
   if (newStatus === 'ready') updates.status = 'ready';
   if (newStatus === 'done') updates.status = 'completed';
+  if (paymentStatus) updates.payment_status = paymentStatus;
   await sb.from('orders').update(updates).eq('id', orderId);
 }
 
@@ -1940,14 +1947,14 @@ function renderOrders(filter){
   if(!el) return;
   const allOrders = getOrders();
   let list=allOrders;
-  if(filter==='cash') list=allOrders.filter(o=>o.status==='cash'||o.isCash);
+  if(filter==='cash') list=allOrders.filter(o=>o.status==='cash'||o.needsConfirm);
   else if(filter==='new') list=allOrders.filter(o=>o.status==='new');
   else if(filter==='preparing') list=allOrders.filter(o=>o.status==='preparing');
   else if(filter==='ready') list=allOrders.filter(o=>o.status==='ready');
   else if(filter==='done') list=allOrders.filter(o=>o.status==='done');
   if(list.length===0){el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);font-family:var(--font-mono);font-size:13px;">No ${filter==='all'?'active':filter} orders right now ☕</div>`;return;}
 
-  const statusLabels={new:'🆕 New',cash:'💵 Cash',await:'💳 Awaiting payment',preparing:'⏳ Preparing',ready:'✅ Ready',done:'Done'};
+  const statusLabels={new:'🆕 New',cash:'🧾 Confirm Payment',await:'💳 Awaiting payment',preparing:'⏳ Preparing',ready:'✅ Ready',done:'Done'};
   const statusClasses={new:'ls-new',cash:'ls-cash',await:'ls-cash',preparing:'ls-prep',ready:'ls-ready',done:'ls-done'};
   const cardClasses={new:' new-order',cash:' cash-pending',await:' cash-pending',ready:' ready-to-serve',done:'',preparing:''};
 
@@ -1959,7 +1966,11 @@ function renderOrders(filter){
         <div class="loi-time">${o.time}</div>
         <div class="loi-status ${statusClasses[o.status]||'ls-done'}">${statusLabels[o.status]||o.status}</div>
       </div>
-      ${o.isCash?`<div class="cash-alert-bar">💵 Customer chose cash payment — confirm LKR ${o.total.toLocaleString()} received in hand</div>`:''}
+      ${o.needsConfirm?`<div class="cash-alert-bar">${
+        o.payment==='cash' ? `💵 Customer chose cash — confirm LKR ${o.total.toLocaleString()} received in hand` :
+        o.payment==='qr' ? `📱 Customer paid by QR/transfer — confirm LKR ${o.total.toLocaleString()} arrived` :
+        `🎟️ Customer is redeeming a voucher — confirm before preparing`
+      }</div>`:''}
       <div class="loi-body">
         ${o.items.map(i=>`<div class="loi-item-row">
           <div class="loi-emoji">${i.emoji||'☕'}</div>
@@ -1975,7 +1986,7 @@ function renderOrders(filter){
         <div class="loi-payment lp-${o.payment}">${o.payment==='card'?'💳 Card':o.payment==='cash'?'💵 Cash':o.payment==='voucher'?'🎟️ Voucher':'📱 QR'}</div>
         <div class="loi-total">LKR ${o.total.toLocaleString()}</div>
         ${o.status==='new'?`<button class="loi-action la-confirm" onclick="updateOrder('${o.id}','preparing')">Start Preparing</button>`:
-          o.status==='cash'?`<button class="loi-action la-cash" onclick="confirmOrderCash('${o.id}')">✓ Cash Received</button>`:
+          o.status==='cash'?`<button class="loi-action la-cash" onclick="confirmOrderCash('${o.id}')">✓ Confirm Payment</button>`:
           o.status==='await'?`<button class="loi-action la-done" disabled>Waiting for online payment</button>`:
           o.status==='preparing'?`<button class="loi-action la-ready" onclick="updateOrder('${o.id}','ready')">Mark Ready</button>`:
           o.status==='ready'?`<button class="loi-action la-done" onclick="updateOrder('${o.id}','done')">Complete</button>`:
@@ -1988,7 +1999,7 @@ function updateOrder(id,newStatus){
   const orders=getOrders();
   const o=orders.find(x=>x.id===id);
   if(!o) return;
-  o.status=newStatus;o.isCash=false;
+  o.status=newStatus;o.needsConfirm=false;
   const msgs={preparing:'Now preparing — customer notified',ready:'Ready! Customer notified to collect',done:'Order completed ✓'};
   showToast(msgs[newStatus]||'Order updated','✓');
   updateOrderStatusDB(id,newStatus);
@@ -1996,13 +2007,21 @@ function updateOrder(id,newStatus){
   updateOrderCount();
 }
 
+// Confirms cash/QR/voucher payment — this actually persists payment_status
+// to the DB (a pre-existing bug here left it purely client-side: the order
+// looked confirmed in the UI but reverted to 'pending' on next reload,
+// since the write to Supabase never happened). Cash gets its own
+// 'cash_confirmed' status (used elsewhere for cash-specific reporting);
+// QR/voucher settle as 'paid' since the value has genuinely arrived
+// (bank transfer / redeemed voucher), same as a card charge.
 function confirmOrderCash(id){
   const orders=getOrders();
   const o=orders.find(x=>x.id===id);
   if(!o) return;
-  o.status='preparing';o.isCash=false;
-  showToast('Cash confirmed — start preparing order','💵');
-  updateOrderStatusDB(id,'preparing');
+  o.status='preparing';o.needsConfirm=false;
+  const paymentStatus = o.payment==='cash' ? 'cash_confirmed' : 'paid';
+  showToast(o.payment==='cash'?'Cash confirmed — start preparing order':'Payment confirmed — start preparing order','💵');
+  updateOrderStatusDB(id,'preparing',paymentStatus);
   dismissCash();
   renderOrders('all');
   updateOrderCount();
@@ -2045,7 +2064,8 @@ function dismissCash(){document.getElementById('cash-confirm-popup').classList.r
 // ── NEW ORDER POPUP ──
 function showNewOrderPopup(order){
   document.getElementById('nop-title').textContent=order.items.map(i=>i.name+' ×'+i.qty).join(' + ');
-  document.getElementById('nop-sub').textContent=(order.payment==='card'?'Card':'Cash')+' payment · LKR '+order.total.toLocaleString()+' · '+order.mode;
+  const payLabel = order.payment==='card'?'Card':order.payment==='qr'?'QR/Transfer':order.payment==='voucher'?'Voucher':'Cash';
+  document.getElementById('nop-sub').textContent=payLabel+' payment · LKR '+order.total.toLocaleString()+' · '+order.mode;
   const pop=document.getElementById('new-order-popup');
   pop.classList.add('show');
   setTimeout(()=>pop.classList.remove('show'),6000);

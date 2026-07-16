@@ -1192,12 +1192,13 @@ async function submitOrderToSupabase(cart, selectedStore, payMethod) {
       order_type: window.currentMode || 'pickup',
       delivery_address_text,
       payment_method: payMethod === '💳 Card' ? 'card' : payMethod === '💵 Cash at Counter' ? 'cash' : payMethod === '📱 QR / Transfer' ? 'qr' : 'voucher',
-      // Card orders start 'pending' and are flipped to 'paid' ONLY by the
-      // payhere-notify edge function after PayHere confirms the charge —
-      // the browser never gets to declare its own payment successful.
-      // (Previously card/qr were marked 'paid' at insert with no payment
-      // taken at all.)
-      payment_status: (payMethod.includes('Cash') || payMethod.includes('Card')) ? 'pending' : 'paid',
+      // Every order starts 'pending' -- nothing is 'paid' until someone
+      // actually confirms it: card via payhere-notify (server-verified),
+      // cash/QR/voucher via the franchisee tapping "Confirm Payment" at
+      // the counter (see brewops-franchisee-v2.html). Previously card/QR/
+      // voucher were all marked 'paid' at insert with no confirmation of
+      // any kind -- this was true even for orders never actually paid for.
+      payment_status: 'pending',
       coupon_id: coupon?.id || null,
       subtotal: subtotal * 100,
       discount: discount * 100,
@@ -2137,7 +2138,17 @@ async function renderOrders(tabIdx){
     return;
   }
 
+  // Keyed lookup so the retry-payment button (inline onclick can't carry
+  // a full object) can hand startCardPayment() the real order row.
+  window.CUSTOMER_ORDERS_CACHE = Object.fromEntries(orders.map(o => [o.id, o]));
   el.innerHTML = orders.map(orderCardHTML).join('');
+}
+
+async function retryCardPayment(orderId){
+  const order = window.CUSTOMER_ORDERS_CACHE?.[orderId];
+  if (!order) return;
+  const result = await startCardPayment(order);
+  if (result === 'completed') renderOrders(0);
 }
 
 function orderCardHTML(o){
@@ -2174,7 +2185,9 @@ function orderCardHTML(o){
       </div>
       <div class="oc-foot">
         <div class="oc-date">${dateStr}</div>
-        <button class="oc-reorder" onclick="showToast('Reorder coming soon ☕','')">Order Again</button>
+        ${o.payment_status === 'failed' && o.payment_method === 'card'
+          ? `<button class="oc-reorder" onclick="retryCardPayment('${o.id}')">Retry Payment</button>`
+          : `<button class="oc-reorder" onclick="showToast('Reorder coming soon ☕','')">Order Again</button>`}
       </div>
     </div>`;
 }

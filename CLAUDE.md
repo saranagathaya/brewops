@@ -338,11 +338,17 @@ under host Deno instead, as that test did.
 - Card payments are integrated with PayHere (see "Payments" above) but
   not yet live: the merchant account activation (bank review) is in
   progress, so production runs in sandbox mode until PayHere approves it.
-  Two adjacent honesty gaps remain: QR/voucher orders are still inserted
-  as `payment_status='paid'` with no confirmation mechanism at all (card
-  was fixed; QR needs a franchisee confirm flow like cash has), and a
-  failed card payment can't be retried (payhere-checkout only accepts
-  `pending` orders, and the customer app has no "pay again" button).
+  All four payment methods (card/cash/QR/voucher) now insert as
+  `payment_status='pending'` and require an actual confirmation event
+  before being treated as paid — card via `payhere-notify`, the other
+  three via the franchisee tapping "Confirm Payment" (cash lands as
+  `cash_confirmed`, QR/voucher as `paid`). A failed card payment can be
+  retried: `payhere-checkout` accepts a `failed` order and re-arms it to
+  `pending` for a new attempt; the customer app shows a "Retry Payment"
+  button on failed card orders. Not yet verified: the actual PayHere
+  sandbox popup UI and webhook round-trip against PayHere's real servers
+  (everything above is proven against the DB/function logic directly,
+  not against PayHere itself) — needs real sandbox merchant credentials.
 - Delivery service is scaffolded (order_type, address picker) but disabled
   in the customer app pending real courier integration.
 - Telegram Bot notifications (replacing an earlier WhatsApp plan) are

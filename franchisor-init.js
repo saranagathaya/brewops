@@ -251,7 +251,12 @@ async function loadDashboard() {
 
     const today = todayOrders || [];
     const liveNow = today.filter(o => o.status !== 'completed').length;
-    const cashPending = today.filter(o => o.payment_method === 'cash' && o.payment_status === 'pending').length;
+    // Any non-card method left unconfirmed needs a franchisee tap to
+    // resolve (cash/QR/voucher all share the same "Confirm Payment" flow
+    // in the franchisee app) -- previously cash-only, but QR/voucher used
+    // to be marked 'paid' at insert with no real confirmation, so this
+    // undercounted once that was fixed.
+    const cashPending = today.filter(o => o.payment_method !== 'card' && o.payment_status === 'pending').length;
     const appRevenue = today.reduce((sum, o) => sum + (o.total || 0), 0);
     const avgOrder = today.length ? Math.round(appRevenue / today.length / 100) : 0;
 

@@ -62,7 +62,17 @@ Deno.serve(async (req) => {
     if (!order) return fail(404, "Order not found");
     if (order.customer_id !== user.id) return fail(403, "Not your order");
     if (order.payment_method !== "card") return fail(400, "Not a card order");
-    if (order.payment_status !== "pending") return fail(400, "Order is not awaiting payment");
+    // 'pending' = first attempt; 'failed' = retry after a declined card.
+    // 'paid'/'refunded' are terminal -- no new payment object for those.
+    if (order.payment_status !== "pending" && order.payment_status !== "failed") {
+      return fail(400, "Order is not awaiting payment");
+    }
+    if (order.payment_status === "failed") {
+      // Re-arm the order for a fresh attempt. payhere-notify only accepts a
+      // 'paid'/'failed' transition FROM 'pending', so a stale 'failed' order
+      // has to move back to 'pending' before the next webhook can land.
+      await admin.from("orders").update({ payment_status: "pending" }).eq("id", order.id);
+    }
 
     const { data: profile } = await admin.from("profiles")
       .select("full_name, phone").eq("id", user.id).maybeSingle();
