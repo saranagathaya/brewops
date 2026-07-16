@@ -385,6 +385,18 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# PayHere payment functions (supabase/functions/). Both self-authenticate:
+# payhere-checkout validates the caller's session token in-code, and
+# payhere-notify is called by PayHere's servers (no Supabase JWT exists) —
+# its md5sig signature check IS the auth. So gateway JWT verification is
+# off for both. Mirror this in the dashboard when deploying ("Enforce JWT
+# verification" unchecked).
+[functions.payhere-checkout]
+verify_jwt = false
+
+[functions.payhere-notify]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

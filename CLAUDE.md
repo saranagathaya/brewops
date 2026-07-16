@@ -294,10 +294,55 @@ these files). One staging-specific fact to not trip over:
   commit it — the production values hardcoded in the real files are the
   deployed configuration.
 
+## Payments (PayHere)
+
+Card payments go through PayHere (Sri Lankan gateway) via two edge
+functions in `supabase/functions/`:
+
+- `payhere-checkout` — the customer app invokes this to get the signed
+  payment object for `payhere.startPayment()` (popup flow). It
+  authenticates the caller itself (gateway `verify_jwt` is off — see
+  `supabase/config.toml`), checks the order belongs to them / is a card
+  order / is unpaid, and signs with the merchant secret, which never
+  reaches the browser.
+- `payhere-notify` — PayHere's server-to-server webhook, and the ONLY
+  writer of a card order's payment outcome. Auth is the `md5sig`
+  signature check (requires the merchant secret to forge); it also
+  rejects amounts that don't match the order total. Maps status 2→paid,
+  -2→failed, -3→refunded; pending/canceled attempts leave the order
+  `pending`.
+
+The customer app inserts card orders as `payment_status='pending'` and
+never marks them paid itself. The franchisee app shows card+pending
+orders as "💳 Awaiting payment" (no action button) until the webhook
+flips them — the realtime UPDATE handler picks that up automatically.
+
+Both functions need these secrets set in the dashboard (Edge Functions →
+Secrets): `PAYHERE_MERCHANT_ID`, `PAYHERE_MERCHANT_SECRET`,
+`PAYHERE_SANDBOX` ("true" until the live merchant account is approved),
+and `SB_SECRET_KEY` (a new-format `sb_secret_*` API key — the
+platform-injected `SUPABASE_SERVICE_ROLE_KEY` is a disabled legacy key
+here, see the key-retirement notes above). Deploy with "Enforce JWT
+verification" OFF for both (mirrors `supabase/config.toml`).
+
+Verified by running the actual function code against the local staging
+stack with dummy merchant credentials (which lets tests forge valid
+md5sigs): hash formula, ownership/authz rejections, paid/failed/refunded
+mapping, forged-signature and amount-tampering rejection. Note for local
+work: the edge-runtime container may fail to boot on TLS-intercepting
+networks ("invalid peer certificate") — run the function files directly
+under host Deno instead, as that test did.
+
 ## Known gaps / open items
 
-- No real payment gateway integration — "card" payments are recorded but not
-  actually processed by any payment processor yet.
+- Card payments are integrated with PayHere (see "Payments" above) but
+  not yet live: the merchant account activation (bank review) is in
+  progress, so production runs in sandbox mode until PayHere approves it.
+  Two adjacent honesty gaps remain: QR/voucher orders are still inserted
+  as `payment_status='paid'` with no confirmation mechanism at all (card
+  was fixed; QR needs a franchisee confirm flow like cash has), and a
+  failed card payment can't be retried (payhere-checkout only accepts
+  `pending` orders, and the customer app has no "pay again" button).
 - Delivery service is scaffolded (order_type, address picker) but disabled
   in the customer app pending real courier integration.
 - Telegram Bot notifications (replacing an earlier WhatsApp plan) are

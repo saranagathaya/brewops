@@ -1090,7 +1090,9 @@ async function loadFranchiseeData() {
         })),
         payment: o.payment_method,
         total: Math.round(o.total/100),
-        status: o.payment_method==='cash'&&(o.status==='pending'||o.payment_status==='pending') ? 'cash' : (o.status==='pending'||o.status==='confirmed') ? 'new' : o.status,
+        status: o.payment_method==='cash'&&(o.status==='pending'||o.payment_status==='pending') ? 'cash'
+              : o.payment_method==='card'&&o.payment_status==='pending'&&(o.status==='pending'||o.status==='confirmed') ? 'await'
+              : (o.status==='pending'||o.status==='confirmed') ? 'new' : o.status,
         time: new Date(o.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
         mode: o.order_type==='pickup' ? 'Pickup' : 'Delivery',
         isCash: o.payment_method==='cash' && o.payment_status==='pending'
@@ -1346,7 +1348,8 @@ function subscribeToOrders() {
         })),
         payment: order.payment_method,
         total: Math.round(order.total/100),
-        status: order.payment_method==='cash' ? 'cash' : 'new',
+        status: order.payment_method==='cash' ? 'cash'
+              : order.payment_method==='card'&&order.payment_status==='pending' ? 'await' : 'new',
         time: new Date(order.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
         mode: order.order_type==='pickup' ? 'Pickup' : 'Delivery',
         isCash: order.payment_method==='cash'
@@ -1944,9 +1947,9 @@ function renderOrders(filter){
   else if(filter==='done') list=allOrders.filter(o=>o.status==='done');
   if(list.length===0){el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);font-family:var(--font-mono);font-size:13px;">No ${filter==='all'?'active':filter} orders right now ☕</div>`;return;}
 
-  const statusLabels={new:'🆕 New',cash:'💵 Cash',preparing:'⏳ Preparing',ready:'✅ Ready',done:'Done'};
-  const statusClasses={new:'ls-new',cash:'ls-cash',preparing:'ls-prep',ready:'ls-ready',done:'ls-done'};
-  const cardClasses={new:' new-order',cash:' cash-pending',ready:' ready-to-serve',done:'',preparing:''};
+  const statusLabels={new:'🆕 New',cash:'💵 Cash',await:'💳 Awaiting payment',preparing:'⏳ Preparing',ready:'✅ Ready',done:'Done'};
+  const statusClasses={new:'ls-new',cash:'ls-cash',await:'ls-cash',preparing:'ls-prep',ready:'ls-ready',done:'ls-done'};
+  const cardClasses={new:' new-order',cash:' cash-pending',await:' cash-pending',ready:' ready-to-serve',done:'',preparing:''};
 
   el.innerHTML=list.map(o=>`
     <div class="live-order-item${cardClasses[o.status]||''}">
@@ -1973,6 +1976,7 @@ function renderOrders(filter){
         <div class="loi-total">LKR ${o.total.toLocaleString()}</div>
         ${o.status==='new'?`<button class="loi-action la-confirm" onclick="updateOrder('${o.id}','preparing')">Start Preparing</button>`:
           o.status==='cash'?`<button class="loi-action la-cash" onclick="confirmOrderCash('${o.id}')">✓ Cash Received</button>`:
+          o.status==='await'?`<button class="loi-action la-done" disabled>Waiting for online payment</button>`:
           o.status==='preparing'?`<button class="loi-action la-ready" onclick="updateOrder('${o.id}','ready')">Mark Ready</button>`:
           o.status==='ready'?`<button class="loi-action la-done" onclick="updateOrder('${o.id}','done')">Complete</button>`:
           `<button class="loi-action la-done" disabled>Completed</button>`}

@@ -1192,7 +1192,12 @@ async function submitOrderToSupabase(cart, selectedStore, payMethod) {
       order_type: window.currentMode || 'pickup',
       delivery_address_text,
       payment_method: payMethod === '💳 Card' ? 'card' : payMethod === '💵 Cash at Counter' ? 'cash' : payMethod === '📱 QR / Transfer' ? 'qr' : 'voucher',
-      payment_status: payMethod.includes('Cash') ? 'pending' : 'paid',
+      // Card orders start 'pending' and are flipped to 'paid' ONLY by the
+      // payhere-notify edge function after PayHere confirms the charge —
+      // the browser never gets to declare its own payment successful.
+      // (Previously card/qr were marked 'paid' at insert with no payment
+      // taken at all.)
+      payment_status: (payMethod.includes('Cash') || payMethod.includes('Card')) ? 'pending' : 'paid',
       coupon_id: coupon?.id || null,
       subtotal: subtotal * 100,
       discount: discount * 100,
@@ -2012,11 +2017,12 @@ async function placeOrder(){
   if (btn) { btn.textContent = 'Placing order...'; btn.disabled = true; }
 
   let orderId = null;
+  let placedOrder = null;
   if (sb) {
-    const order = await submitOrderToSupabase(cart, selectedStore, payMethod);
-    if (order) {
-      orderId = order.id;
-      showToast(`Order #${order.order_number} placed! ☕`,'✅');
+    placedOrder = await submitOrderToSupabase(cart, selectedStore, payMethod);
+    if (placedOrder) {
+      orderId = placedOrder.id;
+      if (!payMethod.includes('Card')) showToast(`Order #${placedOrder.order_number} placed! ☕`,'✅');
     } else {
       showToast('Order placed (offline mode) ☕','✅');
     }
@@ -2034,7 +2040,60 @@ async function placeOrder(){
   if (payMethod.includes('Cash')) {
     setTimeout(()=>showToast(`Cash payment confirmed at ${selectedStore.name}`,'💵'),2000);
   }
+
+  // Card orders: open the PayHere popup for the order just created. The
+  // order is already in the DB as payment_status 'pending'; only the
+  // payhere-notify webhook (verifying PayHere's signature server-side)
+  // ever marks it 'paid' — the callbacks below just drive the UI.
+  if (payMethod.includes('Card') && placedOrder && sb) {
+    await startCardPayment(placedOrder);
+  }
+
   renderOrders(0);
+}
+
+// ── PayHere card payment (popup flow) ──
+// Loads PayHere's official JS once, asks the payhere-checkout edge
+// function for the signed payment object (the merchant secret needed to
+// sign it never reaches this browser), and opens the payment popup.
+function loadPayHereJs(){
+  return new Promise((resolve, reject) => {
+    if (window.payhere) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://www.payhere.lk/lib/payhere.js';
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Could not load payment gateway'));
+    document.head.appendChild(s);
+  });
+}
+
+async function startCardPayment(order){
+  try {
+    await loadPayHereJs();
+    const { data: payment, error } = await sb.functions.invoke('payhere-checkout', {
+      body: { order_id: order.id }
+    });
+    if (error || payment?.error) throw new Error(payment?.error || error.message || 'Payment setup failed');
+
+    return await new Promise((resolve) => {
+      payhere.onCompleted = function(){
+        showToast(`Payment successful! Order #${order.order_number} ☕`,'✅');
+        resolve('completed');
+      };
+      payhere.onDismissed = function(){
+        showToast(`Payment not completed — order #${order.order_number} is saved but unpaid`,'⚠️');
+        resolve('dismissed');
+      };
+      payhere.onError = function(err){
+        showToast('Payment failed: ' + (err || 'unknown error'),'❌');
+        resolve('error');
+      };
+      payhere.startPayment(payment);
+    });
+  } catch (e) {
+    showToast(e.message || 'Could not start card payment','❌');
+    return 'error';
+  }
 }
 
 // ══ ORDERS ══
@@ -2088,7 +2147,11 @@ function orderCardHTML(o){
   const typeLabel = o.order_type === 'delivery' ? 'Delivery' : 'Pick Up';
   const typeCls = o.order_type === 'delivery' ? 'oc-type-delivery' : 'oc-type-pickup';
   const isLive = o.status !== 'completed' && o.status !== 'cancelled';
-  const statusLabel = o.status === 'completed' ? 'Completed ›' :
+  // Unpaid/failed card orders say so honestly instead of "Order received"
+  const awaitingCard = o.payment_method === 'card' && o.payment_status === 'pending' && isLive;
+  const statusLabel = o.payment_status === 'failed' ? 'Payment failed' :
+                       awaitingCard ? 'Payment pending' :
+                       o.status === 'completed' ? 'Completed ›' :
                        o.status === 'cancelled' ? 'Cancelled' :
                        o.status === 'ready' ? 'Ready for pickup ›' :
                        o.status === 'preparing' ? 'Preparing ›' : 'Order received ›';
