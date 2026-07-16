@@ -34,6 +34,23 @@ to test a specific brand), or the franchisee/franchisor apps directly. There
 is no dev/prod split — editing the `.html` files and reloading the browser
 is the entire iteration loop.
 
+## Production hosting
+
+The repo is served directly by GitHub Pages (no build step needed — it's
+already just static files) at the custom domain `qbrew.app`, configured via
+the root `CNAME` file and DNS records at the registrar (Namecheap). `qbrew`
+is the platform/company-facing name (what franchisor/franchisee users see);
+it is deliberately distinct from each Outlet Brand's own customer-facing
+name (Liétard Artisan Roast, TestBrand Coffee Co., etc.), which
+`brewops-customer.html` still themes per `?brand=<slug>` exactly as before —
+`index.html` at the repo root exists only to give `qbrew.app/` a landing
+page, and immediately redirects to `brewops-customer.html`, forwarding any
+query string through unchanged (so `qbrew.app/?brand=lietard` still works).
+`policies/` holds the Return, Privacy, and Terms pages required by the
+PayHere merchant activation review. They carry real legal/compliance
+weight (bank-reviewed, and binding on real customers once live) — treat
+edits to their content more like a legal document than app copy.
+
 ## Architecture of each HTML file
 
 Each app is one HTML file: `<style>` block, then markup, then JS at the

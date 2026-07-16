@@ -1,0 +1,23 @@
+/* Shared styling for the legal/policy pages — plain readable documents,
+   not app UI, so this stays deliberately simple: no animation, no JS,
+   just the brand's palette applied to a normal document layout. */
+:root {
+  --gold: #C8922A; --gold2: #E8B04A;
+  --cream: #FAF6F0; --text: #2A2015; --text2: #6b6155;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--cream); color: var(--text);
+  margin: 0; padding: 32px 20px 80px; line-height: 1.6;
+}
+.doc { max-width: 720px; margin: 0 auto; }
+.doc-header { border-bottom: 3px solid var(--gold); padding-bottom: 16px; margin-bottom: 28px; }
+.doc-brand { font-size: 22px; font-weight: 700; font-style: italic; color: var(--text); }
+.doc-title { font-size: 26px; font-weight: 700; margin: 10px 0 4px; }
+.doc-updated { font-size: 13px; color: var(--text2); }
+h2 { font-size: 18px; margin-top: 34px; margin-bottom: 10px; color: var(--text); }
+p, li { color: var(--text); font-size: 15px; }
+a { color: var(--gold); }
+ul { padding-left: 20px; }
+.back-link { display: inline-block; margin-top: 40px; font-size: 14px; }

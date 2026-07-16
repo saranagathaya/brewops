@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QBrew</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<script>
+  // qbrew.app has no single default brand -- this is the multi-tenant
+  // customer app's entry point, so forward whatever query string arrived
+  // (e.g. ?brand=lietard) straight through; resolveBrand() in
+  // brewops-customer.html applies its own default when none is given.
+  location.replace('brewops-customer.html' + location.search);
+</script>
+<noscript><a href="brewops-customer.html">Continue to QBrew</a></noscript>
+</body>
+</html>

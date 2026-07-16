@@ -12,8 +12,12 @@ const mime = {
 };
 
 http.createServer((req, res) => {
-  let filePath = path.join(root, decodeURIComponent(req.url.split('?')[0]));
-  if (filePath.endsWith('/')) filePath = path.join(filePath, 'index.html');
+  const urlPath = decodeURIComponent(req.url.split('?')[0]);
+  let filePath = path.join(root, urlPath);
+  // Check the raw URL path (always '/') for the trailing slash, not the
+  // Windows-joined filePath -- path.join normalizes to '\' on Windows, so
+  // the old check silently never matched and index.html fallback broke.
+  if (urlPath.endsWith('/')) filePath = path.join(filePath, 'index.html');
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
     const ext = path.extname(filePath);
