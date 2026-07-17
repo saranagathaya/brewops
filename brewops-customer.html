@@ -1191,7 +1191,7 @@ async function submitOrderToSupabase(cart, selectedStore, payMethod) {
       customer_phone: window.CURRENT_USER_PHONE || null,
       order_type: window.currentMode || 'pickup',
       delivery_address_text,
-      payment_method: payMethod === '💳 Card' ? 'card' : payMethod === '💵 Cash at Counter' ? 'cash' : payMethod === '📱 QR / Transfer' ? 'qr' : 'voucher',
+      payment_method: payMethod,
       // Every order starts 'pending' -- nothing is 'paid' until someone
       // actually confirms it: card via payhere-notify (server-verified),
       // cash/QR/voucher via the franchisee tapping "Confirm Payment" at
@@ -2011,8 +2011,14 @@ async function placeOrder(){
     }
     window.CURRENT_USER_ID = session.user.id;
   }
-  const payEl = document.querySelector('.pm-opt.selected .pm-opt-label');
-  const payMethod = payEl ? payEl.textContent : 'Card';
+  // The DB enum ('card'|'cash'|'qr'|'voucher') comes straight from the tile's
+  // data-method attribute -- a prior version matched against the visible
+  // label text (e.g. '💳 Card') which never equalled the actual label
+  // content ('Card', no emoji), so every order was silently recorded as
+  // 'voucher' regardless of what was actually selected. data-method is the
+  // one value here that's never meant to change, so match on that instead.
+  const payEl = document.querySelector('.pm-opt.selected');
+  const payMethod = payEl ? payEl.dataset.method : 'card';
 
   const btn = document.querySelector('.place-order-btn');
   if (btn) { btn.textContent = 'Placing order...'; btn.disabled = true; }
@@ -2023,7 +2029,7 @@ async function placeOrder(){
     placedOrder = await submitOrderToSupabase(cart, selectedStore, payMethod);
     if (placedOrder) {
       orderId = placedOrder.id;
-      if (!payMethod.includes('Card')) showToast(`Order #${placedOrder.order_number} placed! ☕`,'✅');
+      if (payMethod !== 'card') showToast(`Order #${placedOrder.order_number} placed! ☕`,'✅');
     } else {
       showToast('Order placed (offline mode) ☕','✅');
     }
@@ -2038,7 +2044,7 @@ async function placeOrder(){
   window.activeCoupon = null;
   window.SELECTED_DELIVERY_ADDRESS = null;
 
-  if (payMethod.includes('Cash')) {
+  if (payMethod === 'cash') {
     setTimeout(()=>showToast(`Cash payment confirmed at ${selectedStore.name}`,'💵'),2000);
   }
 
@@ -2046,7 +2052,7 @@ async function placeOrder(){
   // order is already in the DB as payment_status 'pending'; only the
   // payhere-notify webhook (verifying PayHere's signature server-side)
   // ever marks it 'paid' — the callbacks below just drive the UI.
-  if (payMethod.includes('Card') && placedOrder && sb) {
+  if (payMethod === 'card' && placedOrder && sb) {
     await startCardPayment(placedOrder);
   }
 
