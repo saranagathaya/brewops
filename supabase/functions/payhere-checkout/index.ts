@@ -68,9 +68,13 @@ Deno.serve(async (req) => {
       return fail(400, "Order is not awaiting payment");
     }
     if (order.payment_status === "failed") {
-      // Re-arm the order for a fresh attempt. payhere-notify only accepts a
-      // 'paid'/'failed' transition FROM 'pending', so a stale 'failed' order
-      // has to move back to 'pending' before the next webhook can land.
+      // Re-arm for a fresh attempt. payhere-notify's transition guard
+      // itself now accepts 'paid' from either 'pending' or 'failed' (a
+      // decline-then-retry-then-approve sequence needs that), so this
+      // reset isn't strictly required for correctness anymore -- but it
+      // keeps the UI honest while a retry is in flight (the franchisee
+      // app shows "Awaiting payment", not a stale "Failed", the moment
+      // the customer starts a new attempt).
       await admin.from("orders").update({ payment_status: "pending" }).eq("id", order.id);
     }
 
