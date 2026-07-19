@@ -26,6 +26,7 @@ const files = [
   '14-brand-accounts-function.sql', '15-rls-orders-and-view-security-fixes.sql',
   '16-notification-triggers-drop-service-role.sql', '17-daily-ops-rls-tighten.sql',
   '18-app-settings-composite-key.sql', '19-drop-notification-triggers.sql',
+  '20-order-number-sequence.sql',
 ];
 
 async function main() {
