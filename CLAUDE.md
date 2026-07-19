@@ -324,13 +324,29 @@ functions in `supabase/functions/`:
   authenticates the caller itself (gateway `verify_jwt` is off — see
   `supabase/config.toml`), checks the order belongs to them / is a card
   order / is unpaid, and signs with the merchant secret, which never
-  reaches the browser.
+  reaches the browser. `return_url`/`cancel_url` must be real URLs, not
+  `undefined` — the popup flow doesn't navigate to them (onCompleted/
+  onDismissed callbacks drive the UI instead), but PayHere's own
+  `checkoutJ` endpoint 500s if the keys are missing entirely (an
+  `undefined` value vanishes on JSON serialization). Found live in
+  sandbox: the browser reported it as a CORS failure (no
+  Access-Control-Allow-Origin header on PayHere's error response),
+  which masked the real 500 until the raw Network tab was checked.
 - `payhere-notify` — PayHere's server-to-server webhook, and the ONLY
   writer of a card order's payment outcome. Auth is the `md5sig`
   signature check (requires the merchant secret to forge); it also
   rejects amounts that don't match the order total. Maps status 2→paid,
   -2→failed, -3→refunded; pending/canceled attempts leave the order
-  `pending`.
+  `pending`. The paid/failed/refunded transitions are guarded against
+  regressing an already-resolved order (a stale signed webhook can't
+  flip a paid order back to failed) — but `paid` must be reachable from
+  *either* `pending` or `failed`, not just `pending`: PayHere sends one
+  notify call per attempt, so a declined card followed by a same-order
+  retry that succeeds sends decline-then-approve, and the guard
+  originally only accepted the approve from `pending`, silently
+  dropping a genuine success. Found live in sandbox: a real
+  decline-then-retry-then-approve run left the order stuck on `failed`
+  despite PayHere showing "Payment Approved" with a real payment ID.
 
 The customer app inserts card orders as `payment_status='pending'` and
 never marks them paid itself. The franchisee app shows card+pending
@@ -352,6 +368,16 @@ mapping, forged-signature and amount-tampering rejection. Note for local
 work: the edge-runtime container may fail to boot on TLS-intercepting
 networks ("invalid peer certificate") — run the function files directly
 under host Deno instead, as that test did.
+
+Both bugs above were caught by an actual PayHere sandbox popup +
+decline/retry/approve round-trip on 2026-07-19 (the local staging tests
+predate them and use forged signatures, which can't reproduce a bug in
+what URLs get sent to PayHere's own servers or in a real multi-attempt
+sequence). Re-verified directly against the deployed production
+functions afterward with disposable test orders and real forged
+signatures — 10/10 checks, including both the decline-then-retry-then-
+approve fix and that the original stale-webhook regression guard still
+holds.
 
 ## Known gaps / open items
 

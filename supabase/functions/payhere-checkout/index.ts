@@ -91,10 +91,16 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       sandbox: Deno.env.get("PAYHERE_SANDBOX") === "true",
       merchant_id: merchantId,
-      // Popup (payhere.js) flow — return/cancel handled by JS callbacks,
-      // but PayHere still requires the keys to be present:
-      return_url: undefined,
-      cancel_url: undefined,
+      // Popup (payhere.js) flow — onCompleted/onDismissed callbacks drive
+      // the actual UI, not these redirects, but PayHere's checkout API
+      // requires them to be present as real URLs regardless: `undefined`
+      // vanishes when this object is serialized, so PayHere's server was
+      // receiving a request with the keys missing entirely and rejecting
+      // it outright (500 from sandbox.payhere.lk/pay/checkoutJ — reported
+      // to the browser as a CORS failure since no headers were set on the
+      // error response, masking the real cause).
+      return_url: `${req.headers.get("origin") || "https://qbrew.app"}/`,
+      cancel_url: `${req.headers.get("origin") || "https://qbrew.app"}/`,
       notify_url: `${supabaseUrl}/functions/v1/payhere-notify`,
       order_id: order.order_number,
       items: itemsLabel,

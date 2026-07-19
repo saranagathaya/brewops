@@ -56,19 +56,24 @@ Deno.serve(async (req) => {
       return new Response("amount mismatch", { status: 400 });
     }
 
-    // Legal transitions only — a late/replayed webhook must not regress a
-    // terminal state (e.g. a stale signed "-2" arriving after "paid" would
-    // otherwise mark a successfully-charged order as failed).
+    // Legal transitions only — a late/replayed webhook must not regress an
+    // already-successful order (e.g. a stale signed "-2" arriving after
+    // "paid" must never mark a successfully-charged order as failed).
+    // But a decline followed by a same-order retry is completely normal —
+    // PayHere sends a separate notify call per attempt, so "paid" must be
+    // reachable from a prior "failed", not just from "pending" (found live:
+    // a real decline-then-retry-then-approve sandbox run got the genuine
+    // approval silently dropped because this only accepted from:'pending').
     const transition =
-      statusCode === "2" ? { to: "paid", from: "pending" } :
-      statusCode === "-2" ? { to: "failed", from: "pending" } :
-      statusCode === "-3" ? { to: "refunded", from: "paid" } : null;
+      statusCode === "2" ? { to: "paid", from: ["pending", "failed"] } :
+      statusCode === "-2" ? { to: "failed", from: ["pending"] } :
+      statusCode === "-3" ? { to: "refunded", from: ["paid"] } : null;
 
     if (transition) {
       await admin.from("orders")
         .update({ payment_status: transition.to, payment_account: f("payment_id") || null })
         .eq("id", order.id)
-        .eq("payment_status", transition.from);
+        .in("payment_status", transition.from);
     }
 
     return new Response("ok");
