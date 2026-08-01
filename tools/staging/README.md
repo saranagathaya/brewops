@@ -44,11 +44,12 @@ Then build the schema and seed test data:
 ```
 cd tools/staging
 npm install
-node run-migrations.js      # runs 00→20 in order (19 drops the 3
+node run-migrations.js      # runs 00→21 in order (19 drops the 3
                             # notification triggers everywhere — they
                             # carried a legacy key and hardcoded
                             # production's edge-function URL; 20 fixes
-                            # a real order_number race condition)
+                            # a real order_number race condition; 21
+                            # adds the per-brand dark theme flag)
 node seed-staging.js        # both test brands + outlet + franchisor/
                             # franchisee login per brand (see its header
                             # for the emails; password "staging-password"),

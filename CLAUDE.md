@@ -302,7 +302,7 @@ tradeoff, not an open bug.
 `tools/staging/` (see its README for the full walkthrough) builds a
 complete local Supabase stack in Docker — Postgres + Auth + Storage +
 Realtime + Studio via `npx supabase start` (config in `supabase/`), then
-`run-migrations.js` applies 00→20 in order and `seed-staging.js` creates
+`run-migrations.js` applies 00→21 in order and `seed-staging.js` creates
 both test brands with an outlet and franchisor/franchisee logins each.
 Use it to trial schema/RLS changes before running them on production —
 it's the only place the full migration sequence actually executes end to
@@ -431,7 +431,51 @@ holds.
   literal hex (`.profile-hero`, the two store-chip location-pin SVGs) —
   those never responded to *any* brand color, not just the derived ones.
   `#splash`'s gradient is deliberately left hardcoded: it renders before
-  brand resolution completes, so there's nothing to theme it with yet.
+  brand resolution completes, so there's nothing to theme it with yet
+  (it's Liétard's dark theme + real logo specifically, same reasoning
+  as below — there's nothing generic to fall back to before brand data
+  arrives, and the splash was already hardcoded to Liétard before this).
+- Dark theme (opt-in per brand, `brands.dark_theme`, `21-brand-dark-theme.sql`):
+  `applyBrandTheme()` sets `document.documentElement.dataset.theme` to
+  `'dark'`/`'light'` from the flag, which engages a `:root[data-theme="dark"]`
+  CSS override block (near-black surfaces, light text, sans-serif
+  `--font-display` in place of the serif). Additive — brands without the
+  flag are pixel-identical to before. Liétard is the only brand using it
+  today, with its stored colors changed to a real olive-green identity
+  (not just a dark-mode recolor of the old burgundy/gold) at the user's
+  request, taken from a Lovable-built reference design. `--font-display`'s
+  paired `font-style:italic` (used everywhere it appears, for the serif's
+  elegant feel) is now `var(--font-display-style)` instead of hardcoded,
+  so the dark theme can set it to `normal` for its plain sans-serif look
+  without an italic sans-serif ever rendering.
+  Building this surfaced two real, previously-undocumented bugs, both
+  the same root cause (a hardcoded color bypassing a variable that
+  already existed for exactly this purpose) in different places:
+  - Many box-shadow colors across buttons/badges/scrims were hardcoded
+    to Liétard's *original* burgundy (`rgba(139,26,26,...)`) instead of
+    the already-existing `--brand-shadow` variable — every brand's
+    shadows had always been burgundy-tinted regardless of their own
+    color. Fixed by replacing them with
+    `color-mix(in srgb, var(--brand) N%, transparent)` (preserves each
+    spot's original alpha exactly, unlike collapsing them all to
+    `--brand-shadow`'s fixed 0.3).
+  - `.bottom-nav` and `.cart-bar` (the app's persistent bottom
+    navigation and the sticky cart summary bar) had their translucent
+    background hardcoded to `rgba(255,255,255,X)` — under the dark
+    theme this rendered as a stark white bar with no relationship to
+    the page around it, which first looked like a layout/alignment bug
+    (verified it wasn't: the nav's `getBoundingClientRect()` sits flush
+    against `window.innerHeight` with zero gap — `--inset-b` is always
+    `0px` in this app, nothing dynamic sets it). It was purely a color
+    bug. Fixed the same way, with `color-mix(in srgb, var(--white) N%,
+    transparent)` so the translucency effect still works against
+    either theme's actual surface color. `.co-bottom`'s matching
+    hardcoded shadow (`rgba(26,18,8,...)`, a warm tone tuned for the
+    light theme specifically) was replaced with a neutral
+    `rgba(0,0,0,0.12)` for the same reason -- these three are the only
+    spots on the plain app-shell surface (as opposed to a photo/
+    gradient hero background, where white-on-dark is intentional and
+    correct regardless of theme) using this pattern.
 - App Settings: Payment Settings (which checkout methods the customer app
   offers) and 2 of 4 Notifications toggles (new-order alert, cash-confirm
   popup — both gate real franchisee-app behavior) are wired to
