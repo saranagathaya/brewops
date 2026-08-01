@@ -382,8 +382,13 @@ holds.
 ## Known gaps / open items
 
 - Card payments are integrated with PayHere (see "Payments" above) but
-  not yet live: the merchant account activation (bank review) is in
-  progress, so production runs in sandbox mode until PayHere approves it.
+  not yet live: the live merchant activation form was fully submitted
+  2026-08-01 and is now in the bank's review queue (form data → bank
+  account → CRIB → Risk; PayHere quotes 5-10 business days), so
+  production runs in sandbox mode until that's approved. The sandbox
+  integration itself is fully verified end-to-end (see "Payments"
+  above) — nothing about going live is blocked on code, only on the
+  bank review.
   All four payment methods (card/cash/QR/voucher) now insert as
   `payment_status='pending'` and require an actual confirmation event
   before being treated as paid — card via `payhere-notify`, the other
@@ -391,10 +396,26 @@ holds.
   `cash_confirmed`, QR/voucher as `paid`). A failed card payment can be
   retried: `payhere-checkout` accepts a `failed` order and re-arms it to
   `pending` for a new attempt; the customer app shows a "Retry Payment"
-  button on failed card orders. Not yet verified: the actual PayHere
-  sandbox popup UI and webhook round-trip against PayHere's real servers
-  (everything above is proven against the DB/function logic directly,
-  not against PayHere itself) — needs real sandbox merchant credentials.
+  button on failed card orders.
+- Email confirmation on signup was enabled 2026-08-01 (Supabase →
+  Authentication → Sign In / Providers → "Confirm email") to stop the
+  throwaway-fake-account problem test signups kept creating. It's
+  currently running on Supabase's default built-in mailer, which is
+  explicitly a testing-only facility with a very low send-rate ceiling —
+  confirmed live: a second signup attempt shortly after a first hit
+  "email rate limit exceeded", and the first attempt's email eventually
+  arrived minutes late rather than instantly. Fine for occasional manual
+  testing, but not something real customer signups can rely on — a real
+  SMTP provider (Resend was the pick, since it pairs commonly with
+  Supabase and has a workable free tier) needs to be wired in via
+  Authentication → Emails → SMTP Settings before real customer traffic
+  arrives. Domain verification for this was started against `qbrew.app`
+  in Resend but paused: Resend's setup wants an MX record on the `send`
+  subdomain, which requires switching Namecheap's Mail Settings from
+  "Email Forwarding" to "Custom MX" — a change that could affect
+  existing `qbrew.app` email forwarding, so it deserves its own careful
+  pass rather than being rushed in alongside a testing annoyance. Do
+  this properly right before real launch, not before.
 - Delivery service is scaffolded (order_type, address picker) but disabled
   in the customer app pending real courier integration.
 - Telegram Bot notifications (replacing an earlier WhatsApp plan) are
