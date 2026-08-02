@@ -1838,13 +1838,10 @@ function decrementCartItem(id, optKey){
 }
 
 // ══ STORES ══
-// Google returns an Open Location Code ("plus code", e.g. "WXC2+2WF") as a
-// place's address when the picked point has no street address on file, and
-// outlets saved before the franchisor app started filtering those out still
-// carry one. It tells a customer nothing about where the café actually is,
-// so strip it here too rather than leaving existing outlets looking broken
-// until someone re-picks their address.
-const PLUS_CODE_RE = /^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3},?\s*/i;
+// PLUS_CODE_RE lives in shared.js (loaded before this script) -- outlets
+// saved before the franchisor app started filtering plus codes out still
+// carry one, so this strips it at display time too rather than leaving
+// those outlets looking broken until someone re-picks their address.
 function displayOutletAddress(o){
   const cleaned = (o.address || '').replace(PLUS_CODE_RE, '').trim();
   return cleaned || o.location || '';

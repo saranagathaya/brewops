@@ -148,12 +148,9 @@ function resetNetworkKpis() {
 let pendingOutletLatLng = null;
 let outletAutocomplete = null;
 
-// Google hands back an Open Location Code ("plus code", e.g. "WXC2+2WF")
-// as a place's formatted_address whenever the exact point picked has no
-// street address on file — common in Sri Lanka. That's meaningless to a
-// customer trying to actually find the café, so it never gets stored as
-// the outlet address.
-const PLUS_CODE_RE = /^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3},?\s*/i;
+// PLUS_CODE_RE lives in shared.js (loaded before this file) since the
+// customer app strips the same pattern from outlets saved before this
+// existed — see its comment there for why.
 
 // Prefers the place's own name (the café/landmark the franchisor searched
 // for) and strips a leading plus code off the address, so "WXC2+2WF,
