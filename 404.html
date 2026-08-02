@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QBrew</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<script>
+  // GitHub Pages serves this file for any URL with no matching real file --
+  // used here as a lightweight static-hosting router so every brand gets a
+  // clean URL (qbrew.app/<brand-slug>/...) with zero new files or deploys
+  // needed each time a brand is created. Pulls the first path segment as
+  // the brand slug and falls through to the real brewops-customer.html
+  // with it as a ?brand= param. Does no validation of its own --
+  // resolveBrand() there already handles an unknown/invalid slug safely
+  // (shows its own error page instead of falling through to unfiltered
+  // data), so there's nothing for this file to check.
+  const seg = location.pathname.split('/').filter(Boolean)[0];
+  if (seg) {
+    const params = new URLSearchParams(location.search);
+    params.set('brand', seg);
+    location.replace('/brewops-customer.html?' + params.toString());
+  } else {
+    location.replace('/');
+  }
+</script>
+<noscript><a href="/">Continue to QBrew</a></noscript>
+</body>
+</html>

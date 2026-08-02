@@ -42,10 +42,41 @@ the root `CNAME` file and DNS records at the registrar (Namecheap). `qbrew`
 is the platform/company-facing name (what franchisor/franchisee users see);
 it is deliberately distinct from each Outlet Brand's own customer-facing
 name (Liétard Artisan Roast, TestBrand Coffee Co., etc.), which
-`brewops-customer.html` still themes per `?brand=<slug>` exactly as before —
-`index.html` at the repo root exists only to give `qbrew.app/` a landing
-page, and immediately redirects to `brewops-customer.html`, forwarding any
-query string through unchanged (so `qbrew.app/?brand=lietard` still works).
+`brewops-customer.html` still themes per `?brand=<slug>` exactly as before.
+
+**Per-brand URLs**: every brand gets a clean URL of the form
+`qbrew.app/<brand-slug>/brewops-customer.html` (also works as bare
+`/<brand-slug>` or `/<brand-slug>/`) — e.g. `qbrew.app/lietard/...` and
+`qbrew.app/testbrand-coffee-co/...`. Since GitHub Pages is fully static
+with no server-side routing, and brands are created purely via a database
+insert from the Platform Admin UI (zero repo/deploy interaction), a literal
+folder per brand isn't viable. Instead, `404.html` (repo root) doubles as a
+router: GitHub Pages serves it for any URL with no matching real file, so
+it reads the first path segment as a brand slug and redirects to
+`brewops-customer.html?brand=<slug>` — giving every brand, including ones
+created after this was written, a clean URL for free with no new files or
+deploys needed. It does zero validation of its own; `resolveBrand()` in
+`brewops-customer.html` already rejects an unknown/inactive slug safely
+(its own "we couldn't find that café" page, never falling through to
+unfiltered data), so the router doesn't need to check anything. One
+caveat: GitHub Pages serves `404.html` with an actual HTTP 404 status
+under the hood — harmless for the client-side redirect real visitors
+experience, but worth knowing if anything ever checks status codes or
+crawls the site.
+
+`index.html` at the repo root is `qbrew.app`'s own landing page — a
+company/platform page (visual language borrowed from a Lovable reference,
+`https://coffee-scroll.lovable.app`, but with original copy describing
+what qbrew actually is, not that reference's single-roastery story) with
+no links out to any brand's ordering app; reaching a specific brand's app
+happens only via that brand's own separately-shared `/<slug>/` link (QR
+code, social, etc.), never from `qbrew.app` itself. It still preserves one
+narrow backward-compat path: if `?brand=<slug>` is explicitly present in
+the query string (an old-style link already shared somewhere, from before
+per-brand paths existed), it forwards straight to
+`brewops-customer.html?brand=<slug>` exactly like before, instead of
+showing the landing page — so nothing already distributed breaks.
+
 `policies/` holds the Return, Privacy, and Terms pages required by the
 PayHere merchant activation review. They carry real legal/compliance
 weight (bank-reviewed, and binding on real customers once live) — treat
@@ -56,13 +87,14 @@ edits to their content more like a legal document than app copy.
 A Capacitor wrapper that packages `brewops-customer.html` as an installable
 Liétard-branded Android app — a WebView shell, not a separate codebase. Its
 `capacitor.config.json` sets `server.url` to
-`https://qbrew.app/brewops-customer.html?brand=lietard` directly (bypassing
-the root `index.html` redirect), so the app always shows whatever is
-currently live on `qbrew.app` for Liétard — there is no bundled/offline
-copy of the web app, and no separate build step keeps it in sync; editing
-`brewops-customer.html` and pushing to `main` is the entire update path for
-both the website and this app. This mirrors how the project originally
-came about: a Lovable-hosted design mockup
+`https://qbrew.app/lietard/brewops-customer.html` (the clean per-brand URL,
+see "Production hosting" above — resolved via the `404.html` router to the
+real `brewops-customer.html?brand=lietard` at runtime), so the app always
+shows whatever is currently live on `qbrew.app` for Liétard — there is no
+bundled/offline copy of the web app, and no separate build step keeps it
+in sync; editing `brewops-customer.html` and pushing to `main` is the
+entire update path for both the website and this app. This mirrors how the
+project originally came about: a Lovable-hosted design mockup
 (`https://lietard-coffee-app.lovable.app`) wrapped the same way, which is
 what the Liétard dark-theme re-skin (see "Per-brand theming" below) was
 visually based on — this app now points at the real production experience
@@ -181,6 +213,26 @@ CDN inside `initSupabase()`, not bundled. The legacy JWT-format API keys
 production rejects them with 401 "Legacy API keys are disabled", so any
 old copy of them (including the once-exposed service_role string) is dead.
 Don't re-enable them.
+
+**Google Maps connection**: `GOOGLE_MAPS_API_KEY` is hardcoded in
+`franchisor-init.js`, public by design like the Supabase key above — Maps
+JS keys are meant to be client-visible and are secured via HTTP referrer
+restriction in Google Cloud Console, not by hiding the key. **That
+restriction (scope it to `qbrew.app/*` + `localhost` for local dev) still
+needs to be set** — until it is, the key could be copied from page source
+and used elsewhere against this Google Cloud billing account. It's used
+for exactly one thing: Places Autocomplete on the franchisor's Add/Edit
+Outlet form (`franchisor-cms.js`), so franchisors can search a real
+address instead of typing raw coordinates — picking a suggestion fills
+`outlets.lat`/`lng` (columns that existed in the schema from day one but
+were unused until this) alongside the address. Lazy-loaded via
+`ensureGoogleMapsLoaded()` the same way Supabase is lazy-loaded, and only
+ever loaded by the franchisor app — the customer app has no Google Maps
+dependency at all; it computes outlet distance client-side with a plain
+Haversine formula against the device's own geolocation
+(`applyStoreDistancesIfKnown()` in `brewops-customer.html`) and links out
+to `google.com/maps/search` for directions, neither of which needs an API
+key or network call.
 
 **Auth differs per app**:
 - `brewops-customer.html` — browsing is anonymous; login/signup only appears

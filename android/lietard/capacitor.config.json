@@ -3,7 +3,7 @@
   "appName": "Liétard",
   "webDir": "dist",
   "server": {
-    "url": "https://qbrew.app/brewops-customer.html?brand=lietard",
+    "url": "https://qbrew.app/lietard/brewops-customer.html",
     "cleartext": false
   }
 }
