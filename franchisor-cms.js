@@ -148,6 +148,26 @@ function resetNetworkKpis() {
 let pendingOutletLatLng = null;
 let outletAutocomplete = null;
 
+// Google hands back an Open Location Code ("plus code", e.g. "WXC2+2WF")
+// as a place's formatted_address whenever the exact point picked has no
+// street address on file — common in Sri Lanka. That's meaningless to a
+// customer trying to actually find the café, so it never gets stored as
+// the outlet address.
+const PLUS_CODE_RE = /^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3},?\s*/i;
+
+// Prefers the place's own name (the café/landmark the franchisor searched
+// for) and strips a leading plus code off the address, so "WXC2+2WF,
+// Malabe, Sri Lanka" becomes "Malabe, Sri Lanka" — or, for a named place,
+// "Liétard Malabe, Malabe, Sri Lanka".
+function readablePlaceAddress(place) {
+  const raw = (place.formatted_address || '').trim();
+  const stripped = raw.replace(PLUS_CODE_RE, '').trim();
+  const name = (place.name || '').trim();
+  if (!name || PLUS_CODE_RE.test(name)) return stripped || raw;
+  if (!stripped) return name;
+  return stripped.toLowerCase().startsWith(name.toLowerCase()) ? stripped : name + ', ' + stripped;
+}
+
 async function ensureOutletAutocomplete() {
   try {
     await ensureGoogleMapsLoaded();
@@ -157,11 +177,12 @@ async function ensureOutletAutocomplete() {
   }
   if (outletAutocomplete) return;
   const input = document.getElementById('outlet-address');
-  outletAutocomplete = new google.maps.places.Autocomplete(input, { fields: ['formatted_address', 'geometry'] });
+  outletAutocomplete = new google.maps.places.Autocomplete(input, { fields: ['name', 'formatted_address', 'geometry'] });
   outletAutocomplete.addListener('place_changed', () => {
     const place = outletAutocomplete.getPlace();
     if (!place.geometry) return; // franchisor typed free text and hit enter without picking a suggestion
-    if (place.formatted_address) input.value = place.formatted_address;
+    const readable = readablePlaceAddress(place);
+    if (readable) input.value = readable;
     pendingOutletLatLng = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
   });
 }

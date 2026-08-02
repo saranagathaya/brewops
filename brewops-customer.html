@@ -1123,7 +1123,7 @@ async function loadSupabaseData() {
     }
     if (outletRes.data) {
       window.STORES = outletRes.data.map(o => ({
-        id: o.id, name: o.name, addr: o.address || o.location,
+        id: o.id, name: o.name, addr: displayOutletAddress(o),
         lat: o.lat, lng: o.lng, dist: '', status: 'open'
       }));
     }
@@ -1838,6 +1838,18 @@ function decrementCartItem(id, optKey){
 }
 
 // ══ STORES ══
+// Google returns an Open Location Code ("plus code", e.g. "WXC2+2WF") as a
+// place's address when the picked point has no street address on file, and
+// outlets saved before the franchisor app started filtering those out still
+// carry one. It tells a customer nothing about where the café actually is,
+// so strip it here too rather than leaving existing outlets looking broken
+// until someone re-picks their address.
+const PLUS_CODE_RE = /^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3},?\s*/i;
+function displayOutletAddress(o){
+  const cleaned = (o.address || '').replace(PLUS_CODE_RE, '').trim();
+  return cleaned || o.location || '';
+}
+
 // Great-circle distance in km between two lat/lng points.
 function haversineDistanceKm(lat1, lng1, lat2, lng2) {
   const R = 6371;
