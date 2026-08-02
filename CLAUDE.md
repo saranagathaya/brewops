@@ -65,9 +65,31 @@ experience, but worth knowing if anything ever checks status codes or
 crawls the site.
 
 `index.html` at the repo root is `qbrew.app`'s own landing page — a
-company/platform page (visual language borrowed from a Lovable reference,
-`https://coffee-scroll.lovable.app`, but with original copy describing
-what qbrew actually is, not that reference's single-roastery story) with
+company/platform page whose layout, palette and motion are ported from the
+user's own Lovable project `coffee-scroll` ("Ember & Oak", live at
+`https://coffee-scroll.lovable.app`; source readable via that project's
+Lovable MCP). The structure is faithful to it — intro word-loader, parallax
+photo hero with a masked wordmark reveal, manifesto, three sticky-image
+feature blocks, three centred quote sections, a scroll-driven word stack,
+marquee — but the copy is original, describing what qbrew actually is
+rather than that reference's single-roastery story (sourcing, roasting and
+subscription boxes don't apply here and would be false on a real page).
+The reference's oklch design tokens were converted to hex so the palette is
+identical while still rendering on older mobile browsers, and its four
+photos live in `assets/landing/` (the root `.gitignore` blanket-ignores
+`*.jpg`, so there is a deliberate `!assets/landing/*.jpg` exception — drop
+it and these silently vanish from the build). Two deliberate departures
+from the reference, both to avoid shipping something untrue: its email
+capture form is gone (it had no backend — it just set local state, so on a
+real site it would collect addresses that go nowhere), and its
+"LEARN MORE →" links are gone (there is nowhere for them to go). Scroll
+reveals are progressive-enhancement: content is visible by default and only
+hidden once JS confirms `IntersectionObserver` exists, with a 4s safety
+timer that reveals everything if the observer never fires — otherwise a
+backgrounded tab or an old browser would render a blank page. Hero
+entrance animations are pure CSS for the same reason (`requestAnimationFrame`
+does not fire in a hidden tab, which would strand the wordmark translated
+out of view). It has
 no links out to any brand's ordering app; reaching a specific brand's app
 happens only via that brand's own separately-shared `/<slug>/` link (QR
 code, social, etc.), never from `qbrew.app` itself. It still preserves one

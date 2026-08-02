@@ -4,6 +4,9 @@ brewops-notifications-setup/
 *.zip
 *.jpg
 *.JPG
+# ...but the qbrew.app landing page's own photography is real source, not a
+# stray screenshot -- the blanket *.jpg rule above would silently drop it.
+!assets/landing/*.jpg
 node_modules/
 
 # Android/Capacitor (android/lietard/)
