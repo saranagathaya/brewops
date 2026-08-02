@@ -88,9 +88,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .promo-price-unit{font-size:12px;color:rgba(42,20,0,0.7);font-weight:600;}
 .promo-skip{position:absolute;top:calc(20px + var(--inset-t));right:20px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.25);color:#fff;font-size:12px;font-family:var(--font-mono);padding:6px 15px;border-radius:20px;cursor:pointer;z-index:10;backdrop-filter:blur(8px);}
 .promo-top{position:absolute;top:calc(22px + var(--inset-t));left:24px;z-index:10;display:flex;align-items:center;gap:9px;}
-.promo-top .pe{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;}
-.promo-top .pe svg{width:18px;height:18px;}
-.promo-top .pn{font-family:var(--font-display);font-style:var(--font-display-style);font-weight:700;font-size:20px;color:#fff;}
+.promo-top .promo-logo-img{height:136px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));}
 .promo-dots{position:absolute;bottom:calc(34px + var(--inset-b));left:30px;display:flex;gap:6px;z-index:10;}
 .promo-dot{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,0.35);transition:all 0.3s;}
 .promo-dot.active{width:22px;background:var(--gold2);}
@@ -406,7 +404,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 
 <!-- PROMO -->
 <div class="screen" id="promo">
-  <div class="promo-top"><div class="pe"><svg viewBox="0 0 52 52" fill="none"><rect x="4" y="4" width="44" height="44" rx="6" stroke="white" stroke-width="4"/><rect x="13" y="13" width="26" height="26" rx="4" stroke="white" stroke-width="3.5"/></svg></div><div class="pn">Liétard</div></div>
+  <div class="promo-top"><img src="assets/lietard-logo.png" alt="Liétard" class="promo-logo-img"></div>
   <button id="oc-cust-1" class="promo-skip">Skip ›</button>
   <div class="promo-slides" id="promo-slides"></div>
   <div class="promo-dots"><div class="promo-dot active"></div><div class="promo-dot"></div><div class="promo-dot"></div></div>
