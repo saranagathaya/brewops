@@ -1,0 +1,82 @@
+# iOS builds for both native app wrappers (see apps/lietard/, apps/staff/).
+# Both are Capacitor projects wrapping a live page from qbrew.app -- no web
+# build step, just install deps, install CocoaPods, and archive the Xcode
+# project. Code signing is Codemagic's own App Store Connect integration
+# (Team settings -> Integrations -> App Store Connect, using an API key
+# generated once in App Store Connect under Users and Access ->
+# Integrations), not a manually managed .p12/provisioning profile.
+#
+# This file is written against Codemagic's documented conventions but has
+# never actually run -- there's no Mac or Codemagic account in the
+# environment this was built in to verify it. Treat the first real run as
+# part of setting this up, not as a guaranteed-working config.
+workflows:
+  lietard-ios:
+    name: Liétard customer app (iOS)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      vars:
+        APP_DIR: "apps/lietard"
+        XCODE_WORKSPACE: "apps/lietard/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: com.lietard.coffee.app
+      app_store_connect: codemagic_integration
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          cd "$APP_DIR" && npm install
+      - name: Install CocoaPods dependencies
+        script: |
+          cd "$APP_DIR/ios/App" && pod install
+      - name: Set up code signing on the Xcode project
+        script: xcode-project use-profiles
+      - name: Build .ipa
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  staff-ios:
+    name: qbrew Staff app (iOS)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      vars:
+        APP_DIR: "apps/staff"
+        XCODE_WORKSPACE: "apps/staff/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: com.qbrew.staff
+      app_store_connect: codemagic_integration
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          cd "$APP_DIR" && npm install
+      - name: Install CocoaPods dependencies
+        script: |
+          cd "$APP_DIR/ios/App" && pod install
+      - name: Set up code signing on the Xcode project
+        script: xcode-project use-profiles
+      - name: Build .ipa
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

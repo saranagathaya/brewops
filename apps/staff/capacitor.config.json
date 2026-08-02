@@ -1,0 +1,9 @@
+{
+  "appId": "com.qbrew.staff",
+  "appName": "qbrew Staff",
+  "webDir": "dist",
+  "server": {
+    "url": "https://qbrew.app/brewops-franchisee-v2.html",
+    "cleartext": false
+  }
+}

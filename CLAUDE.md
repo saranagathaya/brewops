@@ -104,52 +104,73 @@ PayHere merchant activation review. They carry real legal/compliance
 weight (bank-reviewed, and binding on real customers once live) — treat
 edits to their content more like a legal document than app copy.
 
-## Android app (`android/lietard/`)
+## Native apps (`apps/`)
 
-A Capacitor wrapper that packages `brewops-customer.html` as an installable
-Liétard-branded Android app — a WebView shell, not a separate codebase. Its
-`capacitor.config.json` sets `server.url` to
-`https://qbrew.app/lietard/brewops-customer.html` (the clean per-brand URL,
-see "Production hosting" above — resolved via the `404.html` router to the
-real `brewops-customer.html?brand=lietard` at runtime), so the app always
-shows whatever is currently live on `qbrew.app` for Liétard — there is no
-bundled/offline copy of the web app, and no separate build step keeps it
-in sync; editing `brewops-customer.html` and pushing to `main` is the
-entire update path for both the website and this app. This mirrors how the
-project originally came about: a Lovable-hosted design mockup
-(`https://lietard-coffee-app.lovable.app`) wrapped the same way, which is
-what the Liétard dark-theme re-skin (see "Per-brand theming" below) was
-visually based on — this app now points at the real production experience
-instead of that mockup.
+Two Capacitor wrappers, each packaging a live page from `qbrew.app` as an
+installable app — WebView (Android) / WKWebView (iOS) shells, not separate
+codebases. Both share the same core pattern: `capacitor.config.json`'s
+`server.url` points at the real production page, so the app always shows
+whatever is currently live — there is no bundled/offline copy of the web
+app, and no separate build step keeps it in sync; editing the HTML file and
+pushing to `main` is the entire update path for both the website and every
+app wrapping it.
 
-Single-brand by design: `appId` (`com.lietard.coffee.app`), the launcher
-icon/splash, and the hardcoded `?brand=lietard` are all Liétard-specific.
-A second brand wanting its own app would mean duplicating this folder with
-its own `appId`/branding/`?brand=` slug, not parameterizing this one.
+- **`apps/lietard/`** — the Liétard-branded **customer** app
+  (`brewops-customer.html`). `server.url` is
+  `https://qbrew.app/lietard/brewops-customer.html` (the clean per-brand
+  URL, see "Production hosting" above — resolved via the `404.html` router
+  to the real `brewops-customer.html?brand=lietard` at runtime). Originally
+  built (as `android/lietard/`, Android-only) to replace a Lovable-hosted
+  design mockup (`https://lietard-coffee-app.lovable.app`) that the Liétard
+  dark-theme re-skin (see "Per-brand theming" below) was visually based on;
+  later renamed to `apps/lietard/` and given an iOS platform once both
+  became sibling native folders under one shared config, matching Capacitor's
+  normal project layout. **Single-brand by design**: `appId`
+  (`com.lietard.coffee.app`), the launcher icon/splash, and the hardcoded
+  `/lietard/` URL are all Liétard-specific — see "Adding a new brand's
+  customer app" below for what a second brand's app actually involves.
+- **`apps/staff/`** — a **universal** app for franchisee/franchisor staff
+  (`brewops-franchisee-v2.html`), `appId` `com.qbrew.staff`. Unlike the
+  customer app, this is **not** per-brand: `server.url` points straight at
+  `https://qbrew.app/brewops-franchisee-v2.html` with no brand slug at all,
+  because staff brand-scoping already happens post-login via the
+  authenticated profile's `brand_id`/`outlet_id` (see "Auth differs per
+  app" above) rather than a URL parameter — any outlet's staff install the
+  same app and only ever see their own brand's data. Its icon/splash are a
+  **placeholder** built from qbrew's own landing-page palette (a plain
+  amber "Q" on near-black, `apps/staff/resources/`) since no dedicated
+  qbrew icon-shaped mark exists yet — swap the source images and regenerate
+  (see below) once a real one does.
 
-Source assets for the icon/splash live in `android/lietard/resources/`
-(`icon.png`, `icon-foreground.png`, `icon-background.png`, `splash.png`) —
-regenerate the actual per-density Android resources from them with
-`npx @capacitor/assets generate --android` (run from `android/lietard/`)
-after changing any of those source files. That command only writes/updates
-files it generates — it does **not** delete stale ones, so when
-regenerating after a source image change, check `git status` for leftover
-files from a previous format that should be removed (this bit us once:
-Capacitor's default project shipped `ic_launcher*.webp` placeholders,
-`@capacitor/assets` added `ic_launcher*.png` for the real logo but left the
-old `.webp` files in place, and having both a `.png` and `.webp` resolving
-to the same `@mipmap/ic_launcher` resource name fails the Gradle build
-with a duplicate-resource error).
+### Building
 
-Building: `cd android/lietard/android && ./gradlew assembleDebug`, needs a
+Source assets for icon/splash live in `apps/<name>/resources/` (`icon.png`,
+`icon-foreground.png`, `icon-background.png`, `splash.png`). Regenerate the
+actual per-platform resources from them after changing any source image:
+```
+cd apps/<name>
+npx @capacitor/assets generate --android
+npx @capacitor/assets generate --ios
+```
+This only writes/updates files it generates — it does **not** delete stale
+ones, so check `git status` for leftover files from a previous format that
+should be removed (this bit us once on the Android side: Capacitor's
+default project shipped `ic_launcher*.webp` placeholders, `@capacitor/assets`
+added `ic_launcher*.png` for the real logo but left the old `.webp` files in
+place, and having both resolve to the same `@mipmap/ic_launcher` resource
+name fails the Gradle build with a duplicate-resource error).
+
+**Android**: `cd apps/<name>/android && ./gradlew assembleDebug`, needs a
 JDK new enough for `capacitor-android`'s `compileOptions` (currently
 Java 21) — if `JAVA_HOME` points at an older JDK, override it for just the
 build command rather than changing the system default. Output lands at
-`android/lietard/android/app/build/outputs/apk/debug/app-debug.apk`. No
-release keystore/signing is set up yet — debug-only for now, sideload to
-test. Local Android/Gradle build artifacts (`local.properties`, `.gradle/`,
-`build/`, `.idea/`, the `app/release/` baseline-profile output) are
-git-ignored (see root `.gitignore`); only source files are tracked.
+`apps/<name>/android/app/build/outputs/apk/debug/app-debug.apk`. No release
+keystore/signing is set up yet — debug-only for now, sideload to test.
+Local Android/Gradle build artifacts (`local.properties`, `.gradle/`,
+`build/`, `.idea/`, the `app/release/` baseline-profile output) and iOS's
+`Pods/`/`xcuserdata/`/`DerivedData/` are git-ignored via a generic `apps/*/`
+wildcard pattern in the root `.gitignore`, so a new app under `apps/`
+inherits this automatically — only source files are tracked.
 
 If a from-scratch Gradle build fails resolving a dependency with a
 certificate/PKIX error, check whether local antivirus "HTTPS scanning"
@@ -162,6 +183,57 @@ its own separate `cacerts` store) — do this on a writable copy of
 `cacerts` and point Gradle at it via `-Djavax.net.ssl.trustStore=`, or
 properly into the real JDK install if you have admin rights, rather than
 disabling AV scanning or the certificate check.
+
+Both apps also ship an Android `network_security_config.xml` bundling
+Let's Encrypt's root (ISRG Root X1) as an explicit trust anchor
+(`android/app/src/main/res/xml/`, wired via
+`android:networkSecurityConfig` in `AndroidManifest.xml`). Android didn't
+add that root to its own trust store until 7.1.1, and the old fallback
+that covered older devices expired in 2021 — since GitHub Pages issues
+`qbrew.app`'s certificate exclusively via Let's Encrypt, any device below
+7.1.1 can't validate it at all, and the WebView fails the load silently
+(blank screen, no error). Confirmed live on an Android 7.0 device: the
+same URL worked fine in that phone's regular browser (which maintains its
+own separately-updated certificate list) while the wrapped app stayed
+blank, until this fix. iOS doesn't need the equivalent — Apple's trust
+store has included ISRG Root X1 since iOS 10 (2016), long before this
+matters for any realistically-supported device.
+
+**iOS**: `npx cap add ios` (from `apps/<name>/`) generates
+`apps/<name>/ios/App/`, an Xcode project + workspace — pure Capacitor CLI,
+no Mac needed to generate it. Actually compiling, signing, and producing an
+installable `.ipa` does need a Mac, which this project doesn't have locally
+— see `codemagic.yaml` at the repo root for cloud-Mac CI builds via
+[Codemagic](https://codemagic.io), one workflow per app. Both need, once
+set up: an Apple Developer Program enrollment ($99/year, required for any
+real device install, ad hoc or App Store) and a Codemagic account connected
+to this repo, with an App Store Connect API key configured as its
+`app_store_connect` integration for code signing (no manually managed
+`.p12`/provisioning profile). **That YAML has never actually run** — it's
+written against Codemagic's documented conventions but unverified against
+a real build; treat the first real run as part of finishing this setup,
+not as a guaranteed-working config.
+
+### Adding a new brand's customer app
+
+The customer app is deliberately single-brand-per-install (see
+`apps/lietard/` above), so a second brand wanting one means copying the
+folder rather than parameterizing it:
+1. Copy `apps/lietard/` to `apps/<new-slug>/`.
+2. In `capacitor.config.json`: change `appId` (reverse-DNS, e.g.
+   `com.<brand>.app`), `appName`, and `server.url` to
+   `https://qbrew.app/<new-slug>/brewops-customer.html`.
+3. Replace the brand's logo source file and regenerate
+   `apps/<new-slug>/resources/*` from it the same way the Liétard ones were
+   built (crop a bean/mark-only version for the launcher icon — a full
+   text-heavy lockup is illegible at launcher size — and a fuller lockup
+   for the splash, matching that brand's own web app splash screen).
+4. Run `npx @capacitor/assets generate --android` and `--ios`, then rebuild
+   both platforms per "Building" above.
+5. Update the Android package name in `MainActivity.java`'s `package`
+   declaration and the directory it lives in to match the new `appId`.
+6. Add a `<new-slug>-ios` workflow to `codemagic.yaml`, copying the pattern
+   from `lietard-ios`.
 
 ## Architecture of each HTML file
 
@@ -239,15 +311,13 @@ Don't re-enable them.
 **Google Maps connection**: `GOOGLE_MAPS_API_KEY` is hardcoded in
 `franchisor-init.js`, public by design like the Supabase key above — Maps
 JS keys are meant to be client-visible and are secured via HTTP referrer
-restriction in Google Cloud Console, not by hiding the key. **That
-restriction (scope it to `qbrew.app/*` + `localhost` for local dev) still
-needs to be set** — until it is, the key could be copied from page source
-and used elsewhere against this Google Cloud billing account. It's used
-for exactly one thing: Places Autocomplete on the franchisor's Add/Edit
-Outlet form (`franchisor-cms.js`), so franchisors can search a real
-address instead of typing raw coordinates — picking a suggestion fills
-`outlets.lat`/`lng` (columns that existed in the schema from day one but
-were unused until this) alongside the address. Lazy-loaded via
+restriction in Google Cloud Console, not by hiding the key. That
+restriction (scoped to `qbrew.app/*` + `localhost` for local dev) is set.
+It's used for exactly one thing: Places Autocomplete on the franchisor's
+Add/Edit Outlet form (`franchisor-cms.js`), so franchisors can search a
+real address instead of typing raw coordinates — picking a suggestion
+fills `outlets.lat`/`lng` (columns that existed in the schema from day one
+but were unused until this) alongside the address. Lazy-loaded via
 `ensureGoogleMapsLoaded()` the same way Supabase is lazy-loaded, and only
 ever loaded by the franchisor app — the customer app has no Google Maps
 dependency at all; it computes outlet distance client-side with a plain
@@ -255,6 +325,16 @@ Haversine formula against the device's own geolocation
 (`applyStoreDistancesIfKnown()` in `brewops-customer.html`) and links out
 to `google.com/maps/search` for directions, neither of which needs an API
 key or network call.
+
+Google returns an Open Location Code ("plus code", e.g. `WXC2+2WF`) as a
+place's `formatted_address` whenever the exact point picked has no street
+address on file — common in Sri Lanka. Precise, but meaningless to a
+customer trying to find the café, so `PLUS_CODE_RE` (`shared.js`, loaded by
+both apps) strips it: `franchisor-cms.js` prefers the place's own `name`
+and strips a leading plus code before filling the Address field, and
+`displayOutletAddress()` (`brewops-customer.html`) strips the same pattern
+at display time so outlets saved before this existed still read sensibly
+without anyone re-picking their address.
 
 **Auth differs per app**:
 - `brewops-customer.html` — browsing is anonymous; login/signup only appears
@@ -631,3 +711,15 @@ holds.
   in the month) — falls back to an honest "not enough history" message
   when there's no prior month of `daily_ops` data, rather than fabricating
   a trend from a month that never happened.
+- Native apps (see "Native apps" above): both `apps/lietard/` and
+  `apps/staff/` have working Android debug builds, verified against real
+  data (Liétard on a real device; Staff against a real seeded franchisee
+  login on local staging). Both also have generated iOS projects, but
+  **no iOS build has actually been compiled** — that needs a Mac, which
+  this project doesn't have access to yet. `codemagic.yaml` is written and
+  ready, but needs an Apple Developer Program enrollment and a Codemagic
+  account connected before it can run for the first time. `apps/staff/`'s
+  icon/splash are an explicit placeholder (a plain "Q" mark built from
+  qbrew's own palette, not a real logo) pending an actual qbrew icon-shaped
+  mark. No release/App Store signing is set up for either app — sideload
+  debug builds only for now.
