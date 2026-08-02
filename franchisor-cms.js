@@ -141,6 +141,31 @@ function resetNetworkKpis() {
   ['kpi-best-revenue-sub','kpi-most-cups-sub','kpi-lowest-sub','kpi-healthy-sub'].forEach(id => document.getElementById(id).textContent = '—');
 }
 
+// Set by the Places Autocomplete `place_changed` listener whenever the
+// franchisor picks a real suggestion; null means "no new coordinates this
+// session" so saveOutlet() knows not to overwrite existing lat/lng just
+// because the modal was opened and closed without touching the address.
+let pendingOutletLatLng = null;
+let outletAutocomplete = null;
+
+async function ensureOutletAutocomplete() {
+  try {
+    await ensureGoogleMapsLoaded();
+  } catch (e) {
+    console.error('Google Maps failed to load:', e.message);
+    return;
+  }
+  if (outletAutocomplete) return;
+  const input = document.getElementById('outlet-address');
+  outletAutocomplete = new google.maps.places.Autocomplete(input, { fields: ['formatted_address', 'geometry'] });
+  outletAutocomplete.addListener('place_changed', () => {
+    const place = outletAutocomplete.getPlace();
+    if (!place.geometry) return; // franchisor typed free text and hit enter without picking a suggestion
+    if (place.formatted_address) input.value = place.formatted_address;
+    pendingOutletLatLng = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
+  });
+}
+
 function openAddOutletModal() {
   document.getElementById('outlet-modal-title').textContent = 'Add Outlet';
   document.getElementById('outlet-edit-id').value = '';
@@ -148,7 +173,9 @@ function openAddOutletModal() {
   document.getElementById('outlet-location').value = '';
   document.getElementById('outlet-address').value = '';
   document.getElementById('outlet-active').checked = true;
+  pendingOutletLatLng = null;
   openModal('modal-outlet');
+  ensureOutletAutocomplete();
 }
 
 async function openEditOutletModal(id) {
@@ -161,7 +188,11 @@ async function openEditOutletModal(id) {
   document.getElementById('outlet-location').value = outlet.location || '';
   document.getElementById('outlet-address').value = outlet.address || '';
   document.getElementById('outlet-active').checked = outlet.is_active;
+  // Prefill from the existing row so saving without re-picking the address
+  // (e.g. just toggling Active) keeps the outlet's current coordinates.
+  pendingOutletLatLng = (outlet.lat != null && outlet.lng != null) ? { lat: outlet.lat, lng: outlet.lng } : null;
   openModal('modal-outlet');
+  ensureOutletAutocomplete();
 }
 
 async function saveOutlet() {
@@ -177,7 +208,10 @@ async function saveOutlet() {
   const btn = document.getElementById('outlet-save-btn');
   btn.disabled = true; btn.textContent = 'Saving...';
 
-  const payload = { name, location, address: address || null, is_active, brand_id: window.MY_PROFILE?.brand_id };
+  const payload = {
+    name, location, address: address || null, is_active, brand_id: window.MY_PROFILE?.brand_id,
+    ...(pendingOutletLatLng ? { lat: pendingOutletLatLng.lat, lng: pendingOutletLatLng.lng } : {}),
+  };
   const { error } = id
     ? await sb.from('outlets').update(payload).eq('id', id)
     : await sb.from('outlets').insert(payload);

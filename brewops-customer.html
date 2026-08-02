@@ -346,6 +346,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .si-status{font-size:10px;font-family:var(--font-mono);margin-top:4px;}
 .si-status.open{color:var(--green);}
 .si-status.busy{color:var(--gold);}
+.si-map-link{font-size:11px;color:var(--brand);font-weight:600;text-decoration:none;display:inline-block;margin-top:3px;}
 
 /* CHECKOUT */
 #modal-checkout .modal-sheet{background:var(--cream2);}
@@ -1123,7 +1124,7 @@ async function loadSupabaseData() {
     if (outletRes.data) {
       window.STORES = outletRes.data.map(o => ({
         id: o.id, name: o.name, addr: o.address || o.location,
-        dist: '— km', status: 'open'
+        lat: o.lat, lng: o.lng, dist: '', status: 'open'
       }));
     }
     if (settingsRes.data) {
@@ -1837,6 +1838,31 @@ function decrementCartItem(id, optKey){
 }
 
 // ══ STORES ══
+// Great-circle distance in km between two lat/lng points.
+function haversineDistanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Recomputes each outlet's dist/distKm against window.CUSTOMER_LOCATION (if
+// known) and sorts nearest-first. Safe to call any time STORES is rebuilt;
+// a no-op until the customer has actually granted geolocation.
+function applyStoreDistancesIfKnown(){
+  const loc = window.CUSTOMER_LOCATION;
+  if (!loc) return;
+  const stores = window.STORES || [];
+  stores.forEach(s => {
+    if (s.lat == null || s.lng == null) return;
+    const km = haversineDistanceKm(loc.lat, loc.lng, s.lat, s.lng);
+    s.distKm = km;
+    s.dist = km < 1 ? `${Math.round(km*1000)} m` : `${km.toFixed(1)} km`;
+  });
+  stores.sort((a,b) => (a.distKm ?? Infinity) - (b.distKm ?? Infinity));
+}
+
 function buildStoreList(){
   const el = document.getElementById('store-list');
   const stores = window.STORES || [];
@@ -1847,7 +1873,11 @@ function buildStoreList(){
   el.innerHTML = stores.map(s=>`
     <div class="store-item" onclick="selectStore('${s.id}')">
       <div class="si-icon">📍</div>
-      <div style="flex:1;min-width:0;"><div class="si-name">${s.name}</div><div class="si-addr">${s.addr||''}</div></div>
+      <div style="flex:1;min-width:0;">
+        <div class="si-name">${s.name}</div>
+        <div class="si-addr">${s.addr||''}</div>
+        ${(s.lat!=null && s.lng!=null) ? `<a href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}" target="_blank" rel="noopener" class="si-map-link" onclick="event.stopPropagation()">View on map ›</a>` : ''}
+      </div>
       <div class="si-right"><div class="si-dist">${s.dist||'—'}</div><div class="si-status ${s.status||'open'}">${s.status==='busy'?'● Busy':'● Open'}</div></div>
     </div>`).join('');
 }
@@ -1865,7 +1895,23 @@ function selectStore(id){
   showToast(`${selectedStore.name} selected ✓`,'📍');
 }
 
-function openStoreSelector(){ openModal('modal-store'); }
+// Asked at most once per session; a denial/error just leaves outlets in
+// their original order with no distance shown, same as before this feature.
+let customerLocationRequested = false;
+function openStoreSelector(){
+  openModal('modal-store');
+  if (window.CUSTOMER_LOCATION) { applyStoreDistancesIfKnown(); buildStoreList(); return; }
+  if (customerLocationRequested || !navigator.geolocation) return;
+  customerLocationRequested = true;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      window.CUSTOMER_LOCATION = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      applyStoreDistancesIfKnown();
+      buildStoreList();
+    },
+    () => { /* denied or unavailable — keep the unsorted list, no distance */ }
+  );
+}
 
 // ══ CHECKOUT ══
 // Hides payment methods the franchisor has disabled (Payment Settings

@@ -3,6 +3,30 @@
 const SUPABASE_URL = 'https://fjmzsxslnzrtgcilttly.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zCZlpiOEgr0nQWt9Tp331g_wVxuaTb-'; // publishable key (public by design; legacy JWT anon key retired)
 
+// ══ GOOGLE MAPS CONFIG ══
+// Used only for Places Autocomplete on the Add/Edit Outlet form (see
+// franchisor-cms.js) so franchisors can search a real address instead of
+// typing raw coordinates. Public by design like the Supabase key above —
+// Maps JS keys are meant to be client-visible; they're secured via HTTP
+// referrer restriction in Google Cloud Console (scoped to qbrew.app +
+// localhost for dev), not by hiding the key.
+const GOOGLE_MAPS_API_KEY = 'AIzaSyDTAGMkWqxjszdA9Brt4IJMLt4JZyZyTUM';
+
+let googleMapsLoadPromise = null;
+function ensureGoogleMapsLoaded() {
+  if (googleMapsLoadPromise) return googleMapsLoadPromise;
+  googleMapsLoadPromise = new Promise((resolve, reject) => {
+    if (window.google?.maps?.places) { resolve(); return; }
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Google Maps'));
+    document.head.appendChild(script);
+  });
+  return googleMapsLoadPromise;
+}
+
 let sb = null;
 
 async function initSupabase() {
