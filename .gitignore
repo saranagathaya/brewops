@@ -5,3 +5,11 @@ brewops-notifications-setup/
 *.jpg
 *.JPG
 node_modules/
+
+# Android/Capacitor (android/lietard/)
+android/lietard/android/local.properties
+android/lietard/**/.gradle/
+android/lietard/**/build/
+android/lietard/**/.idea/
+android/lietard/android/app/release/
+*.iml

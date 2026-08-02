@@ -51,6 +51,64 @@ PayHere merchant activation review. They carry real legal/compliance
 weight (bank-reviewed, and binding on real customers once live) — treat
 edits to their content more like a legal document than app copy.
 
+## Android app (`android/lietard/`)
+
+A Capacitor wrapper that packages `brewops-customer.html` as an installable
+Liétard-branded Android app — a WebView shell, not a separate codebase. Its
+`capacitor.config.json` sets `server.url` to
+`https://qbrew.app/brewops-customer.html?brand=lietard` directly (bypassing
+the root `index.html` redirect), so the app always shows whatever is
+currently live on `qbrew.app` for Liétard — there is no bundled/offline
+copy of the web app, and no separate build step keeps it in sync; editing
+`brewops-customer.html` and pushing to `main` is the entire update path for
+both the website and this app. This mirrors how the project originally
+came about: a Lovable-hosted design mockup
+(`https://lietard-coffee-app.lovable.app`) wrapped the same way, which is
+what the Liétard dark-theme re-skin (see "Per-brand theming" below) was
+visually based on — this app now points at the real production experience
+instead of that mockup.
+
+Single-brand by design: `appId` (`com.lietard.coffee.app`), the launcher
+icon/splash, and the hardcoded `?brand=lietard` are all Liétard-specific.
+A second brand wanting its own app would mean duplicating this folder with
+its own `appId`/branding/`?brand=` slug, not parameterizing this one.
+
+Source assets for the icon/splash live in `android/lietard/resources/`
+(`icon.png`, `icon-foreground.png`, `icon-background.png`, `splash.png`) —
+regenerate the actual per-density Android resources from them with
+`npx @capacitor/assets generate --android` (run from `android/lietard/`)
+after changing any of those source files. That command only writes/updates
+files it generates — it does **not** delete stale ones, so when
+regenerating after a source image change, check `git status` for leftover
+files from a previous format that should be removed (this bit us once:
+Capacitor's default project shipped `ic_launcher*.webp` placeholders,
+`@capacitor/assets` added `ic_launcher*.png` for the real logo but left the
+old `.webp` files in place, and having both a `.png` and `.webp` resolving
+to the same `@mipmap/ic_launcher` resource name fails the Gradle build
+with a duplicate-resource error).
+
+Building: `cd android/lietard/android && ./gradlew assembleDebug`, needs a
+JDK new enough for `capacitor-android`'s `compileOptions` (currently
+Java 21) — if `JAVA_HOME` points at an older JDK, override it for just the
+build command rather than changing the system default. Output lands at
+`android/lietard/android/app/build/outputs/apk/debug/app-debug.apk`. No
+release keystore/signing is set up yet — debug-only for now, sideload to
+test. Local Android/Gradle build artifacts (`local.properties`, `.gradle/`,
+`build/`, `.idea/`, the `app/release/` baseline-profile output) are
+git-ignored (see root `.gitignore`); only source files are tracked.
+
+If a from-scratch Gradle build fails resolving a dependency with a
+certificate/PKIX error, check whether local antivirus "HTTPS scanning"
+(Norton and similar tools do this) is intercepting the connection and
+serving its own re-signed certificate — `openssl s_client -connect
+repo.maven.apache.org:443 -showcerts` will show the actual issuer if so.
+The fix is importing that AV's root CA into the JDK's own truststore (a
+browser trusting it doesn't make the JVM trust it too, since Java ships
+its own separate `cacerts` store) — do this on a writable copy of
+`cacerts` and point Gradle at it via `-Djavax.net.ssl.trustStore=`, or
+properly into the real JDK install if you have admin rights, rather than
+disabling AV scanning or the certificate check.
+
 ## Architecture of each HTML file
 
 Each app is one HTML file: `<style>` block, then markup, then JS at the

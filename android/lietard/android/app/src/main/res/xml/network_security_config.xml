@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android only added Let's Encrypt's root (ISRG Root X1) to its OS trust
+  store starting at Android 7.1.1, and the old cross-signature that used
+  to cover older devices (DST Root CA X3) expired in September 2021. Any
+  device below 7.1.1 (confirmed: Android 7.0) therefore can't validate
+  qbrew.app's certificate at all, since GitHub Pages issues custom-domain
+  certs exclusively via Let's Encrypt, and the WebView fails the load
+  silently (blank screen, no error shown). Bundling the root here makes
+  the app trust it directly regardless of the OS store's age.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="@raw/isrgrootx1" />
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

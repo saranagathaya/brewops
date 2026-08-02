@@ -1,0 +1,9 @@
+{
+  "appId": "com.lietard.coffee.app",
+  "appName": "Liétard",
+  "webDir": "dist",
+  "server": {
+    "url": "https://qbrew.app/brewops-customer.html?brand=lietard",
+    "cleartext": false
+  }
+}
