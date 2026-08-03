@@ -71,3 +71,5 @@ document.getElementById('ca-tab-signup').addEventListener('click', function(even
 document.getElementById('ca-login-btn').addEventListener('click', function(event){ doCheckoutLogin() });
 document.getElementById('ca-signup-btn').addEventListener('click', function(event){ doCheckoutSignup() });
 document.getElementById('oc-cust-61').addEventListener('click', function(event){ closeCheckoutAuthModal() });
+document.getElementById('home-search-input').addEventListener('focus', function(event){ focusHomeSearch() });
+document.getElementById('menu-search-input').addEventListener('input', function(event){ searchMenuItems(this.value) });

@@ -40,8 +40,8 @@
    are still set per-brand as usual; only the base surface/text/font
    tokens are overridden here. */
 :root[data-theme="dark"] {
-  --cream: #121212; --cream2: #1a1a1a; --cream3: #242424; --white: #1c1c1c;
-  --text: #f5f5f0; --text2: #c7c7c0; --text3: #8f8f88; --text4: #5c5c56;
+  --cream: #121212; --cream2: #161616; --cream3: #242424; --white: #1c1c1c;
+  --text: #f5f5f0; --text2: #c7c7c0; --text3: #8f8f88; --text4: #7a7a74;
   --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
   --shadow: 0 2px 10px rgba(0,0,0,0.45);
   --shadow-lg: 0 10px 30px rgba(0,0,0,0.55);
@@ -53,6 +53,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:14px;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-height:100vh;width:100%;margin:0;overflow-x:hidden;position:relative;}
+input::placeholder,textarea::placeholder{color:var(--text3);opacity:1;}
 
 .screen{display:none;position:fixed;inset:0;z-index:10;overflow:hidden;}
 .screen.active{display:flex;flex-direction:column;}
@@ -110,14 +111,13 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .store-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:5px;}
 .store-name .chev{font-size:12px;color:var(--text3);}
 .store-dist{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:1px;}
-.qr-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--border2);background:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
-.qr-btn svg{width:19px;height:19px;}
 .topbar-row2{display:flex;gap:9px;align-items:center;}
 .mode-toggle{display:flex;background:var(--cream2);border-radius:22px;padding:3px;gap:2px;flex-shrink:0;}
 .mode-btn{padding:6px 15px;border-radius:18px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--text3);}
 .mode-btn.active{background:var(--brand);color:#fff;box-shadow:0 3px 10px color-mix(in srgb, var(--brand) 32%, transparent);}
 .search-bar{flex:1;display:flex;align-items:center;gap:8px;background:var(--cream2);border-radius:22px;padding:8px 14px;font-size:12.5px;color:var(--text3);}
 .search-bar svg{width:15px;height:15px;flex-shrink:0;}
+.search-bar input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:var(--font-body);font-size:12.5px;color:var(--text);}
 
 /* HERO BANNER */
 .hero{margin:14px 16px 0;border-radius:var(--r-lg);overflow:hidden;position:relative;height:200px;flex-shrink:0;box-shadow:var(--shadow-card);}
@@ -170,8 +170,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .fc-badge{position:absolute;top:9px;left:9px;color:#fff;font-size:9px;font-family:var(--font-mono);padding:3px 8px;border-radius:8px;font-weight:600;box-shadow:0 4px 10px rgba(0,0,0,0.2);}
 .fc-fav{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-size:12px;backdrop-filter:blur(4px);}
 .fc-body{padding:11px 12px 13px;}
-.fc-name{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.25;}
-.fc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.fc-name{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:calc(1.25em * 2);}
+.fc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;min-height:18px;}
 .fc-tag{font-size:9px;background:var(--cream2);color:var(--text3);border-radius:5px;padding:2px 6px;font-family:var(--font-mono);}
 .fc-price-row{display:flex;align-items:flex-end;justify-content:space-between;}
 .fc-price{font-size:17px;font-weight:700;color:var(--brand);font-family:var(--font-mono);line-height:1;}
@@ -285,6 +285,16 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .mli-value{font-size:12px;color:var(--text3);font-family:var(--font-mono);}
 .mli-arrow{font-size:18px;color:var(--text4);}
 
+/* FORMS — Settings, Address Manager. Previously had zero CSS at all, so
+   these rendered as bare unstyled browser-default inputs (stark white
+   boxes, generic sans font, no relation to the rest of the app). */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.04em;}
+.form-input,.form-textarea{width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);color:var(--text);}
+.form-textarea{min-height:72px;resize:vertical;line-height:1.4;}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:26px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);margin-top:4px;}
+.submit-btn.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2a1400;box-shadow:0 8px 20px rgba(200,146,42,0.35);}
+
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:var(--inset-b);left:0;right:0;width:100%;height:var(--nav-h);background:color-mix(in srgb, var(--white) 97%, transparent);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,0.12);}
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--text4);transition:color 0.15s;}
@@ -390,7 +400,7 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .place-order-btn{padding:15px 30px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:#fff;border:none;border-radius:26px;font-size:15px;font-weight:700;font-family:var(--font-body);cursor:pointer;box-shadow:0 8px 20px color-mix(in srgb, var(--brand) 40%, transparent);}
 
 /* TOAST */
-.toast{position:fixed;bottom:calc(var(--nav-h) + 18px + var(--inset-b));left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:11px 22px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all 0.25s;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-xl);}
+.toast{position:fixed;bottom:calc(var(--nav-h) + 18px + var(--inset-b));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,20,20,0.94);color:#fff;padding:11px 22px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all 0.25s;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-xl);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head><body>
@@ -426,14 +436,13 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
               <div class="store-dist" id="selected-store-dist">Tap to choose your nearest café</div>
             </div>
           </div>
-          <div class="qr-btn"><svg viewBox="0 0 19 19" fill="none"><rect x="1.5" y="1.5" width="6" height="6" rx="1" stroke="#4A3728" stroke-width="1.4"/><rect x="11.5" y="1.5" width="6" height="6" rx="1" stroke="#4A3728" stroke-width="1.4"/><rect x="1.5" y="11.5" width="6" height="6" rx="1" stroke="#4A3728" stroke-width="1.4"/><rect x="12" y="12" width="5" height="5" fill="#4A3728"/></svg></div>
         </div>
         <div class="topbar-row2">
           <div class="mode-toggle">
             <div id="oc-cust-3" class="mode-btn active">Pick Up</div>
             <div id="oc-cust-4" class="mode-btn" style="opacity:0.4;cursor:not-allowed;">Delivery</div>
           </div>
-          <div class="search-bar"><svg viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#8B7355" stroke-width="1.4"/><path d="M10 10l3 3" stroke="#8B7355" stroke-width="1.4" stroke-linecap="round"/></svg> Try "Flat White" or "Cold Brew"</div>
+          <div class="search-bar"><svg viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="var(--text3)" stroke-width="1.4"/><path d="M10 10l3 3" stroke="var(--text3)" stroke-width="1.4" stroke-linecap="round"/></svg><input type="text" id="home-search-input" placeholder='Try &quot;Flat White&quot; or &quot;Cold Brew&quot;' autocomplete="off"></div>
         </div>
       </div>
 
@@ -473,6 +482,9 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
             <div class="store-chip-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.2 4.5 8 4.5 8s4.5-4.8 4.5-8c0-2.5-2-4.5-4.5-4.5z" stroke="var(--brand)" stroke-width="1.4"/><circle cx="8" cy="6" r="1.6" fill="var(--brand)"/></svg></div>
             <div class="store-meta"><div class="store-name"><span id="menu-store-name">Select outlet</span><span class="chev">›</span></div></div>
           </div>
+        </div>
+        <div class="topbar-row2">
+          <div class="search-bar"><svg viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="var(--text3)" stroke-width="1.4"/><path d="M10 10l3 3" stroke="var(--text3)" stroke-width="1.4" stroke-linecap="round"/></svg><input type="text" id="menu-search-input" placeholder='Try &quot;Flat White&quot; or &quot;Cold Brew&quot;' autocomplete="off"></div>
         </div>
       </div>
       <div class="menu-layout">
@@ -750,16 +762,16 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
     <div id="ca-error" style="display:none;background:var(--brand-light);color:var(--brand2);border:1px solid color-mix(in srgb, var(--brand) 20%, transparent);padding:10px 14px;border-radius:var(--r-sm);font-size:12.5px;margin-bottom:14px;"></div>
 
     <div id="ca-form-login">
-      <input type="email" id="ca-login-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
-      <input type="password" id="ca-login-password" placeholder="Password" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <input type="email" id="ca-login-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);color:var(--text);">
+      <input type="password" id="ca-login-password" placeholder="Password" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);color:var(--text);">
       <button id="ca-login-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px color-mix(in srgb, var(--brand) 40%, transparent);">Log In & Place Order</button>
     </div>
 
     <div id="ca-form-signup" style="display:none;">
-      <input type="text" id="ca-signup-name" placeholder="Full name" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
-      <input type="email" id="ca-signup-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
-      <input type="tel" id="ca-signup-phone" placeholder="Phone number" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
-      <input type="password" id="ca-signup-password" placeholder="Password (min 6 characters)" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);">
+      <input type="text" id="ca-signup-name" placeholder="Full name" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);color:var(--text);">
+      <input type="email" id="ca-signup-email" placeholder="Email" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);color:var(--text);">
+      <input type="tel" id="ca-signup-phone" placeholder="Phone number" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:10px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);color:var(--text);">
+      <input type="password" id="ca-signup-password" placeholder="Password (min 6 characters)" style="width:100%;padding:13px 14px;border:1.5px solid var(--border2);border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;box-sizing:border-box;font-family:var(--font-body);background:var(--white);color:var(--text);">
       <button id="ca-signup-btn" style="width:100%;padding:14px;border:none;border-radius:26px;background:linear-gradient(135deg,var(--brand2),var(--brand));color:white;font-weight:700;font-size:14.5px;cursor:pointer;font-family:var(--font-body);box-shadow:0 8px 20px color-mix(in srgb, var(--brand) 40%, transparent);">Create Account & Place Order</button>
     </div>
 
@@ -1490,7 +1502,12 @@ function renderMenuItems(key, clickedEl){
   const el = document.getElementById('menu-items');
   el.innerHTML =
     `<div class="menu-section-banner">${categoryBannerPhotoHTML(bannerItem?.image_url, cat.icon)}<div class="scrim"></div><div class="msb-text"><div class="msb-title">${cat.name}</div><div class="msb-sub">${items.length} BEVERAGE${items.length===1?'':'S'} · FRESHLY MADE</div></div></div>`+
-    items.map(item=>`<div class="menu-item" onclick="openItemModal('${item.id}')">
+    items.map(menuItemCardHTML).join('');
+  el.scrollTop = 0;
+}
+
+function menuItemCardHTML(item){
+  return `<div class="menu-item" onclick="openItemModal('${item.id}')">
       ${photoHTML(item.image_url, item.emoji, 'mi-img')}
       <div class="mi-body">
         <div class="mi-name">${item.name}${item.badge?` <span class="mi-badge" style="${badgeClass(item.badge)}">${item.badge}</span>`:''}</div>
@@ -1498,8 +1515,45 @@ function renderMenuItems(key, clickedEl){
         <div class="mi-desc">${item.desc||''}</div>
         <div class="mi-price-row"><div class="mi-price"><span class="cur">LKR </span>${fmt(item.price)}${item.oldPrice?`<span class="mi-price-old">LKR ${fmt(item.oldPrice)}</span>`:''}</div>
           <div class="mi-add-btn" onclick="event.stopPropagation();quickAddToCart('${item.id}')">+</div></div>
-      </div></div>`).join('');
+      </div></div>`;
+}
+
+// Live-filters across every category's items by name/description/tags,
+// triggered by the Home page's search bar. Clearing the query restores the
+// normal first-category view rather than leaving an empty results screen.
+function searchMenuItems(query){
+  const MENU = window.MENU || {};
+  const q = query.trim().toLowerCase();
+  const el = document.getElementById('menu-items');
+  if (!el) return;
+  document.querySelectorAll('.cat-item').forEach(c=>c.classList.remove('active'));
+  if (!q) {
+    const firstKey = Object.keys(MENU)[0];
+    if (firstKey) renderMenuItems(firstKey, document.querySelector('.cat-item'));
+    return;
+  }
+  const matches = Object.values(MENU).flatMap(cat=>cat.items||[]).filter(item =>
+    (item.name||'').toLowerCase().includes(q) ||
+    (item.desc||'').toLowerCase().includes(q) ||
+    (item.tags||[]).some(t=>t.toLowerCase().includes(q))
+  );
+  el.innerHTML =
+    `<div class="menu-section-banner">${categoryBannerPhotoHTML(null,'🔍')}<div class="scrim"></div><div class="msb-text"><div class="msb-title">Search results</div><div class="msb-sub">${matches.length} MATCH${matches.length===1?'':'ES'} FOR "${query.trim().toUpperCase()}"</div></div></div>` +
+    (matches.length ? matches.map(menuItemCardHTML).join('') : `<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;">No beverages match "${query.trim()}".</div>`);
   el.scrollTop = 0;
+}
+
+// The Home page's search bar is an entry point, not where typing actually
+// happens: navigating away hides that page (.app-page{display:none}),
+// which would blur the field after every single keystroke. Instead,
+// focusing it jumps straight to the Menu page's own persistent search
+// input and hands focus there, before any typing occurs.
+function focusHomeSearch(){
+  document.getElementById('home-search-input').blur();
+  goPage('pg-menu');
+  const menuInput = document.getElementById('menu-search-input');
+  menuInput.value = '';
+  menuInput.focus();
 }
 
 // ══ ORDER TAB (merch: coffee beans, souvenirs) ══
