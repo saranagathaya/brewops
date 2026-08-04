@@ -42,6 +42,32 @@ const cors = {
 // if a brand ever operates elsewhere.
 const REGION_CODES = ["lk"];
 
+// ══ PER-USER RATE LIMIT ══
+// The auth check above stops anonymous abuse, but a single signed-up
+// account looping this endpoint would still burn the shared
+// AutocompletePlacesRequest quota (Google Cloud Console → Quotas) before
+// anyone noticed. This is a coarse backstop for that case, not a precise
+// guarantee: it's an in-memory counter, scoped to ONE function instance.
+// Supabase Edge Functions can run several instances under load and reset
+// on cold start, so a caller spread across instances could exceed this in
+// theory. What it reliably catches is the actual threat -- one script
+// hammering the endpoint in a tight loop from a warm instance -- which is
+// the scenario worth defending against here. A real per-user cap that
+// holds across instances would need a database counter table instead;
+// not worth the extra migration + write on every request for a project
+// this size, but revisit if traffic ever justifies it.
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 20; // generous for a real person typing; tight for a script
+const requestLog = new Map<string, number[]>();
+
+function isRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const timestamps = (requestLog.get(userId) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  timestamps.push(now);
+  requestLog.set(userId, timestamps);
+  return timestamps.length > RATE_LIMIT_MAX;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   const json = (status: number, body: unknown) =>
@@ -62,6 +88,7 @@ Deno.serve(async (req) => {
     const token = (req.headers.get("Authorization") || "").replace("Bearer ", "");
     const { data: { user }, error: userErr } = await admin.auth.getUser(token);
     if (userErr || !user) return fail(401, "Not signed in");
+    if (isRateLimited(user.id)) return fail(429, "Too many lookups -- wait a moment and try again");
 
     const { action, input, placeId, sessionToken } = await req.json();
 
