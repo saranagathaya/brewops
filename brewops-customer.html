@@ -2071,7 +2071,7 @@ async function populateCheckoutAddressOptions() {
   wrap.innerHTML = addresses.map(a => `
     <div onclick="selectCheckoutAddress('${a.id}')" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;">
       <div style="width:18px;height:18px;border-radius:50%;border:2px solid ${a.id===window.SELECTED_DELIVERY_ADDRESS?'var(--brand)':'var(--border2)'};background:${a.id===window.SELECTED_DELIVERY_ADDRESS?'var(--brand)':'transparent'};flex-shrink:0;margin-top:2px;"></div>
-      <div><div style="font-size:13px;font-weight:600;">${a.label || 'Address'}</div><div style="font-size:12px;color:var(--text2);">${a.address_line}${a.city?', '+a.city:''}</div></div>
+      <div><div style="font-size:13px;font-weight:600;">${escapeHtml(a.label || 'Address')}</div><div style="font-size:12px;color:var(--text2);">${escapeHtml(a.address_line)}${a.city?', '+escapeHtml(a.city):''}</div></div>
     </div>`).join('');
 
   const checkoutWarn = document.getElementById('checkout-address-warning');
