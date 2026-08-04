@@ -129,7 +129,7 @@ input::placeholder,textarea::placeholder{color:var(--text3);opacity:1;}
 /* HERO BANNER */
 .hero{margin:14px 16px 0;border-radius:var(--r-lg);overflow:hidden;position:relative;height:200px;flex-shrink:0;box-shadow:var(--shadow-card);}
 .hero .photo{position:absolute;inset:0;}
-.hero .scrim{position:absolute;inset:0;background:linear-gradient(105deg,var(--brand-dark) 0%,color-mix(in srgb, var(--brand) 62%, transparent) 48%,color-mix(in srgb, var(--brand) 5%, transparent) 100%);}
+.hero .scrim{position:absolute;inset:0;background:var(--brand-dark);background:linear-gradient(105deg,var(--brand-dark) 0%,color-mix(in srgb, var(--brand) 62%, transparent) 48%,color-mix(in srgb, var(--brand) 5%, transparent) 100%);}
 .hero-content{position:absolute;inset:0;padding:20px 22px;display:flex;flex-direction:column;justify-content:center;z-index:2;}
 .hero-label{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:10px;font-family:var(--font-mono);letter-spacing:0.05em;padding:4px 11px;border-radius:14px;margin-bottom:10px;backdrop-filter:blur(6px);}
 .hero-headline{font-family:var(--font-display);font-size:30px;font-style:var(--font-display-style);font-weight:700;color:#fff;line-height:1.02;margin-bottom:6px;max-width:220px;}
@@ -223,7 +223,7 @@ input::placeholder,textarea::placeholder{color:var(--text3);opacity:1;}
 .mi-add-btn:active{transform:scale(0.88);}
 
 /* CART BAR */
-.cart-bar{position:sticky;bottom:0;background:color-mix(in srgb, var(--white) 96%, transparent);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:11px 16px;display:none;flex-shrink:0;z-index:40;box-shadow:0 -6px 20px rgba(0,0,0,0.12);}
+.cart-bar{position:sticky;bottom:0;background:var(--white);background:color-mix(in srgb, var(--white) 96%, transparent);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:11px 16px;display:none;flex-shrink:0;z-index:40;box-shadow:0 -6px 20px rgba(0,0,0,0.12);}
 .cart-bar.visible{display:flex;align-items:center;gap:12px;}
 .cart-icon-wrap{width:48px;height:48px;background:linear-gradient(135deg,var(--brand2),var(--brand));border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;box-shadow:0 6px 16px color-mix(in srgb, var(--brand) 40%, transparent);}
 .cart-icon-wrap svg{width:24px;height:24px;}
@@ -303,7 +303,7 @@ input::placeholder,textarea::placeholder{color:var(--text3);opacity:1;}
 .submit-btn.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2a1400;box-shadow:0 8px 20px rgba(200,146,42,0.35);}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:var(--inset-b);left:0;right:0;width:100%;height:var(--nav-h);background:color-mix(in srgb, var(--white) 97%, transparent);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,0.12);}
+.bottom-nav{position:fixed;bottom:var(--inset-b);left:0;right:0;width:100%;height:var(--nav-h);background:var(--white);background:color-mix(in srgb, var(--white) 97%, transparent);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,0.12);}
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--text4);transition:color 0.15s;}
 .bnav-item svg{width:23px;height:23px;}
 .bnav-item.active{color:var(--brand);}
@@ -409,6 +409,17 @@ input::placeholder,textarea::placeholder{color:var(--text3);opacity:1;}
 /* TOAST */
 .toast{position:fixed;bottom:calc(var(--nav-h) + 18px + var(--inset-b));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,20,20,0.94);color:#fff;padding:11px 22px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all 0.25s;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-xl);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Flexbox gap needs Chrome 84+ -- older Android WebView (this app's
+   minSdkVersion is 23, Android 6.0) silently ignores it rather than
+   erroring, so the two flex items just sit flush with zero spacing.
+   Unlike color-mix() above, there's no "declare twice, last wins" trick
+   for gap itself (both a gap and a margin would apply on a browser that
+   understands gap), so this is gated behind a feature query instead. */
+@supports not (gap: 1px) {
+  .topbar-row2>*+*{margin-left:9px;}
+  .search-bar>*+*{margin-left:8px;}
+}
 </style>
 </head><body>
 
