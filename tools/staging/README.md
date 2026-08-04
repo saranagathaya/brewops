@@ -44,7 +44,7 @@ Then build the schema and seed test data:
 ```
 cd tools/staging
 npm install
-node run-migrations.js      # runs 00→21 in order (19 drops the 3
+node run-migrations.js      # runs 00→22 in order (19 drops the 3
                             # notification triggers everywhere — they
                             # carried a legacy key and hardcoded
                             # production's edge-function URL; 20 fixes

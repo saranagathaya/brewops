@@ -601,7 +601,7 @@ input::placeholder,textarea::placeholder{color:var(--text3);opacity:1;}
         <div class="sheet-body">
           <input type="hidden" id="address-edit-id" value="">
           <div class="form-group"><label class="form-label">Label</label><input class="form-input" id="address-label" placeholder="Home, Work, Other"></div>
-          <div class="form-group"><label class="form-label">Address</label><textarea class="form-textarea" id="address-line" placeholder="Street address, building, unit..."></textarea></div>
+          <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="address-line" placeholder="Street address, building, unit..."></div>
           <div class="form-group"><label class="form-label">City</label><input class="form-input" id="address-city" placeholder="e.g. Colombo"></div>
           <div class="form-group"><label class="form-label">Notes (optional)</label><input class="form-input" id="address-notes" placeholder="Gate code, landmark, delivery instructions..."></div>
           <button class="submit-btn gold" id="address-save-btn">Save Address</button>
@@ -1214,11 +1214,15 @@ async function submitOrderToSupabase(cart, selectedStore, payMethod) {
     // preserved exactly as-is even if the customer edits/deletes the saved
     // address later. Only relevant in delivery mode — pickup orders have none.
     let delivery_address_text = null;
+    let delivery_lat = null;
+    let delivery_lng = null;
     if (window.currentMode === 'delivery' && window.SELECTED_DELIVERY_ADDRESS) {
       const { data: addr } = await sb.from('customer_addresses').select('*')
         .eq('id', window.SELECTED_DELIVERY_ADDRESS).maybeSingle();
       if (addr) {
         delivery_address_text = `${addr.label ? addr.label + ': ' : ''}${addr.address_line}${addr.city ? ', ' + addr.city : ''}${addr.notes ? ' (' + addr.notes + ')' : ''}`;
+        delivery_lat = addr.lat ?? null;
+        delivery_lng = addr.lng ?? null;
       }
     }
 
@@ -1229,6 +1233,8 @@ async function submitOrderToSupabase(cart, selectedStore, payMethod) {
       customer_phone: window.CURRENT_USER_PHONE || null,
       order_type: window.currentMode || 'pickup',
       delivery_address_text,
+      delivery_lat,
+      delivery_lng,
       payment_method: payMethod,
       // Every order starts 'pending' -- nothing is 'paid' until someone
       // actually confirms it: card via payhere-notify (server-verified),
@@ -2543,17 +2549,55 @@ async function loadSavedAddresses() {
   body.innerHTML = SAVED_ADDRESSES.map(a => `
     <div style="border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <div style="font-weight:600;font-size:13px;">${a.label || 'Address'}</div>
+        <div style="font-weight:600;font-size:13px;">${escapeHtml(a.label || 'Address')}</div>
         ${a.is_default ? `<span style="font-size:10px;background:var(--brand-dim);color:var(--brand);padding:2px 8px;border-radius:10px;font-weight:600;">DEFAULT</span>` : ''}
       </div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.4;">${a.address_line}${a.city ? ', ' + a.city : ''}</div>
-      ${a.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${a.notes}</div>` : ''}
+      <div style="font-size:13px;color:var(--text2);line-height:1.4;">${escapeHtml(a.address_line)}${a.city ? ', ' + escapeHtml(a.city) : ''}</div>
+      ${a.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${escapeHtml(a.notes)}</div>` : ''}
       <div style="display:flex;gap:8px;margin-top:8px;">
         ${!a.is_default ? `<button class="topbar-btn" style="font-size:11px;padding:4px 10px;" onclick="makeAddressDefault('${a.id}')">Make Default</button>` : ''}
         <button class="topbar-btn" style="font-size:11px;padding:4px 10px;" onclick="openEditAddressForm('${a.id}')">Edit</button>
         <button class="topbar-btn" style="font-size:11px;padding:4px 10px;" onclick="deleteAddress('${a.id}')">Delete</button>
       </div>
     </div>`).join('');
+}
+
+// Coordinates for the address currently in the form, carrying the exact
+// address text they describe (`forText`). saveAddress() writes them only
+// while that text still matches what's in the field -- otherwise someone
+// who picks "Colombo Fort Station" from Autocomplete and then hand-edits
+// the line to a different place entirely would save the new text against
+// the old pin, and a rider would drive to the wrong address while the card
+// reads correctly. Null means "no coordinates", which saveAddress() writes
+// as a real null rather than leaving a stale pin behind.
+let pendingAddressLatLng = null;
+
+let addressAutocomplete = null;
+
+async function ensureAddressAutocomplete() {
+  try {
+    await ensureGoogleMapsLoaded();
+  } catch (e) {
+    console.error('Google Maps failed to load:', e.message);
+    return;
+  }
+  // Safe against concurrent opens despite following an await: nothing
+  // yields between this check and the assignment below, so the pair is
+  // atomic on a single-threaded event loop.
+  if (addressAutocomplete) return;
+  const input = document.getElementById('address-line');
+  addressAutocomplete = new google.maps.places.Autocomplete(input, { fields: ['name', 'formatted_address', 'geometry'] });
+  addressAutocomplete.addListener('place_changed', () => {
+    const place = addressAutocomplete.getPlace();
+    if (!place.geometry) return; // typed free text and hit enter without picking a suggestion
+    const readable = readablePlaceAddress(place);
+    if (readable) input.value = readable;
+    pendingAddressLatLng = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+      forText: input.value,
+    };
+  });
 }
 
 function openAddAddressForm() {
@@ -2563,7 +2607,9 @@ function openAddAddressForm() {
   document.getElementById('address-line').value = '';
   document.getElementById('address-city').value = '';
   document.getElementById('address-notes').value = '';
+  pendingAddressLatLng = null;
   openModal('modal-address-form');
+  ensureAddressAutocomplete();
 }
 
 function openEditAddressForm(id) {
@@ -2575,7 +2621,13 @@ function openEditAddressForm(id) {
   document.getElementById('address-line').value = addr.address_line || '';
   document.getElementById('address-city').value = addr.city || '';
   document.getElementById('address-notes').value = addr.notes || '';
+  // Prefill from the stored row so saving without re-picking the address
+  // (e.g. just renaming the label) keeps the existing coordinates.
+  pendingAddressLatLng = (addr.lat != null && addr.lng != null)
+    ? { lat: addr.lat, lng: addr.lng, forText: addr.address_line || '' }
+    : null;
   openModal('modal-address-form');
+  ensureAddressAutocomplete();
 }
 
 async function saveAddress() {
@@ -2591,7 +2643,15 @@ async function saveAddress() {
   const btn = document.getElementById('address-save-btn');
   btn.disabled = true; btn.textContent = 'Saving...';
 
-  const payload = { customer_id: window.CURRENT_USER_ID, label, address_line, city: city || null, notes: notes || null };
+  // Only keep the coordinates if the address text still matches the place
+  // they came from; otherwise write real nulls, so an edited address can
+  // never keep the previous location's pin (see pendingAddressLatLng).
+  const coordsMatchText = pendingAddressLatLng && pendingAddressLatLng.forText.trim() === address_line;
+  const payload = {
+    customer_id: window.CURRENT_USER_ID, label, address_line, city: city || null, notes: notes || null,
+    lat: coordsMatchText ? pendingAddressLatLng.lat : null,
+    lng: coordsMatchText ? pendingAddressLatLng.lng : null,
+  };
   const { error } = id
     ? await sb.from('customer_addresses').update(payload).eq('id', id)
     : await sb.from('customer_addresses').insert(payload);

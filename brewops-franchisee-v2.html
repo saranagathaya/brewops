@@ -146,6 +146,8 @@ body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-
 .loi-item-qty{font-size:12px;font-family:var(--font-mono);color:var(--text3);}
 .loi-item-price{font-size:13px;font-family:var(--font-mono);font-weight:600;color:var(--gold);}
 .cash-alert-bar{background:var(--amber-dim);border-top:1px solid rgba(202,103,2,0.2);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--amber);font-weight:500;}
+.loi-delivery-bar{background:var(--blue-dim);border-top:1px solid rgba(59,130,246,0.15);padding:8px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);}
+.loi-delivery-bar .loi-map-link{color:var(--blue);font-family:var(--font-mono);font-size:11px;font-weight:600;text-decoration:none;flex-shrink:0;margin-left:auto;}
 .loi-foot{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--border);}
 .loi-payment{font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:4px;flex-shrink:0;}
 .lp-card{background:var(--blue-dim);color:var(--blue);}
@@ -1101,6 +1103,9 @@ async function loadFranchiseeData() {
               : (o.status==='pending'||o.status==='confirmed') ? 'new' : o.status,
         time: new Date(o.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
         mode: o.order_type==='pickup' ? 'Pickup' : 'Delivery',
+        deliveryAddress: o.delivery_address_text || null,
+        deliveryLat: o.delivery_lat,
+        deliveryLng: o.delivery_lng,
         needsConfirm: o.payment_method!=='card' && o.payment_status==='pending'
       }));
       renderOrders('all');
@@ -1358,6 +1363,9 @@ function subscribeToOrders() {
               : order.payment_method==='card'&&order.payment_status==='pending' ? 'await' : 'new',
         time: new Date(order.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
         mode: order.order_type==='pickup' ? 'Pickup' : 'Delivery',
+        deliveryAddress: order.delivery_address_text || null,
+        deliveryLat: order.delivery_lat,
+        deliveryLng: order.delivery_lng,
         needsConfirm: order.payment_method!=='card' && order.payment_status==='pending'
       };
       // Add to top of orders list
@@ -1966,6 +1974,9 @@ function renderOrders(filter){
         <div class="loi-time">${o.time}</div>
         <div class="loi-status ${statusClasses[o.status]||'ls-done'}">${statusLabels[o.status]||o.status}</div>
       </div>
+      ${o.mode==='Delivery' && o.deliveryAddress?`<div class="loi-delivery-bar">📍 ${escapeHtml(o.deliveryAddress)}${
+        (o.deliveryLat!=null && o.deliveryLng!=null) ? `<a href="https://www.google.com/maps/search/?api=1&query=${o.deliveryLat},${o.deliveryLng}" target="_blank" rel="noopener" class="loi-map-link">View on map ›</a>` : ''
+      }</div>`:''}
       ${o.needsConfirm?`<div class="cash-alert-bar">${
         o.payment==='cash' ? `💵 Customer chose cash — confirm LKR ${o.total.toLocaleString()} received in hand` :
         o.payment==='qr' ? `📱 Customer paid by QR/transfer — confirm LKR ${o.total.toLocaleString()} arrived` :

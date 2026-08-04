@@ -159,6 +159,9 @@ function renderOrders() {
         <span class="status-pill ${statusPillMap[o.status]||''}">${statusMap[o.status]||o.status}</span>
       </div>
       ${isCash?`<div class="cash-confirm-banner">💵 Cash payment — awaiting franchisee confirmation at ${outletName}</div>`:''}
+      ${o.order_type==='delivery' && o.delivery_address_text?`<div class="oc-delivery-bar">📍 ${escapeHtml(o.delivery_address_text)}${
+        (o.delivery_lat!=null && o.delivery_lng!=null) ? `<a href="https://www.google.com/maps/search/?api=1&query=${o.delivery_lat},${o.delivery_lng}" target="_blank" rel="noopener" class="oc-map-link">View on map ›</a>` : ''
+      }</div>`:''}
       <div class="oc-body">
         <div class="oc-items">
           ${items.map(i=>`<div class="oc-item-row">

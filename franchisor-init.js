@@ -3,29 +3,9 @@
 const SUPABASE_URL = 'https://fjmzsxslnzrtgcilttly.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zCZlpiOEgr0nQWt9Tp331g_wVxuaTb-'; // publishable key (public by design; legacy JWT anon key retired)
 
-// ══ GOOGLE MAPS CONFIG ══
-// Used only for Places Autocomplete on the Add/Edit Outlet form (see
-// franchisor-cms.js) so franchisors can search a real address instead of
-// typing raw coordinates. Public by design like the Supabase key above —
-// Maps JS keys are meant to be client-visible; they're secured via HTTP
-// referrer restriction in Google Cloud Console (scoped to qbrew.app +
-// localhost for dev), not by hiding the key.
-const GOOGLE_MAPS_API_KEY = 'AIzaSyDTAGMkWqxjszdA9Brt4IJMLt4JZyZyTUM';
-
-let googleMapsLoadPromise = null;
-function ensureGoogleMapsLoaded() {
-  if (googleMapsLoadPromise) return googleMapsLoadPromise;
-  googleMapsLoadPromise = new Promise((resolve, reject) => {
-    if (window.google?.maps?.places) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google Maps'));
-    document.head.appendChild(script);
-  });
-  return googleMapsLoadPromise;
-}
+// GOOGLE_MAPS_API_KEY / ensureGoogleMapsLoaded() live in shared.js (loaded
+// before this file) since the customer app's address form now uses the
+// same loader for Places Autocomplete -- see shared.js for why.
 
 let sb = null;
 
@@ -248,7 +228,11 @@ async function loadDashboard() {
   if (!sb || !window.MY_PROFILE?.brand_id) return;
   try {
     const ordersRes = await sb.from('orders')
-      .select('id,outlet_id,status,total,payment_method,created_at,order_items(*),outlets(name)')
+      // order_number was missing here, so renderOrders()'s
+      // `${o.order_number||'—'}` rendered a dash on every card — the
+      // franchisor could never see an order's number. The franchisee app
+      // had the equivalent bug fixed earlier; this side was missed.
+      .select('id,order_number,outlet_id,status,total,payment_method,created_at,order_type,delivery_address_text,delivery_lat,delivery_lng,order_items(*),outlets(name)')
       .not('status','eq','cancelled')
       .eq('brand_id', window.MY_PROFILE.brand_id)
       .order('created_at', { ascending: false })

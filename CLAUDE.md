@@ -258,6 +258,18 @@ being bound to the element. If you add a new **dynamically-rendered**
 element, inline `onclick="..."` in the template literal remains the
 existing, consistent pattern for that case.
 
+**Escaping**: those template literals are assigned to `innerHTML`, so any
+value a *user typed* must go through `escapeHtml()` (`shared.js`) at the
+point of interpolation. Most interpolated text is staff-authored (menu
+item names, stock names, outlet names) and was never a real risk, which is
+why no helper existed for a long time. Saved delivery addresses broke that
+assumption — they are free text an anonymous customer types that then
+renders inside an authenticated franchisee/franchisor page, so unescaped
+markup would run with that staff member's RLS privileges. Escape on
+render rather than sanitising on write, so the stored value stays exactly
+what the customer typed (a rider still has to read it). See "Database /
+migrations" below for the specific fields this covers.
+
 Files are internally organized into clearly delimited sections marked with
 `══` banners (e.g. `// ══ MENU MANAGER — full CRUD wired to Supabase ══`).
 Grep for `══` in a file first to get a table of contents before editing —
@@ -308,30 +320,37 @@ production rejects them with 401 "Legacy API keys are disabled", so any
 old copy of them (including the once-exposed service_role string) is dead.
 Don't re-enable them.
 
-**Google Maps connection**: `GOOGLE_MAPS_API_KEY` is hardcoded in
-`franchisor-init.js`, public by design like the Supabase key above — Maps
-JS keys are meant to be client-visible and are secured via HTTP referrer
-restriction in Google Cloud Console, not by hiding the key. That
-restriction (scoped to `qbrew.app/*` + `localhost` for local dev) is set.
-It's used for exactly one thing: Places Autocomplete on the franchisor's
-Add/Edit Outlet form (`franchisor-cms.js`), so franchisors can search a
-real address instead of typing raw coordinates — picking a suggestion
-fills `outlets.lat`/`lng` (columns that existed in the schema from day one
-but were unused until this) alongside the address. Lazy-loaded via
-`ensureGoogleMapsLoaded()` the same way Supabase is lazy-loaded, and only
-ever loaded by the franchisor app — the customer app has no Google Maps
-dependency at all; it computes outlet distance client-side with a plain
-Haversine formula against the device's own geolocation
-(`applyStoreDistancesIfKnown()` in `brewops-customer.html`) and links out
-to `google.com/maps/search` for directions, neither of which needs an API
-key or network call.
+**Google Maps connection**: `GOOGLE_MAPS_API_KEY` and the lazy loader
+`ensureGoogleMapsLoaded()` live in `shared.js` (originally
+`franchisor-init.js` only; moved once a second app needed them — see
+`PLUS_CODE_RE` below for the same pattern), public by design like the
+Supabase key above — Maps JS keys are meant to be client-visible and are
+secured via HTTP referrer restriction in Google Cloud Console, not by
+hiding the key. That restriction (scoped to `qbrew.app/*` + `localhost` for
+local dev) is set. It powers Places Autocomplete in two places: the
+franchisor's Add/Edit Outlet form (`franchisor-cms.js`), so franchisors can
+search a real address instead of typing raw coordinates — picking a
+suggestion fills `outlets.lat`/`lng` (columns that existed in the schema
+from day one but were unused until this) alongside the address — and, as
+of migration 22, the customer app's Address Manager form
+(`brewops-customer.html`, `ensureAddressAutocomplete()`), which fills
+`customer_addresses.lat`/`lng` the same way. That second use is a real,
+deliberate change: the customer app used to have no Google Maps dependency
+at all beyond the free `google.com/maps/search` deep link — now it also
+loads the Places script for anonymous customers filling in a delivery
+address. Outlet **distance sort** on the customer app's store selector is
+untouched by this and still needs no API key: it's a plain Haversine
+formula against the device's own geolocation
+(`applyStoreDistancesIfKnown()`), separate from Autocomplete entirely.
 
 Google returns an Open Location Code ("plus code", e.g. `WXC2+2WF`) as a
 place's `formatted_address` whenever the exact point picked has no street
 address on file — common in Sri Lanka. Precise, but meaningless to a
-customer trying to find the café, so `PLUS_CODE_RE` (`shared.js`, loaded by
-both apps) strips it: `franchisor-cms.js` prefers the place's own `name`
-and strips a leading plus code before filling the Address field, and
+customer trying to find the café, so `PLUS_CODE_RE` and the
+`readablePlaceAddress()` helper that uses it (both `shared.js`, loaded by
+all three apps) strip/reformat it: `franchisor-cms.js` and the customer
+app's address form both prefer the place's own `name` and strip a leading
+plus code before filling their address field, and
 `displayOutletAddress()` (`brewops-customer.html`) strips the same pattern
 at display time so outlets saved before this existed still read sensibly
 without anyone re-picking their address.
@@ -399,6 +418,36 @@ all unique) both before and after the fix (the old function does fail
 under that load, though staging's synthetic non-`ORD-`-prefixed probe
 rows make that specific repro noisy — the atomicity guarantee itself
 doesn't depend on that finding).
+
+`customer_addresses.lat`/`lng` and `orders.delivery_lat`/`delivery_lng`
+(`22-customer-addresses-lat-lng.sql`) bring saved customer addresses up to
+the same standard outlets already had: real coordinates from Places
+Autocomplete, not just a free-text address. `orders.delivery_lat`/`lng` are
+a checkout-time snapshot for the same reason `delivery_address_text`
+already is one — a franchisee looking at an old order isn't affected if
+the customer later edits or deletes that saved address. Before this,
+`delivery_address_text` was write-only: set at checkout but never actually
+displayed anywhere (grepped both franchisee and franchisor apps and found
+zero reads) — a franchisee looking at a delivery order saw only the word
+"Delivery," with no way to know where to take it. Both are now shown on
+the order card in `brewops-franchisee-v2.html` **and** on the franchisor's
+cross-outlet Orders page (`franchisor-live-ops.js`), with a "View on map"
+link (the same free `google.com/maps/search` deep link pattern used for
+outlets) whenever coordinates are present. Note the franchisor's order
+query uses an explicit column list rather than `select('*')`, so the four
+delivery columns had to be named there too (`franchisor-init.js`) — easy
+to miss when adding any future order column. Delivery mode itself is still
+disabled in the customer app UI (see "Known gaps" below) — this only fixes
+the data plumbing so it's ready whenever that toggles on.
+
+A saved address is the first **customer-typed free text this project
+renders into a staff member's session**, which is what forced
+`escapeHtml()` into `shared.js` (see "Architecture" above). Interpolating
+`delivery_address_text` raw would have executed customer-supplied markup
+inside an authenticated franchisee/franchisor page holding that brand's
+RLS privileges. Escape at every interpolation of `label`/`address_line`/
+`city`/`notes`/`delivery_address_text` — the customer app's own address
+list included.
 
 `00-base-schema.sql` covers the original base schema (`profiles`, `outlets`,
 `orders`, `menu_items`, etc.) that predates this repo's numbered migration
@@ -514,7 +563,7 @@ tradeoff, not an open bug.
 `tools/staging/` (see its README for the full walkthrough) builds a
 complete local Supabase stack in Docker — Postgres + Auth + Storage +
 Realtime + Studio via `npx supabase start` (config in `supabase/`), then
-`run-migrations.js` applies 00→21 in order and `seed-staging.js` creates
+`run-migrations.js` applies 00→22 in order and `seed-staging.js` creates
 both test brands with an outlet and franchisor/franchisee logins each.
 Use it to trial schema/RLS changes before running them on production —
 it's the only place the full migration sequence actually executes end to
@@ -628,8 +677,29 @@ holds.
   existing `qbrew.app` email forwarding, so it deserves its own careful
   pass rather than being rushed in alongside a testing annoyance. Do
   this properly right before real launch, not before.
-- Delivery service is scaffolded (order_type, address picker) but disabled
-  in the customer app pending real courier integration.
+- Delivery service is scaffolded (order_type, address picker, and as of
+  migration 22 real address geocoding + franchisee-side display — see
+  "Database / migrations" above) but disabled in the customer app pending
+  real courier integration.
+- **Delivery dispatch — not yet decided.** Getting a rider to the
+  customer's door is a separate, unstarted problem from the address data
+  above. Two real Sri Lanka options were researched but neither is
+  integrated: **PickMe Food's Flash Delivery API** is a delivery-as-a-
+  service product — a business with a PickMe Corporate Merchant account
+  calls it from their own app/site to auto-request a rider once an order
+  is marked ready, while the customer still orders through qbrew, not
+  PickMe's app. This maps directly onto the existing order status
+  lifecycle (pending → preparing → ready). **Uber Direct** is the
+  equivalent product from Uber, but its Sri Lanka availability was not
+  confirmed in research (Uber Eats itself only lists Colombo/Kandy/
+  Negombo). A third option — listing on Uber Eats' or PickMe Food's own
+  **marketplace app** instead — is a fundamentally different model
+  (customers order through *their* app, not qbrew's, bypassing qbrew's
+  ordering/loyalty data entirely) and is unlikely to be the right primary
+  path. Whichever gets picked, both delivery-as-a-service APIs need real
+  dropoff coordinates to request a rider — which is exactly what the
+  `customer_addresses.lat`/`lng` and `orders.delivery_lat`/`lng` columns
+  above now provide.
 - Telegram Bot notifications (replacing an earlier WhatsApp plan) are
   planned but not yet built — franchisor/franchisee-facing ops alerts only,
   customer-facing channel undecided.

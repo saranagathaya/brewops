@@ -141,29 +141,21 @@ function resetNetworkKpis() {
   ['kpi-best-revenue-sub','kpi-most-cups-sub','kpi-lowest-sub','kpi-healthy-sub'].forEach(id => document.getElementById(id).textContent = '—');
 }
 
-// Set by the Places Autocomplete `place_changed` listener whenever the
-// franchisor picks a real suggestion; null means "no new coordinates this
-// session" so saveOutlet() knows not to overwrite existing lat/lng just
-// because the modal was opened and closed without touching the address.
+// Coordinates for the address currently in the form, carrying the exact
+// address text they describe (`forText`). saveOutlet() writes them only
+// while that text still matches the field -- picking a place and then
+// hand-editing the line to a different one would otherwise save the new
+// text against the old pin, putting the outlet's map marker and distance
+// sort somewhere the address doesn't say. Null means "no coordinates",
+// written as a real null rather than leaving a stale pin behind.
 let pendingOutletLatLng = null;
+
 let outletAutocomplete = null;
 
-// PLUS_CODE_RE lives in shared.js (loaded before this file) since the
-// customer app strips the same pattern from outlets saved before this
-// existed — see its comment there for why.
-
-// Prefers the place's own name (the café/landmark the franchisor searched
-// for) and strips a leading plus code off the address, so "WXC2+2WF,
-// Malabe, Sri Lanka" becomes "Malabe, Sri Lanka" — or, for a named place,
-// "Liétard Malabe, Malabe, Sri Lanka".
-function readablePlaceAddress(place) {
-  const raw = (place.formatted_address || '').trim();
-  const stripped = raw.replace(PLUS_CODE_RE, '').trim();
-  const name = (place.name || '').trim();
-  if (!name || PLUS_CODE_RE.test(name)) return stripped || raw;
-  if (!stripped) return name;
-  return stripped.toLowerCase().startsWith(name.toLowerCase()) ? stripped : name + ', ' + stripped;
-}
+// PLUS_CODE_RE and readablePlaceAddress() live in shared.js (loaded before
+// this file) -- the customer app's address-form Autocomplete needs the same
+// place-formatting logic, so it moved there rather than being copy-pasted a
+// second time. See shared.js for both.
 
 async function ensureOutletAutocomplete() {
   try {
@@ -172,6 +164,9 @@ async function ensureOutletAutocomplete() {
     console.error('Google Maps failed to load:', e.message);
     return;
   }
+  // Safe against concurrent opens despite following an await: nothing
+  // yields between this check and the assignment below, so the pair is
+  // atomic on a single-threaded event loop.
   if (outletAutocomplete) return;
   const input = document.getElementById('outlet-address');
   outletAutocomplete = new google.maps.places.Autocomplete(input, { fields: ['name', 'formatted_address', 'geometry'] });
@@ -180,7 +175,11 @@ async function ensureOutletAutocomplete() {
     if (!place.geometry) return; // franchisor typed free text and hit enter without picking a suggestion
     const readable = readablePlaceAddress(place);
     if (readable) input.value = readable;
-    pendingOutletLatLng = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
+    pendingOutletLatLng = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+      forText: input.value,
+    };
   });
 }
 
@@ -208,7 +207,9 @@ async function openEditOutletModal(id) {
   document.getElementById('outlet-active').checked = outlet.is_active;
   // Prefill from the existing row so saving without re-picking the address
   // (e.g. just toggling Active) keeps the outlet's current coordinates.
-  pendingOutletLatLng = (outlet.lat != null && outlet.lng != null) ? { lat: outlet.lat, lng: outlet.lng } : null;
+  pendingOutletLatLng = (outlet.lat != null && outlet.lng != null)
+    ? { lat: outlet.lat, lng: outlet.lng, forText: outlet.address || '' }
+    : null;
   openModal('modal-outlet');
   ensureOutletAutocomplete();
 }
@@ -226,9 +227,14 @@ async function saveOutlet() {
   const btn = document.getElementById('outlet-save-btn');
   btn.disabled = true; btn.textContent = 'Saving...';
 
+  // Only keep the coordinates if the address text still matches the place
+  // they came from; otherwise write real nulls, so an edited address can
+  // never keep the previous location's pin (see pendingOutletLatLng).
+  const coordsMatchText = pendingOutletLatLng && pendingOutletLatLng.forText.trim() === address;
   const payload = {
     name, location, address: address || null, is_active, brand_id: window.MY_PROFILE?.brand_id,
-    ...(pendingOutletLatLng ? { lat: pendingOutletLatLng.lat, lng: pendingOutletLatLng.lng } : {}),
+    lat: coordsMatchText ? pendingOutletLatLng.lat : null,
+    lng: coordsMatchText ? pendingOutletLatLng.lng : null,
   };
   const { error } = id
     ? await sb.from('outlets').update(payload).eq('id', id)
