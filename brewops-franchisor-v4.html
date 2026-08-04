@@ -276,6 +276,12 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .form-group{margin-bottom:14px;}
 .form-label{font-size:11px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;display:block;}
 .form-input{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:13px;font-family:var(--font-sans);outline:none;transition:border-color 0.15s;}
+/* Address suggestions from the places-proxy edge function (see shared.js).
+   Rendered by us, not Google's widget, which would need an API key here. */
+.places-suggest{position:absolute;top:100%;left:0;right:0;z-index:60;margin-top:4px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r-sm);box-shadow:0 10px 28px rgba(0,0,0,0.45);overflow:hidden;max-height:230px;overflow-y:auto;}
+.places-suggest-item{display:block;width:100%;text-align:left;padding:9px 12px;border:none;background:none;font-family:var(--font-sans);font-size:13px;color:var(--text);cursor:pointer;line-height:1.35;}
+.places-suggest-item+.places-suggest-item{border-top:1px solid var(--border);}
+.places-suggest-item:hover{background:var(--bg3);}
 .form-input:focus{border-color:var(--accent);}
 .form-select{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:13px;font-family:var(--font-sans);outline:none;appearance:none;cursor:pointer;}
 .form-select option{background:var(--bg2);}

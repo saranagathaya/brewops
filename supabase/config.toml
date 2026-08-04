@@ -397,6 +397,13 @@ verify_jwt = false
 [functions.payhere-notify]
 verify_jwt = false
 
+# places-proxy self-authenticates the same way payhere-checkout does (it
+# calls auth.getUser() on the caller's token and rejects anonymous
+# requests), so gateway JWT verification is off here too. Mirror this in the
+# dashboard when deploying ("Enforce JWT verification" unchecked).
+[functions.places-proxy]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

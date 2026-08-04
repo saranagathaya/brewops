@@ -56,40 +56,103 @@ function escapeHtml(value) {
 // alphabet excludes vowels and 0/1, so ordinary addresses never match.
 const PLUS_CODE_RE = /^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3},?\s*/i;
 
-// ══ GOOGLE MAPS CONFIG ══
-// Used for Places Autocomplete on address fields: the franchisor's
-// Add/Edit Outlet form (franchisor-cms.js) and the customer app's Address
-// Manager form (brewops-customer.html) both search a real address instead
-// of typing raw coordinates. Public by design like the Supabase key --
-// Maps JS keys are meant to be client-visible; they're secured via HTTP
-// referrer restriction in Google Cloud Console (scoped to qbrew.app +
-// localhost for dev), not by hiding the key. Originally lived in
-// franchisor-init.js only; moved here once the customer app needed the
-// same loader, so both apps share one definition instead of two copies
-// drifting apart (the same fix already applied to PLUS_CODE_RE above).
-const GOOGLE_MAPS_API_KEY = 'AIzaSyDTAGMkWqxjszdA9Brt4IJMLt4JZyZyTUM';
+// ══ ADDRESS AUTOCOMPLETE ══
+// There is deliberately NO Google API key in this file, or anywhere else a
+// browser can reach. Both address fields (the franchisor's Add/Edit Outlet
+// form and the customer's Address Manager) used to run
+// google.maps.places.Autocomplete client-side, which forces the key into
+// public source -- and a Maps key can only be defended by HTTP referrer
+// restriction, which the client itself sets. Lookups now go through the
+// `places-proxy` edge function, which holds a server-side key that no
+// browser ever sees. Autocomplete was the only thing either app used the
+// Maps JS API for, so nothing else had to move: outlet distance is local
+// Haversine maths, and "View on map" is a plain google.com/maps/search
+// deep link. Neither needs a key.
+//
+// attachPlacesAutocomplete() renders its own suggestion list rather than
+// using Google's widget, since the widget can only work with a key in the
+// page. onPick receives {name, formatted_address, lat, lng} -- the same
+// shape the old client-side place object had, so readablePlaceAddress()
+// below still consumes it unchanged.
+const PLACES_MIN_CHARS = 3;
+const PLACES_DEBOUNCE_MS = 250;
 
-let googleMapsLoadPromise = null;
-function ensureGoogleMapsLoaded() {
-  if (googleMapsLoadPromise) return googleMapsLoadPromise;
-  googleMapsLoadPromise = new Promise((resolve, reject) => {
-    if (window.google?.maps?.places) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google Maps'));
-    document.head.appendChild(script);
+function attachPlacesAutocomplete(input, onPick) {
+  if (!input || input.dataset.placesAttached) return;
+  input.dataset.placesAttached = '1';
+  input.setAttribute('autocomplete', 'off');
+
+  const parent = input.parentElement;
+  if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
+  const list = document.createElement('div');
+  list.className = 'places-suggest';
+  list.hidden = true;
+  parent.appendChild(list);
+
+  // One Google billing "session" spans the keystrokes of a single lookup
+  // plus the details fetch for whatever gets picked. Held here and cleared
+  // after each pick so the next lookup starts a fresh one.
+  let sessionToken = null;
+  let debounce = null;
+  let seq = 0;
+
+  const hide = () => { list.hidden = true; list.innerHTML = ''; };
+
+  async function call(body) {
+    if (typeof sb === 'undefined' || !sb) throw new Error('Not connected');
+    const { data, error } = await sb.functions.invoke('places-proxy', { body });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return data;
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    clearTimeout(debounce);
+    if (q.length < PLACES_MIN_CHARS) { hide(); return; }
+    debounce = setTimeout(async () => {
+      const mine = ++seq;   // ignore responses that arrive out of order
+      if (!sessionToken) sessionToken = crypto.randomUUID();
+      try {
+        const { suggestions } = await call({ action: 'autocomplete', input: q, sessionToken });
+        if (mine !== seq) return;
+        if (!suggestions?.length) { hide(); return; }
+        list.innerHTML = suggestions
+          .map(s => `<button type="button" class="places-suggest-item" data-place-id="${escapeHtml(s.placeId)}">${escapeHtml(s.description)}</button>`)
+          .join('');
+        list.hidden = false;
+      } catch (e) {
+        console.error('Places lookup failed:', e.message);
+        hide();
+      }
+    }, PLACES_DEBOUNCE_MS);
   });
-  return googleMapsLoadPromise;
+
+  list.addEventListener('mousedown', async (e) => {
+    // mousedown, not click: the input's blur would tear the list down first.
+    const btn = e.target.closest('.places-suggest-item');
+    if (!btn) return;
+    e.preventDefault();
+    const placeId = btn.dataset.placeId;
+    hide();
+    try {
+      const place = await call({ action: 'details', placeId, sessionToken });
+      sessionToken = null;
+      onPick(place);
+    } catch (err) {
+      console.error('Place details failed:', err.message);
+    }
+  });
+
+  input.addEventListener('blur', () => setTimeout(hide, 120));
+  input.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
 }
 
 // Prefers the place's own name (the café/landmark someone searched for) and
 // strips a leading plus code off the address, so "WXC2+2WF, Malabe, Sri
 // Lanka" becomes "Malabe, Sri Lanka" -- or, for a named place, "Liétard
-// Malabe, Malabe, Sri Lanka". Shared by the franchisor's outlet Autocomplete
-// and the customer app's address-form Autocomplete (both moved here for the
-// same reason as the loader above -- one definition instead of two drifting
+// Malabe, Malabe, Sri Lanka". Shared by the franchisor's outlet form and
+// the customer app's address form (one definition instead of two drifting
 // copies).
 function readablePlaceAddress(place) {
   const raw = (place.formatted_address || '').trim();

@@ -320,28 +320,45 @@ production rejects them with 401 "Legacy API keys are disabled", so any
 old copy of them (including the once-exposed service_role string) is dead.
 Don't re-enable them.
 
-**Google Maps connection**: `GOOGLE_MAPS_API_KEY` and the lazy loader
-`ensureGoogleMapsLoaded()` live in `shared.js` (originally
-`franchisor-init.js` only; moved once a second app needed them — see
-`PLUS_CODE_RE` below for the same pattern), public by design like the
-Supabase key above — Maps JS keys are meant to be client-visible and are
-secured via HTTP referrer restriction in Google Cloud Console, not by
-hiding the key. That restriction (scoped to `qbrew.app/*` + `localhost` for
-local dev) is set. It powers Places Autocomplete in two places: the
-franchisor's Add/Edit Outlet form (`franchisor-cms.js`), so franchisors can
-search a real address instead of typing raw coordinates — picking a
-suggestion fills `outlets.lat`/`lng` (columns that existed in the schema
-from day one but were unused until this) alongside the address — and, as
-of migration 22, the customer app's Address Manager form
-(`brewops-customer.html`, `ensureAddressAutocomplete()`), which fills
-`customer_addresses.lat`/`lng` the same way. That second use is a real,
-deliberate change: the customer app used to have no Google Maps dependency
-at all beyond the free `google.com/maps/search` deep link — now it also
-loads the Places script for anonymous customers filling in a delivery
-address. Outlet **distance sort** on the customer app's store selector is
-untouched by this and still needs no API key: it's a plain Haversine
-formula against the device's own geolocation
-(`applyStoreDistancesIfKnown()`), separate from Autocomplete entirely.
+**Google Maps connection**: there is deliberately **no Google API key in
+any client code**, and adding one back would be a regression. Address
+lookups go through the `places-proxy` edge function
+(`supabase/functions/places-proxy/`), which holds a server-side key in the
+`GOOGLE_PLACES_SERVER_KEY` function secret and calls **Places API (New)**
+(`places.googleapis.com/v1/places:autocomplete` and `/v1/places/{id}`).
+
+Both apps previously ran `google.maps.places.Autocomplete` client-side,
+which forces the key into public source — it lived in `shared.js`, and so
+also in the deployed page and in git, where GitGuardian duly flagged it.
+The only control available for such a key is an HTTP referrer restriction,
+and `Referer` is set by the client, so it deters casual reuse but does not
+stop someone spending the project's Maps quota. Autocomplete was the *only*
+thing either app used the Maps JS API for, so moving that single call
+server-side removed the browser-visible key entirely rather than merely
+restricting it.
+
+Client side, `attachPlacesAutocomplete(input, onPick)` (`shared.js`)
+renders its own suggestion list — Google's widget can't be used without a
+key in the page. It debounces, enforces a 3-character minimum, escapes
+suggestion text, ignores out-of-order responses, and carries a
+`sessionToken` across the keystrokes and the final details fetch so Google
+bills one session rather than one per keystroke. `onPick` receives
+`{name, formatted_address, lat, lng}` — deliberately the same shape the old
+client-side place object had, so `readablePlaceAddress()` consumes it
+unchanged. Two callers: the franchisor's Add/Edit Outlet form
+(`franchisor-cms.js` → `outlets.lat`/`lng`) and the customer's Address
+Manager (`brewops-customer.html` → `customer_addresses.lat`/`lng`).
+
+The edge function authenticates its caller (`auth.getUser()`) and rejects
+anonymous requests. That check is load-bearing, not ceremony: without it
+the endpoint would be an open Places proxy, which is the same quota-abuse
+problem in a new place. Both callers are already behind a login, so this
+costs nothing.
+
+Outlet **distance sort** and every "View on map" link are unaffected and
+never needed a key: distance is a plain Haversine formula against the
+device's own geolocation (`applyStoreDistancesIfKnown()`), and the map
+links are plain `google.com/maps/search` deep links.
 
 Google returns an Open Location Code ("plus code", e.g. `WXC2+2WF`) as a
 place's `formatted_address` whenever the exact point picked has no street
@@ -700,6 +717,16 @@ holds.
   dropoff coordinates to request a rider — which is exactly what the
   `customer_addresses.lat`/`lng` and `orders.delivery_lat`/`lng` columns
   above now provide.
+- **`places-proxy` is written but not yet deployed.** Address autocomplete
+  in both apps is wired to it (see "Google Maps connection" above) and the
+  client half is verified against a stubbed proxy, but until the function
+  is deployed AND the `GOOGLE_PLACES_SERVER_KEY` secret is set to a
+  server-side key with **Places API (New)** enabled and *no* referrer
+  restriction, address fields will simply return no suggestions — typing a
+  free-text address and saving still works, it just won't attach
+  coordinates. The Google call itself has never been exercised against the
+  real API. The old browser key is still live in Google Cloud and should be
+  deleted once the proxy is confirmed working, not before.
 - Telegram Bot notifications (replacing an earlier WhatsApp plan) are
   planned but not yet built — franchisor/franchisee-facing ops alerts only,
   customer-facing channel undecided.

@@ -3,9 +3,9 @@
 const SUPABASE_URL = 'https://fjmzsxslnzrtgcilttly.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zCZlpiOEgr0nQWt9Tp331g_wVxuaTb-'; // publishable key (public by design; legacy JWT anon key retired)
 
-// GOOGLE_MAPS_API_KEY / ensureGoogleMapsLoaded() live in shared.js (loaded
-// before this file) since the customer app's address form now uses the
-// same loader for Places Autocomplete -- see shared.js for why.
+// There is no Google API key in this project's client code. Address
+// lookups go through the `places-proxy` edge function, which holds a
+// server-side key -- see attachPlacesAutocomplete() in shared.js for why.
 
 let sb = null;
 

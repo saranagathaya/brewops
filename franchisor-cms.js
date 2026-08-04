@@ -150,36 +150,20 @@ function resetNetworkKpis() {
 // written as a real null rather than leaving a stale pin behind.
 let pendingOutletLatLng = null;
 
-let outletAutocomplete = null;
+// PLUS_CODE_RE, readablePlaceAddress() and attachPlacesAutocomplete() live
+// in shared.js (loaded before this file) -- the customer app's address form
+// needs the same logic, so it lives there rather than being copy-pasted a
+// second time. See shared.js for all three, and for why address lookups go
+// through the places-proxy edge function instead of a Maps script in the
+// page.
 
-// PLUS_CODE_RE and readablePlaceAddress() live in shared.js (loaded before
-// this file) -- the customer app's address-form Autocomplete needs the same
-// place-formatting logic, so it moved there rather than being copy-pasted a
-// second time. See shared.js for both.
-
-async function ensureOutletAutocomplete() {
-  try {
-    await ensureGoogleMapsLoaded();
-  } catch (e) {
-    console.error('Google Maps failed to load:', e.message);
-    return;
-  }
-  // Safe against concurrent opens despite following an await: nothing
-  // yields between this check and the assignment below, so the pair is
-  // atomic on a single-threaded event loop.
-  if (outletAutocomplete) return;
-  const input = document.getElementById('outlet-address');
-  outletAutocomplete = new google.maps.places.Autocomplete(input, { fields: ['name', 'formatted_address', 'geometry'] });
-  outletAutocomplete.addListener('place_changed', () => {
-    const place = outletAutocomplete.getPlace();
-    if (!place.geometry) return; // franchisor typed free text and hit enter without picking a suggestion
+function ensureOutletAutocomplete() {
+  attachPlacesAutocomplete(document.getElementById('outlet-address'), (place) => {
+    const input = document.getElementById('outlet-address');
     const readable = readablePlaceAddress(place);
     if (readable) input.value = readable;
-    pendingOutletLatLng = {
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng(),
-      forText: input.value,
-    };
+    if (place.lat == null || place.lng == null) return;
+    pendingOutletLatLng = { lat: place.lat, lng: place.lng, forText: input.value };
   });
 }
 

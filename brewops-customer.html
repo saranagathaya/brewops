@@ -54,6 +54,13 @@
 html{font-size:14px;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-height:100vh;width:100%;margin:0;overflow-x:hidden;position:relative;}
 input::placeholder,textarea::placeholder{color:var(--text3);opacity:1;}
+/* Address suggestions from the places-proxy edge function (see shared.js).
+   We render these ourselves rather than using Google's widget, which would
+   require an API key in this page. */
+.places-suggest{position:absolute;top:100%;left:0;right:0;z-index:60;margin-top:4px;background:var(--white);border:1.5px solid var(--border2);border-radius:var(--r-sm);box-shadow:0 10px 28px rgba(0,0,0,0.16);overflow:hidden;max-height:230px;overflow-y:auto;}
+.places-suggest-item{display:block;width:100%;text-align:left;padding:11px 14px;border:none;background:none;font-family:var(--font-body);font-size:13.5px;color:var(--text);cursor:pointer;line-height:1.35;}
+.places-suggest-item+.places-suggest-item{border-top:1px solid var(--border);}
+.places-suggest-item:hover{background:var(--cream2);}
 
 .screen{display:none;position:fixed;inset:0;z-index:10;overflow:hidden;}
 .screen.active{display:flex;flex-direction:column;}
@@ -2572,31 +2579,17 @@ async function loadSavedAddresses() {
 // as a real null rather than leaving a stale pin behind.
 let pendingAddressLatLng = null;
 
-let addressAutocomplete = null;
-
-async function ensureAddressAutocomplete() {
-  try {
-    await ensureGoogleMapsLoaded();
-  } catch (e) {
-    console.error('Google Maps failed to load:', e.message);
-    return;
-  }
-  // Safe against concurrent opens despite following an await: nothing
-  // yields between this check and the assignment below, so the pair is
-  // atomic on a single-threaded event loop.
-  if (addressAutocomplete) return;
-  const input = document.getElementById('address-line');
-  addressAutocomplete = new google.maps.places.Autocomplete(input, { fields: ['name', 'formatted_address', 'geometry'] });
-  addressAutocomplete.addListener('place_changed', () => {
-    const place = addressAutocomplete.getPlace();
-    if (!place.geometry) return; // typed free text and hit enter without picking a suggestion
+// Suggestions come from the places-proxy edge function, not from a Maps
+// script in this page -- see attachPlacesAutocomplete() in shared.js for
+// why the key can't live client-side. Idempotent: the helper no-ops if
+// already attached to this input.
+function ensureAddressAutocomplete() {
+  attachPlacesAutocomplete(document.getElementById('address-line'), (place) => {
+    const input = document.getElementById('address-line');
     const readable = readablePlaceAddress(place);
     if (readable) input.value = readable;
-    pendingAddressLatLng = {
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng(),
-      forText: input.value,
-    };
+    if (place.lat == null || place.lng == null) return;
+    pendingAddressLatLng = { lat: place.lat, lng: place.lng, forText: input.value };
   });
 }
 
