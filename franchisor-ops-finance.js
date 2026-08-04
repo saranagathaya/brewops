@@ -415,7 +415,7 @@ async function loadStockRequests() {
         <span style="font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-left:auto">Requested ${when}</span>
       </div>
       <div style="font-size:13px;color:var(--text2);line-height:1.5">${items || 'No items specified'}</div>
-      ${r.notes ? `<div style="font-size:12px;color:var(--text3);margin-top:3px">${r.notes}</div>` : ''}
+      ${r.notes ? `<div style="font-size:12px;color:var(--text3);margin-top:3px">${escapeHtml(r.notes)}</div>` : ''}
       ${r.status !== 'fulfilled' ? `<div style="margin-top:8px"><button class="btn btn-primary" style="font-size:11px;padding:5px 12px" onclick="fulfillStockRequest('${r.id}')">Mark Fulfilled</button></div>` : ''}
     </div>`;
   }).join('');
@@ -510,7 +510,7 @@ function issueRowHTML(i) {
       <span style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">${i.category || 'Other'}</span>
       <span style="font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-left:auto">${timeLabel}</span>
     </div>
-    <div style="font-size:13px;color:var(--text2);line-height:1.5">${i.description}</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.5">${escapeHtml(i.description)}</div>
     <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
       ${isOpen
         ? `<button class="btn btn-primary" style="font-size:11px;padding:5px 12px" onclick="resolveIssue('${i.id}')">Mark Resolved</button>`
@@ -524,7 +524,7 @@ function suggestionRowHTML(i) {
   const dateLabel = new Date(i.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
   return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
     <div style="font-size:12px;font-family:var(--font-mono);color:var(--text3);margin-bottom:5px">${i.outlets?.name || 'Unknown outlet'} · ${dateLabel}</div>
-    <div style="font-size:13px;color:var(--text2);line-height:1.5">${i.description}</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.5">${escapeHtml(i.description)}</div>
   </div>`;
 }
 

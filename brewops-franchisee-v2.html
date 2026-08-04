@@ -1796,7 +1796,7 @@ async function loadAlertsData() {
         const sevCls = i.severity === 'high' ? 'sp-high' : i.severity === 'low' ? 'sp-low' : 'sp-med';
         const timeAgo = timeAgoLabel(i.created_at);
         const statusLabel = i.status === 'open' ? 'Submitted → Awaiting franchisor review' : 'In progress → Franchisor is on it';
-        return `<div class="complaint-item"><div class="comp-header"><span class="sev-pill ${sevCls}">${i.severity[0].toUpperCase()+i.severity.slice(1)}</span><span class="comp-time">${timeAgo}</span></div><div class="comp-text">${i.description}</div><div class="comp-status">Status: ${statusLabel}</div></div>`;
+        return `<div class="complaint-item"><div class="comp-header"><span class="sev-pill ${sevCls}">${i.severity[0].toUpperCase()+i.severity.slice(1)}</span><span class="comp-time">${timeAgo}</span></div><div class="comp-text">${escapeHtml(i.description)}</div><div class="comp-status">Status: ${statusLabel}</div></div>`;
       }).join('')
     : `<div style="padding:10px;color:var(--text3);font-size:13px">No open issues right now ✓</div>`;
 
