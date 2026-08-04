@@ -25,3 +25,31 @@ apps/*/android/app/release/
 apps/*/ios/App/Pods/
 apps/*/**/xcuserdata/
 apps/*/**/DerivedData/
+
+# ══ CREDENTIALS — never commit ══
+# Nothing here exists in the repo today; these are guardrails for what is
+# already planned. Release signing for both native apps is still to be set
+# up (see CLAUDE.md "Native apps"), and the moment it is, Android emits a
+# keystore plus a key.properties holding its password in plaintext, and the
+# Codemagic iOS workflow involves an App Store Connect API key — all of
+# which land inside the project directory and are trivially `git add -A`'d
+# by accident. Same for a .env someone creates to stop retyping the
+# PGHOST/PGPASSWORD values that tools/rls-check wants.
+.env
+.env.*
+!.env.example
+key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+*_rsa
+*_ed25519
+# .pem is ambiguous — a private key or a public certificate. Ignore by
+# default and allow-list the one legitimate use: the ISRG Root X1 public
+# CA cert both Android apps bundle so Android <7.1.1 can validate
+# qbrew.app's Let's Encrypt chain (see CLAUDE.md "Native apps").
+*.pem
+!apps/*/android/app/src/main/res/raw/*.pem
