@@ -637,7 +637,13 @@ Secrets): `PAYHERE_MERCHANT_ID`, `PAYHERE_MERCHANT_SECRET`,
 and `SB_SECRET_KEY` (a new-format `sb_secret_*` API key — the
 platform-injected `SUPABASE_SERVICE_ROLE_KEY` is a disabled legacy key
 here, see the key-retirement notes above). Deploy with "Enforce JWT
-verification" OFF for both (mirrors `supabase/config.toml`).
+verification" OFF for both (mirrors `supabase/config.toml`). The same
+applies to the third function, `places-proxy` — it shares `SB_SECRET_KEY`
+and adds `GOOGLE_PLACES_SERVER_KEY`. That toggle is labelled "Verify JWT
+with legacy secret" in the dashboard and must be off for all three: the
+legacy keys are disabled on this project, so the gateway cannot validate
+the publishable-key-era tokens the apps actually send. Each function
+authenticates its own caller instead.
 
 Verified by running the actual function code against the local staging
 stack with dummy merchant credentials (which lets tests forge valid
@@ -717,16 +723,15 @@ holds.
   dropoff coordinates to request a rider — which is exactly what the
   `customer_addresses.lat`/`lng` and `orders.delivery_lat`/`lng` columns
   above now provide.
-- **`places-proxy` is written but not yet deployed.** Address autocomplete
-  in both apps is wired to it (see "Google Maps connection" above) and the
-  client half is verified against a stubbed proxy, but until the function
-  is deployed AND the `GOOGLE_PLACES_SERVER_KEY` secret is set to a
-  server-side key with **Places API (New)** enabled and *no* referrer
-  restriction, address fields will simply return no suggestions — typing a
-  free-text address and saving still works, it just won't attach
-  coordinates. The Google call itself has never been exercised against the
-  real API. The old browser key is still live in Google Cloud and should be
-  deleted once the proxy is confirmed working, not before.
+- `places-proxy` is deployed and confirmed working against the real Places
+  API (2026-08-04), with `GOOGLE_PLACES_SERVER_KEY` set as a function
+  secret. Note it must be deployed **via the Supabase dashboard editor**,
+  not the CLI, on any TLS-intercepting network — `supabase functions
+  deploy` bundles inside a Docker container that fetches from
+  `registry.npmjs.org` and dies with the same `invalid peer certificate:
+  UnknownIssuer` that stops the local edge-runtime container booting (see
+  "Local staging environment"). Dashboard deploys bundle on Supabase's
+  servers and are unaffected.
 - Telegram Bot notifications (replacing an earlier WhatsApp plan) are
   planned but not yet built — franchisor/franchisee-facing ops alerts only,
   customer-facing channel undecided.
