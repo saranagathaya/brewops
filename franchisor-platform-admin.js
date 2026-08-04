@@ -42,8 +42,8 @@ async function loadPlatformBrands() {
             ${a.role==='franchisor'?'👑':a.role==='franchisee'?'🏪':'👤'}
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:12px;font-weight:600;">${a.full_name||'—'} <span style="font-size:10px;color:var(--text3);font-weight:400;">${a.role}</span>${a.outlet_name?` <span style="font-size:10px;color:var(--text3);">· ${a.outlet_name}</span>`:''}</div>
-            <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);">${a.email}</div>
+            <div style="font-size:12px;font-weight:600;">${escapeHtml(a.full_name||'—')} <span style="font-size:10px;color:var(--text3);font-weight:400;">${a.role}</span>${a.outlet_name?` <span style="font-size:10px;color:var(--text3);">· ${escapeHtml(a.outlet_name)}</span>`:''}</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);">${escapeHtml(a.email)}</div>
           </div>
         </div>`).join('')
       : `<div style="font-size:12px;color:var(--text3);padding:8px 0;">No accounts yet — generate a franchisor invite to get started.</div>`;
